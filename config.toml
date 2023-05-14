@@ -74,3 +74,6 @@ github = "awakecoding"
 linkedin = "mamoreau"
 twitter = "awakecoding"
 email = "marcandre.moreau@gmail.com"
+
+[extra.analytics]
+google = "G-JT1V4R3MZD"
