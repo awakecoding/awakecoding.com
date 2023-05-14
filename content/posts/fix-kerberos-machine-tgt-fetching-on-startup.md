@@ -35,3 +35,5 @@ If you attempt connecting with an IP address or a hostname other than the machin
 ![RDP NLA Failure IP Address Not FQDN](/images/posts/rdp-nla-failure-ip-address-not-fqdn.png)
 
 Issues resulting from a failure to fetch Kerberos machine TGT at startup time go much beyond RDP NLA. If you see errors in the Windows event viewer that indicate a failure to fetch the Kerberos machine TGT on startup, just follow the same steps.
+
+*this blog post is based on [this twitter thread](https://twitter.com/awakecoding/status/1629857517353201668)*
