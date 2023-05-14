@@ -4,7 +4,7 @@ slug = "free-arm-server-4-cpus-24gb-ram-200gb-storage"
 date = 2022-11-23
 +++
 
-![Free ARM Server](/images/blog/free-arm-server-banner.png)
+![Free ARM Server](/images/posts/free-arm-server-banner.png)
 
 Have you ever dreamed of having your very own ARM server in the cloud for *FREE*?
 
