@@ -113,31 +113,130 @@ Here's where it gets tricky: the certificates are first searched in the NTDS ser
 
 That last point is critical, since there is a very high chance that the local machine personal certificate store contains a server certificate suitable for LDAPS that isn't the one you want to use, and with an expiration date much further in the future (1 year) than the one you might be trying to use (3 months with letsencrypt). The best way to accurately configure the certificate that you want for LDAPS is to use the NTDS personal certificate store, which is not visible in the GUI ([certlm.msc](https://learn.microsoft.com/en-us/dotnet/framework/wcf/feature-details/how-to-view-certificates-with-the-mmc-snap-in)) or using the [PowerShell cert:\ provider](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/about/about_certificate_provider).
 
-### Quick & Dirty Method
+### Certificate Importing
 
-The NTDS service personal certificate store path in the registry is `'HKLM:/Software/Microsoft/Cryptography/Services/NTDS/SystemCertificates/My/Certificates'`. The trick is to import the certificate that we want in the local machine personal certificate store (`'HKLM:/Software/Microsoft/SystemCertificates/My/Certificates'`) and then copy it to its final destination by registry key paths, without using the certificate store APIs.
-
-First, import the certificate with its private key in `cert:\LocalMachine\My` using [Import-PfxCertificate](https://learn.microsoft.com/en-us/powershell/module/pki/import-pfxcertificate) and save the thumbprint, like this:
+To open the "NTDS\MY" certificate store, we'll use the [`Get-ServiceCertStore` cmdlet from Jordan Borean](https://gist.github.com/jborean93/9758823e0546abf561b07d380bc60c53) for which I have included an abridged copy inline here:
 
 ```powershell
-$CertificatePassword = $(ConvertTo-SecureString -AsPlainText 'poshacme' -Force)
-$ImportedCertificate = Import-PfxCertificate -FilePath $Certificate.PfxFullChain `
-    -CertStoreLocation 'cert:\LocalMachine\My' -Password $CertificatePassword
-$CertificateThumbprint = $ImportedCertificate.Thumbprint
-```
+Import-Module -Name Microsoft.PowerShell.Security
 
-Second, copy the imported certificate to the NTDS certificate store using the registry key paths and the certificate thumbprint:
+function Get-ServiceCertStore {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$true, ValueFromPipeline=$true, ValueFromPipelineByPropertyName=$true)]
+        [string] $ServiceName,
 
-```powershell
-$LocalCertStore = 'HKLM:/Software/Microsoft/SystemCertificates/My/Certificates'
-$NtdsCertStore = 'HKLM:/Software/Microsoft/Cryptography/Services/NTDS/SystemCertificates/My/Certificates'
-if (-Not (Test-Path $NtdsCertStore)) {
-    New-Item $NtdsCertStore -Force
+        [Parameter()]
+        [string] $Name = 'My',
+
+        [Security.Cryptography.X509Certificates.OpenFlags]
+        $OpenFlags = [Security.Cryptography.X509Certificates.OpenFlags]::MaxAllowed
+    )
+
+    begin {
+        $typeParams = @{
+            TypeDefinition = @'
+using Microsoft.Win32.SafeHandles;
+using System;
+using System.Runtime.InteropServices;
+
+namespace X509
+{
+    public class NativeMethods
+    {
+        [DllImport("Crypt32.dll")]
+        public static extern bool CertCloseStore(
+            IntPtr hCertStore,
+            uint dwFlags);
+
+        [DllImport("Crypt32.dll", CharSet=CharSet.Unicode, SetLastError=true)]
+        public static extern SafeX509Store CertOpenStore(
+            IntPtr lpszStoreProvider,
+            uint dwEncodingType,
+            IntPtr hCryptProv,
+            uint dwFlags,
+            string pvPara);
+    }
+
+    public class SafeX509Store : SafeHandleZeroOrMinusOneIsInvalid
+    {
+        public SafeX509Store() : base(true) { }
+
+        protected override bool ReleaseHandle()
+        {
+            return NativeMethods.CertCloseStore(handle, 0);
+        }
+    }
 }
-Copy-Item -Path "$LocalCertStore/$CertificateThumbprint" -Destination $NtdsCertStore
+'@
+        }
+        Add-Type @typeParams
+
+        $provider = [IntPtr]::new(10)
+        $flags = (0x00050000 -bor 0x00000004)
+        $flagType = [Security.Cryptography.X509Certificates.OpenFlags]
+
+        $openMode = [int]$OpenFlags -band 3
+        $accessFlags = switch ($openMode) {
+            0 { 0x00008000 }
+            2 { 0x00001000 }
+            default { 0 }
+        }
+        $flags = $flags -bor $accessFlags
+
+        if ($OpenFlags.HasFlag($flagType::OpenExistingOnly)) {
+            $flags = $flags -bor 0x00004000
+        }
+        if ($OpenFlags.HasFlag($flagType::IncludeArchived)) {
+            $flags = $flags -bor 0x00000200
+        }
+    }
+
+    process {
+        $handle = [X509.NativeMethods]::CertOpenStore(
+            $provider, 0, [IntPtr]::Zero, $flags, "$ServiceName\$Name"
+        ); $err = [Runtime.InteropServices.Marshal]::GetLastWin32Error()
+
+        if ($handle.IsInvalid) {
+            $exp = [ComponentModel.Win32Exception]$err
+            Write-Error -Message "Failed to open '$ServiceName\$Name': $($exp.Message)" -Exception $exp
+            return
+        }
+
+        try {
+            [Security.Cryptography.X509Certificates.X509Store]::new($handle.DangerousGetHandle())
+        }
+        finally {
+            $handle.Dispose()
+        }
+    }
+}
 ```
 
-The certificate stores are monitored for changes by the NTDS service to automatically reload certificates, but since we didn't use the proper certificate APIs, we need to trigger the renewal manually through LDAP:
+From an elevated PowerShell terminal, load `Get-ServiceCertStore`, then import your LDAP server certificate with the right key storage flags into the "NTDS\MY" certificate store like this:
+
+```powershell
+$CertificateFile = Resolve-Path '.\ldap-server.pfx'
+$CertificatePassword = "cert123!"
+$KeyStorageFlags = [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]'MachineKeySet, PersistKeySet'
+$Certificate = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new($CertificateFile, $CertificatePassword, $KeyStorageFlags)
+$CertificateThumbprint = $Certificate.Thumbprint
+
+$CertificateStore = Get-ServiceCertStore -ServiceName "NTDS" -Name "My"
+$CertificateStore.Add($Certificate)
+```
+
+You can also list certificates in order of selection preference contained within the store. If the first entry in the list isn't the one you expect, remove other certificates from the store:
+
+```powershell
+$LdapServer = [System.Net.Dns]::GetHostEntry("localhost").HostName.TrimEnd('.')
+$CertificateStore.Certificates | Sort-Object NotAfter -Descending | Where-Object {
+    $_.MatchesHostName($LdapServer) -and
+    $_.EnhancedKeyUsageList.ObjectId -contains "1.3.6.1.5.5.7.3.1" # Server Authentication OID
+}
+```
+
+Normally, the new certificate should be reloaded automatically, but if you've used an alternate trick involving copying registry keys to `'HKLM:/Software/Microsoft/Cryptography/Services/NTDS/SystemCertificates/My/Certificates'`, you will need to trigger the hot reload manually through LDAP:
 
 ```powershell
 $dse = [adsi]'LDAP://localhost/rootDSE'
