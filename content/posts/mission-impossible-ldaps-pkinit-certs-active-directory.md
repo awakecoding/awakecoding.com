@@ -5,8 +5,6 @@ date = 2023-08-05
 draft = true
 +++
 
-Your mission, should you choose to accept it, is to configure two *different* certificates in Active Directory to be used for LDAPS and PKINIT, separately, in a way that ensures the desired certificates are selected by the domain controller.
-
 ## LDAPS Certificate
 
 The LDAPS certificate is used by the LDAP server to secure communications using TLS over TCP/636, as an alternative to LDAP over TCP/389 that uses SPNEGO-based security. Enabling and enforcing LDAPS is a common security hardening task in Windows Active Directory environments today. Using [Let's Encrypt certificates is popular for LDAPS](https://blog.devolutions.net/2021/03/how-to-configure-secure-ldap-ldaps-in-active-directory-with-lets-encrypt/) because it is much simpler than using [Active Directory Certificate Services (AD CS)](https://learn.microsoft.com/en-us/windows-server/identity/ad-cs/) if you don't already have it deployed.
@@ -226,15 +224,36 @@ $CertificateStore = Get-ServiceCertStore -ServiceName "NTDS" -Name "My"
 $CertificateStore.Add($Certificate)
 ```
 
-You can also list certificates in order of selection preference contained within the store. If the first entry in the list isn't the one you expect, remove other certificates from the store:
+You can also list certificates in order of selection preference contained within the store, and testing for validity. If the first entry in the list isn't the one you expect, remove other certificates from the store. If Test-Certificate fails on the certificate you wanted, you can now look into fixing the validation issue.
 
 ```powershell
+$CertificateStore = Get-ServiceCertStore -ServiceName "NTDS" -Name "My"
 $LdapServer = [System.Net.Dns]::GetHostEntry("localhost").HostName.TrimEnd('.')
 $CertificateStore.Certificates | Sort-Object NotAfter -Descending | Where-Object {
     $_.MatchesHostName($LdapServer) -and
-    $_.EnhancedKeyUsageList.ObjectId -contains "1.3.6.1.5.5.7.3.1" # Server Authentication OID
+    $_.EnhancedKeyUsageList.ObjectId -contains "1.3.6.1.5.5.7.3.1" } | Where-Object {
+    Test-Certificate -Cert $_ -Policy SSL -EKU @("1.3.6.1.5.5.7.3.1") -DNSName $LdapServer -ErrorAction Continue
 }
 ```
+
+I have simulated a problem by importing a certificate with an incomplete CA chain (I have the root CA, but not the issuer CA), causing the following error:
+
+```powershell
+WARNING: Chain status:
+    CERT_TRUST_REVOCATION_STATUS_UNKNOWN
+    CERT_TRUST_IS_OFFLINE_REVOCATION
+    CERT_TRUST_IS_PARTIAL_CHAIN
+Missing issuer: CN=IT Help Ninja Issuing CA
+```
+
+After installing the issuer CA in the system **Intermediate Certification Authorities** and ensuring my root CA is in the system **Trusted Root Certification Authorities**, I am now down to just one error:
+
+```powershell
+WARNING: Chain status:
+    CERT_TRUST_REVOCATION_STATUS_UNKNOWN
+```
+
+Here's the thing: I have created a [relatively simple CA chain with a script](https://gist.github.com/awakecoding/5d5589af207f7f2b181aae9ef8681edb), and it does not contain usable CRL or OCSP URLs for revocation checking, because it takes more work. The certificate *will* be loaded despite the unknown revocation status, but that's only pushing the problem down to the clients that probably won't be happy about it. In other words: you will have to do the extra work of fixing revocation checking for your clients, or LDAPS will still likely fail.
 
 Normally, the new certificate should be reloaded automatically, but if you've used an alternate trick involving copying registry keys to `'HKLM:/Software/Microsoft/Cryptography/Services/NTDS/SystemCertificates/My/Certificates'`, you will need to trigger the hot reload manually through LDAP:
 
@@ -244,8 +263,8 @@ $dse = [adsi]'LDAP://localhost/rootDSE'
 $dse.CommitChanges()
 ```
 
-## PKINIT Certificate
+Please note that while dealing with the NTDS certificate store through its registry path is not recommended, it can be used as a lazy method to remove certificates: just find the key that corresponds to the certificate thumbprint and delete it.
 
-The PKINIT certificate is used by the Kerberos Key Distribution Center (KDC) for smartcard logons using X.509 client certificates.
+## Closing Thoughts: PKINIT
 
-TBD, fun stuff here, blah blah blah.
+I originally meant for this blog to cover *both* LDAPS and PKINIT certificates, but it turned out to be massive undertaking to document both in depth. I will come back to PKINIT in a separate blog post, but the important thing to remember is that it does *not* use the NTDS service certificate store, and that yes, it can be configured separately from the LDAPS certificate, despite what people may think.
