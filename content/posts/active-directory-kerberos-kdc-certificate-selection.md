@@ -2,6 +2,7 @@
 title = "Active Directory Kerberos KDC certificate selection"
 slug = "active-directory-kerberos-kdc-certificate-selection"
 date = 2023-09-06
+updated = 2023-09-07
 +++
 
 So, you've decided to embark on a quest to reliably select a specific KDC certificate in Active Directory, because randomly-selected certificates that you *think* you have control over are not a desirable thing? Here's what happened to the last person that went down this path:
@@ -10,7 +11,7 @@ So, you've decided to embark on a quest to reliably select a specific KDC certif
 
 The Kerberos KDC certificate is used in PKINIT, a Kerberos extension used in [Windows smartcard authentication](https://learn.microsoft.com/en-us/windows/security/identity-protection/smart-cards/smart-card-architecture), among other things. Contrary to popular belief, it is possible to select a *different* certificate for PKINIT and LDAPS, but the magical recipe had long been lost to time.
 
-Buckle up, because if you though [selecting a specific LDAPS server certificate](https://awakecoding.com/posts/active-directory-ldaps-certificate-selection-deep-dive/) in Active Directory was painful, this is nothing in comparison.
+Buckle up, because if you thought [selecting a specific LDAPS server certificate](https://awakecoding.com/posts/active-directory-ldaps-certificate-selection-deep-dive/) in Active Directory was painful, this is nothing in comparison.
 
 ## Analysis Technique
 
@@ -27,14 +28,14 @@ Please note that the KDC service is hosted inside lsass.exe despite being primar
 
 ## Preparing Test Certificates
 
-In order to properly test the KDC service selects its certificate from multiple valid candidates, I have duplicated the built-in "Kerberos Authentication" certificate template with the following modifications:
+To properly test the KDC service selects its certificate from multiple valid candidates, I have duplicated the built-in "Kerberos Authentication" certificate template with the following modifications:
 
  * On the **Request Handling** tab, check **Allow private key to exported**
  * On the **Subject Name** tab, select **Supply in the request**
 
 ![Kerberos Certificate Template - Allow Private Key Export](/images/posts/ad-pkinit-kerberos-auth-cert-template-allow-export.png)
 
-I have then manually generated 5 certificates with numbers from to 1 to 5 to make them easier to distinguish. The certificate subject name and subject alternative names (SANs) are not relevant to the selection process itself, even if invalid names can cause trouble down the road. In order to manually specify valid subject name information, generate a certificate using the original "Kerberos Authentication" built-in template and then use the same values. When **Subject Name** is set to **Build from Active Directory information** in the template, only SANs are used, with no subject name:
+I have then manually generated 5 certificates with numbers from to 1 to 5 to make them easier to distinguish. The certificate subject name and subject alternative names (SANs) are not relevant to the selection process itself, even if invalid names can cause trouble down the road. To manually specify valid subject name information, generate a certificate using the original "Kerberos Authentication" built-in template and then use the same values. When **Subject Name** is set to **Build from Active Directory information** in the template, only SANs are used, with no subject name:
 
 ![Kerberos Certificate Template - Subject Name Information](/images/posts/ad-pkinit-kerberos-auth-cert-template-subject-name.png)
 
@@ -200,6 +201,14 @@ Set-ItemProperty -Path $KdcRegPath -Name 'UseCachedCRLOnlyAndIgnoreRevocationUnk
 ```
 
 However, you should not leave revocation checking issues unresolved, as they will likely cause problems with the Kerberos clients down the road.
+
+## Legacy KDC Certificates
+
+Domain controllers with AD CS enabled usually have a certificate generated using the **Domain Controller** built-in template. This is a *legacy* certificate, identified as such using the [certificate template name extension](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-wcce/3aec3e50-511a-42f9-a5d5-240af503e470) (1.3.6.1.4.1.311.20.2) with the string value **DomainController**:
+
+![Kerberos Legacy KDC certificate](/images/posts/ad-pkinit-kerberos-legacy-kdc-certificate.png)
+
+Unlike "modern" KDC certificates, legacy KDC certificates do not have the Kerberos authentication EKU (1.3.6.1.5.2.3.5). The KDC service selects the first legacy KDC certificate only if no suitable modern KDC certificate can be found in the certificate store. Since legacy certificates require **DomainController** as the template name encoded inside the X.509 certificate, it is not possible to use a custom template, as it would result in a different name. For all of these reasons, it is recommended to use modern KDC certificates generated using the **Kerberos Authentication** built-in template (or equivalent).
 
 ## KDC Certificate Selection
 
