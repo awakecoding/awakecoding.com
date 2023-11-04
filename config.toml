@@ -11,11 +11,13 @@ default_language = "en"
 # The site theme to use.
 theme = "DeepThought"
 
-# Whether to automatically compile all Sass files in the sass directory
 compile_sass = true
 
-# Whether to build a search index to be used later on by a JavaScript library
 build_search_index = true
+
+# RSS feed
+generate_feed = true
+feed_filename = "rss.xml"
 
 [markdown]
 highlight_code = true
@@ -59,7 +61,7 @@ galleria.enabled = true
 navbar_items = [
  { code = "en", nav_items = [
   { url = "$BASE_URL/", name = "Home" },
-  { url = "$BASE_URL/posts", name = "Posts" },
+  { url = "$BASE_URL/posts", name = "Posts", feed = true },
  ]},
 ]
 
@@ -73,6 +75,7 @@ avatar = "/images/avatar.jpg"
 github = "awakecoding"
 linkedin = "mamoreau"
 twitter = "awakecoding"
+bluesky = "awakecoding.com"
 email = "marcandre.moreau@gmail.com"
 
 [extra.analytics]
