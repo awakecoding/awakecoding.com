@@ -2,6 +2,9 @@
 title = "Active Directory LDAPS certificate selection deep dive"
 slug = "active-directory-ldaps-certificate-selection-deep-dive"
 date = 2023-08-12
+
+[extra]
+banner = "/images/posts/active-directory-ldaps-certificate-selection-deep-dive.png"
 +++
 
 The LDAPS certificate is used by the LDAP server to secure communications using TLS over TCP/636, as an alternative to LDAP over TCP/389 that uses SPNEGO-based security. Enabling and enforcing LDAPS is a common security hardening task in Windows Active Directory environments today. Using [Let's Encrypt certificates is popular for LDAPS](https://blog.devolutions.net/2021/03/how-to-configure-secure-ldap-ldaps-in-active-directory-with-lets-encrypt/) because it is much simpler than using [Active Directory Certificate Services (AD CS)](https://learn.microsoft.com/en-us/windows-server/identity/ad-cs/) if you don't already have it deployed.
