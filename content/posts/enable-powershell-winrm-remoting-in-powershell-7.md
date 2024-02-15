@@ -4,6 +4,9 @@ slug = "enable-powershell-winrm-remoting-in-powershell-7"
 date = 2024-02-07
 description = "Enable PowerShell 7 WinRM remoting for efficient server management without relying on SSH. This post provides a straightforward method to incorporate PowerShell 7 into Windows environments, ensuring compatibility and simplifying remoting tasks with practical code snippets and configuration advice."
 
+[taxonomies]
+tags = ["PowerShell", "Hyper-V"]
+
 [extra]
 banner = "/images/banners/enable-powershell-winrm-remoting-in-powershell-7.png"
 +++

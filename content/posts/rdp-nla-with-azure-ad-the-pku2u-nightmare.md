@@ -4,6 +4,9 @@ slug = "rdp-nla-with-azure-ad-the-pku2u-nightmare"
 date = 2023-08-10
 description = "This post tackles the challenges of RDP Network Level Authentication (NLA) with Azure AD, labeled as the PKU2U nightmare, offering detailed solutions for common problems. It addresses enabling PKU2U authentication, Azure AD workplace joining, the correct Azure AD username format, and third-party application support, providing both technical insights and practical steps to mitigate these issues in Azure AD environments."
 
+[taxonomies]
+tags = ["RDP", "Windows", "Azure"]
+
 [extra]
 banner = "/images/banners/rdp-nla-with-azure-ad-the-pku2u-nightmare.png"
 +++

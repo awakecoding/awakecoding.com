@@ -4,6 +4,9 @@ slug = "free-arm-server-4-cpus-24gb-ram-200gb-storage"
 date = 2022-11-23
 description = "Discover how to leverage Oracle Cloud's Free Tier to deploy an ARM server, complete with 4 CPUs, 24GB RAM, and 200GB storage, without any costs. This guide walks you through creating an Oracle Cloud account, setting up a virtual machine, and initial configurations to get you started on utilizing these robust free cloud resources for your projects."
 
+[taxonomies]
+tags = ["Linux"]
+
 [extra]
 banner = "/images/banners/free-arm-server-4-cpus-24gb-ram-200gb-storage.png"
 +++

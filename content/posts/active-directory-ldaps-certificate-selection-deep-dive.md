@@ -4,6 +4,9 @@ slug = "active-directory-ldaps-certificate-selection-deep-dive"
 date = 2023-08-12
 description = "A deep dive into Active Directory LDAPS certificate selection, detailing the technical intricacies of ensuring secure communications through TLS. This guide covers the validation and selection process, including PowerShell scripts for certificate management, aiming to clarify and resolve common issues with LDAPS implementation."
 
+[taxonomies]
+tags = ["Kerberos", "ActiveDirectory", "Windows"]
+
 [extra]
 banner = "/images/banners/active-directory-ldaps-certificate-selection-deep-dive.png"
 +++

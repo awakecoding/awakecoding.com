@@ -4,6 +4,9 @@ slug = "fix-kerberos-machine-tgt-fetching-on-startup"
 date = 2023-02-26
 description = "Resolve RDP NLA issues on domain-joined devices outside the corporate network by configuring a scheduled task to fetch the Kerberos machine TGT at startup. This practical solution ensures secure, remote desktop access without compromising network security, detailed with step-by-step instructions and troubleshooting tips."
 
+[taxonomies]
+tags = ["Kerberos", "ActiveDirectory"]
+
 [extra]
 banner = "/images/banners/fix-kerberos-machine-tgt-fetching-on-startup.png"
 +++

@@ -5,6 +5,9 @@ date = 2023-09-06
 updated = 2023-09-07
 description = "Discover the intricacies of Active Directory's Kerberos KDC certificate selection for PKINIT, including techniques for choosing a specific certificate, analysis using IDA Pro, and PowerShell cmdlets for managing certificates. This deep dive explores the challenges and solutions for ensuring the right KDC certificate is used, overcoming the unpredictability of certificate selection in Windows environments."
 
+[taxonomies]
+tags = ["Kerberos", "ActiveDirectory", "Windows"]
+
 [extra]
 banner = "/images/banners/active-directory-kerberos-kdc-certificate-selection.png"
 +++

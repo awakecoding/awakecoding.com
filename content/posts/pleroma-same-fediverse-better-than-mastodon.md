@@ -4,6 +4,9 @@ slug = "pleroma-same-fediverse-better-than-mastodon"
 date = 2022-11-20
 description = "Dive into the advantages of Pleroma over Mastodon within the same Fediverse, showcasing how it remains lightweight yet feature-rich, offering full-text search, quote posts, and emoji reactions while maintaining compatibility with Mastodon. This step-by-step guide for installing Pleroma on Linux ensures an easy setup, emphasizing its superiority with practical examples for a more efficient and enriched social media experience."
 
+[taxonomies]
+tags = ["Linux"]
+
 [extra]
 banner = "/images/banners/pleroma-same-fediverse-better-than-mastodon.png"
 +++

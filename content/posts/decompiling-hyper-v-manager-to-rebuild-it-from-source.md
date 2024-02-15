@@ -4,6 +4,9 @@ slug = "decompiling-hyper-v-manager-to-rebuild-it-from-source"
 date = 2024-01-02
 description = "This post guides through decompiling Hyper-V Manager to rebuild it from source, aiming to assess its value for potential open-sourcing. It explores manual and automated decompilation processes, including troubleshooting and enhancing the tool, advocating for community-led improvements to this widely-used but neglected software."
 
+[taxonomies]
+tags = ["Hyper-V", "Reversing"]
+
 [extra]
 banner = "/images/banners/decompiling-hyper-v-manager-to-rebuild-it-from-source.png"
 +++

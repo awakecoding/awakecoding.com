@@ -4,6 +4,9 @@ slug = "add-trusted-root-ca-certificate-ubuntu"
 date = 2022-11-24
 description = "A concise guide on adding a trusted Root CA certificate on Ubuntu, ideal for those who frequently need to ensure their system trusts custom Root CAs. It offers a straightforward procedure, from verifying the certificate format with the file command to converting and installing it, ensuring system-wide trust with practical commands."
 
+[taxonomies]
+tags = ["Linux"]
+
 [extra]
 banner = "/images/banners/add-trusted-root-ca-certificate-ubuntu.png"
 +++

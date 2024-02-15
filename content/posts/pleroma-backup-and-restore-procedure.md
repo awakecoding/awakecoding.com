@@ -4,6 +4,9 @@ slug = "pleroma-backup-and-restore-procedure"
 date = 2022-12-04
 description = "Master the Pleroma backup and restore process with this comprehensive guide, which offers detailed steps for efficiently securing your Pleroma instance. From creating a backup script to restoring data on a new machine, this tutorial ensures you're prepared for data migration or recovery, tailored for administrators with limited system administration experience."
 
+[taxonomies]
+tags = ["Linux"]
+
 [extra]
 banner = "/images/banners/pleroma-backup-and-restore-procedure.png"
 +++

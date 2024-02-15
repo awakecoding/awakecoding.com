@@ -4,6 +4,9 @@ slug = "disabling-web-proxy-auto-detect-wpad-correctly"
 date = 2022-02-22
 description = "Explore the correct method to disable Web Proxy Auto Detect (WPAD) in Windows to enhance security without breaking essential components. This guide clarifies common misconceptions and provides a safe approach using registry modifications, avoiding potential pitfalls associated with service deactivation."
 
+[taxonomies]
+tags = ["Windows", "Kerberos"]
+
 [extra]
 banner = "/images/banners/disabling-web-proxy-auto-detect-wpad-correctly.png"
 +++

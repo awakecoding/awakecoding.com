@@ -4,6 +4,9 @@ slug = "rdp-smartcard-logon-user-name-does-not-exist"
 date = 2023-08-04
 description = "Navigate through the confusion of \"the specified user name does not exist\" error during RDP smartcard logon, offering insights into common misinterpretations and actionable solutions. This post breaks down error messages, suggests disabling strict KDC validation, and guides on certificate trust validation, ensuring successful authentication with practical steps and PowerShell commands."
 
+[taxonomies]
+tags = ["RDP", "Kerberos", "Windows"]
+
 [extra]
 banner = "/images/banners/rdp-smartcard-logon-user-name-does-not-exist.png"
 +++
