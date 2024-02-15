@@ -2,7 +2,7 @@
 title = "PowerShell Remoting Trusted Hosts: What does it mean?"
 slug = "powershell-remoting-trusted-hosts-what-does-it-mean"
 date = 2023-06-17
-draft = false
+description = "This guide demystifies the \"TrustedHosts\" setting in PowerShell remoting, explaining its significance and how to configure it to avoid common errors. It offers solutions for enabling remote connections, particularly when Kerberos or HTTPS isn't used, ensuring security and connectivity for non-domain-joined machines or across different domains."
 
 [extra]
 banner = "/images/banners/powershell-remoting-trusted-hosts-what-does-it-mean.png"

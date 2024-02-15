@@ -2,6 +2,7 @@
 title = "Windows Hello: Cloud Kerberos Trust, or Key Trust?"
 slug = "windows-hello-cloud-kerberos-trust-or-key-trust"
 date = 2023-05-15
+description = "Unpack the dilemma between Cloud Kerberos Trust and Key Trust in Windows Hello for Business deployments. This post navigates through troubleshooting login issues, clarifying deployment types, and offering solutions for transitioning between deployment models with Group Policy and PowerShell, ensuring a smoother Windows Hello setup and operational reliability."
 
 [extra]
 banner = "/images/banners/windows-hello-cloud-kerberos-trust-or-key-trust.png"
