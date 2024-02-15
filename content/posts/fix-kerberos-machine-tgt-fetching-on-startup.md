@@ -2,6 +2,9 @@
 title = "Fix Kerberos Machine TGT Fetching on Startup"
 slug = "fix-kerberos-machine-tgt-fetching-on-startup"
 date = 2023-02-26
+
+[extra]
+banner = "/images/banners/fix-kerberos-machine-tgt-fetching-on-startup.png"
 +++
 
 Is RDP NLA between domain-joined devices not working outside of the corporate network despite having configured a KDC proxy on both? This is a known issue where lsass.exe fails to fetch the Kerberos machine TGT at boot time, but it can be "fixed" with a scheduled task!

@@ -2,6 +2,9 @@
 title = "Pleroma: same fediverse, better than Mastodon!"
 slug = "pleroma-same-fediverse-better-than-mastodon"
 date = 2022-11-20
+
+[extra]
+banner = "/images/banners/pleroma-same-fediverse-better-than-mastodon.png"
 +++
 
 This step-by-step guide shows how to build and install the [Pleroma back-end](https://pleroma.social/) on a Linux server. While Mastodon is the most popular software on the [Fediverse](https://fediverse.party/), it is not the only one, or the best. Alternative back-ends like Pleroma are more lightweight and support features like full text search for all users, or in the federated timeline. Aside from extended features like quote posts and emoji reactions, Pleroma remains fully compatible with Mastodon.

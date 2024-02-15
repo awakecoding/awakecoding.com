@@ -2,6 +2,9 @@
 title = "Add Trusted Root CA certificate on Ubuntu"
 slug = "add-trusted-root-ca-certificate-ubuntu"
 date = 2022-11-24
+
+[extra]
+banner = "/images/banners/add-trusted-root-ca-certificate-ubuntu.png"
 +++
 
 Do you need to add a custom trusted root CA on Ubuntu, and somehow always forget the correct procedure? Here's a quick reminder to use as reference!

@@ -4,7 +4,7 @@ slug = "decompiling-hyper-v-manager-to-rebuild-it-from-source"
 date = 2024-01-02
 
 [extra]
-banner = "/images/posts/decompiling-hyper-v-manager-to-rebuild-it-from-source.png"
+banner = "/images/banners/decompiling-hyper-v-manager-to-rebuild-it-from-source.png"
 +++
 
 ## Why Hyper-V Manager?

@@ -2,6 +2,9 @@
 title = "RDP Smartcard Logon: User Name Does Not Exist"
 slug = "rdp-smartcard-logon-user-name-does-not-exist"
 date = 2023-08-04
+
+[extra]
+banner = "/images/banners/rdp-smartcard-logon-user-name-does-not-exist.png"
 +++
 
 ## Misleading Error Messages, Analyzed

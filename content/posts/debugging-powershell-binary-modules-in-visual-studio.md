@@ -4,7 +4,7 @@ slug = "debugging-powershell-binary-modules-in-visual-studio"
 date = 2023-10-21
 
 [extra]
-banner = "/images/posts/debugging-powershell-binary-modules-in-visual-studio.png"
+banner = "/images/banners/debugging-powershell-binary-modules-in-visual-studio.png"
 +++
 
 So you've been tasked with creating a [PowerShell binary module](https://learn.microsoft.com/en-us/powershell/scripting/developer/module/how-to-write-a-powershell-binary-module) to expose functionality from a C# library you're working on, but don't know where to start in Visual Studio. Maybe you don't even like PowerShell and naively thought you could satisfy system administrators with a [traditional .NET CLI](https://learn.microsoft.com/en-us/dotnet/standard/commandline/) instead of a real PowerShell module like they've been asking for. You've then asked around for advice and all you got is ["use VSCode"](https://learn.microsoft.com/en-us/powershell/scripting/dev-cross-plat/vscode/using-vscode-for-debugging-compiled-cmdlets), but you want to stick to Visual Studio because it's what you know, and it feels more appropriate for everything *except* PowerShell.

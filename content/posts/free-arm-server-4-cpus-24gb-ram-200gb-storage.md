@@ -2,11 +2,14 @@
 title = "Free ARM server with 4 CPUs, 24GB of RAM and 200GB storage!"
 slug = "free-arm-server-4-cpus-24gb-ram-200gb-storage"
 date = 2022-11-23
+
+[extra]
+banner = "/images/banners/free-arm-server-4-cpus-24gb-ram-200gb-storage.png"
 +++
 
-![Free ARM Server](/images/posts/free-arm-server-banner.png)
-
 Have you ever dreamed of having your very own ARM server in the cloud for *FREE*?
+
+![Free ARM Server](/images/posts/free-ubuntu-arm-server-in-oracle-cloud.png)
 
 You're in luck! The [Oracle Cloud Free Tier](https://www.oracle.com/cloud/free/) offers generous [Always Free cloud services](https://www.oracle.com/cloud/free/#always-free), including [Ampere Altra](https://amperecomputing.com/processors/ampere-altra/) ARM compute instances with enough RAM and storage to run decent workloads.
 

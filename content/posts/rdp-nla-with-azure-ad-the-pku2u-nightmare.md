@@ -2,6 +2,9 @@
 title = "RDP NLA with Azure AD: The PKU2U Nightmare"
 slug = "rdp-nla-with-azure-ad-the-pku2u-nightmare"
 date = 2023-08-10
+
+[extra]
+banner = "/images/banners/rdp-nla-with-azure-ad-the-pku2u-nightmare.png"
 +++
 
 So, you've decided to joining systems to Azure AD, either as hybrid-joined (HAADJ) or as pure Azure AD joined (AADJ). The future is in the cloud, and the cloud is better (as long as it is Azure)! That's until you try using RDP to connect to your systems, only to receive a frustratingly persistent "Your credentials did not work" error. You've triple checked the password, and it really should work, but it just won't. Why? Welcome to the PKU2U nightmare: a temporary solution that became permanent in the Azure AD world. Yes, I know it's called Entra ID now, but for simplicy I'll stick to the terminlogy and acronyms most people are familiar with.

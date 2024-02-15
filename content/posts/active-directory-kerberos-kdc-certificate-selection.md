@@ -5,7 +5,7 @@ date = 2023-09-06
 updated = 2023-09-07
 
 [extra]
-banner = "/images/posts/active-directory-kerberos-kdc-certificate-selection.png"
+banner = "/images/banners/active-directory-kerberos-kdc-certificate-selection.png"
 +++
 
 So, you've decided to embark on a quest to reliably select a specific KDC certificate in Active Directory, because randomly-selected certificates that you *think* you have control over are not a desirable thing? Here's what happened to the last person that went down this path:
