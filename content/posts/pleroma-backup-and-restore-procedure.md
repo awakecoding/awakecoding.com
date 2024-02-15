@@ -2,6 +2,9 @@
 title = "Pleroma Backup and Restore Procedure"
 slug = "pleroma-backup-and-restore-procedure"
 date = 2022-12-04
+
+[extra]
+banner = "/images/banners/pleroma-backup-and-restore-procedure.png"
 +++
 
 In previous posts, I have covered how to self-host your own [Mastodon-interoperable Pleroma server](https://cohost.org/awakecoding/post/390625-pleroma-same-fedive) and how to get access to a [free ARM server with 4 CPUs and 24GB of RAM](https://cohost.org/awakecoding/post/384627-free-arm-server-with). After running my own Pleroma server for two weeks, I looked at the resource usage history: CPUs barely do any work, and memory usage is less than 1GB on average. While Pleroma can run on 1 CPU and 2GB of RAM for single-user instance, I have decided to play it safe and downsize to 2 CPUs and 8GB of RAM for now.

@@ -4,7 +4,7 @@ slug = "enable-powershell-winrm-remoting-in-powershell-7"
 date = 2024-02-07
 
 [extra]
-banner = "/images/posts/enable-powershell-winrm-remoting-in-powershell-7.png"
+banner = "/images/banners/enable-powershell-winrm-remoting-in-powershell-7.png"
 +++
 
 Do you often wonder how to use PowerShell 7 in the *server* without switching to [SSH-based remoting](https://learn.microsoft.com/en-us/powershell/scripting/learn/remoting/ssh-remoting-in-powershell)? If [WinRM](https://learn.microsoft.com/en-us/windows/win32/winrm/installation-and-configuration-for-windows-remote-management) already works well, why would you want to deal with SSH keys when all you want is PowerShell 7? While WinRM-based remoting is not officially supported on non-Windows, it remains a decent choice for PowerShell remoting in Windows environments. If you want a code snippet you can just copy/paste to enable PowerShell 7 in WinRM without the whole explanation, just skip to the summary section at the end of this blog. Otherwise, read on!

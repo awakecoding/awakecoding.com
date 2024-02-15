@@ -2,6 +2,9 @@
 title = "Windows Hello: Cloud Kerberos Trust, or Key Trust?"
 slug = "windows-hello-cloud-kerberos-trust-or-key-trust"
 date = 2023-05-15
+
+[extra]
+banner = "/images/banners/windows-hello-cloud-kerberos-trust-or-key-trust.png"
 +++
 
 So you've just enabled [Windows Hello for Business](https://learn.microsoft.com/en-us/windows/security/identity-protection/hello-for-business/hello-overview) through Intune using a [Cloud Kerberos trust deployment](https://learn.microsoft.com/en-us/windows/security/identity-protection/hello-for-business/hello-hybrid-cloud-kerberos-trust) which should work from anywhere once the initial setup is done. You test it with a few users and it works well, so you decide to enable it company-wide, only to be flooded with issues the next day when people try logging in from home:

@@ -3,6 +3,9 @@ title = "PowerShell Remoting Trusted Hosts: What does it mean?"
 slug = "powershell-remoting-trusted-hosts-what-does-it-mean"
 date = 2023-06-17
 draft = false
+
+[extra]
+banner = "/images/banners/powershell-remoting-trusted-hosts-what-does-it-mean.png"
 +++
 
 If you're trying to use PowerShell remoting and hit this cryptic error about a "TrustedHosts" configuration setting, you've come to the right place:

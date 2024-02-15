@@ -2,6 +2,9 @@
 title = "Disabling Web Proxy Auto Detect (WPAD) Correctly"
 slug = "disabling-web-proxy-auto-detect-wpad-correctly"
 date = 2022-02-22
+
+[extra]
+banner = "/images/banners/disabling-web-proxy-auto-detect-wpad-correctly.png"
 +++
 
 The Web Proxy Auto Detect (WPAD) feature in Windows makes it easier to automatically discover proxy settings on the local network. However, since it is commonly abused in a variety of attacks, security hardening guides often instruct to disable WPAD entirely. If you're like most people, your first thought will be to open services.msc, look for something that looks like it ("WinHTTP Web Proxy Auto-Discovery Service"), and... fall right into a trap.
