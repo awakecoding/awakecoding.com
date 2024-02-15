@@ -2,6 +2,10 @@
 title = "Debugging PowerShell Binary Modules in Visual Studio"
 slug = "debugging-powershell-binary-modules-in-visual-studio"
 date = 2023-10-21
+description = "Learn to create and debug PowerShell binary modules in Visual Studio, covering both local and remote debugging. This guide simplifies the development process for PowerShell modules, enhancing productivity with practical examples and troubleshooting tips for common issues."
+
+[taxonomies]
+tags = ["PowerShell"]
 
 [extra]
 banner = "/images/banners/debugging-powershell-binary-modules-in-visual-studio.png"
