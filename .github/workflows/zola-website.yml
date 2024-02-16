@@ -1,0 +1,71 @@
+name: zola website
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+
+env:
+  GOOGLE_ANALYTICS_ID: "G-JT1V4R3MZD"
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    if: github.ref != 'refs/heads/master'
+    steps:
+      - name: Clone project
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          set-safe-directory: '*'
+
+      - name: Install Zola
+        uses: taiki-e/install-action@v2
+        with:
+          tool: zola@0.18
+
+      - name: Inject Google Analytics
+        shell: pwsh
+        run: |
+          Add-Content -Path "config.toml" -Value @(
+            "[extra.analytics]",
+            "google = `${{ env.GOOGLE_ANALYTICS_ID }}`"
+          )
+
+      - name: Build website
+        run: zola build
+
+      - name: Generate feed
+        shell: pwsh
+        run: |
+          .\scripts\GenerateFeed.ps1
+
+      - name: Archive website
+        run: tar -czvf website.tar.gz -C public .
+
+      - name: Upload website
+        uses: actions/upload-artifact@v4
+        with:
+          name: website
+          path: website.tar.xz
+          
+      - name: Publish website
+        shell: pwsh
+        working-directory: public
+        env:
+          PAGES_BRANCH: gh-pages
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $IsMasterBranch = ('${{ github.ref_name }}' -eq 'master')
+          $REMOTE_REPO="https://${Env:GITHUB_ACTOR}:${Env:GITHUB_TOKEN}@${Env:GITHUB_HOSTNAME}/${Env:GITHUB_REPOSITORY}.git"
+          $REMOTE_BRANCH=$PAGES_BRANCH
+          git init
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions-bot@users.noreply.${Env:GITHUB_HOSTNAME}"
+          git add .
+          git commit -m "Deploy ${GITHUB_REPOSITORY} to ${GITHUB_REPOSITORY}:${REMOTE_BRANCH}"
+          if ($IsMasterBranch) {
+            git push --force "${REMOTE_REPO}" master:"${REMOTE_BRANCH}"
+          }

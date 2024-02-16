@@ -36,7 +36,17 @@
           <link>{{ page.permalink | escape_xml | safe }}</link>
           <guid>{{ page.permalink | escape_xml | safe }}</guid>
           <description>{% if page.description %}{{ page.description }}{% else %}{{ page.title }}{% endif %}</description>
-          <meta property="og:image" content="{{ get_url(path=page.extra.banner, trailing_slash=false) }}" />
+          <bannerImage>{{ get_url(path=page.extra.banner, trailing_slash=false) }}</bannerImage>
+          {%- if page.updated -%}
+          <lastUpdated>{{ page.updated | date(format="%a, %d %b %Y %H:%M:%S %z") }}</lastUpdated>
+          {%- endif -%}
+          {%- if page.taxonomies.tags -%}
+            <tags>
+            {%- for tag in page.taxonomies.tags %}
+              <tag>{{ tag }}</tag>
+            {%- endfor %}
+            </tags>
+          {%- endif -%}
       </item>
       {%- endfor %}
     </channel>
