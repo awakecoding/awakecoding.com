@@ -205,4 +205,4 @@ You can also create a moderator account using the --moderator command-line argum
 
 That's it! You can now login to your new Pleroma instance and start using it with other people on the fediverse, including Mastodon!
 
-Special thanks to [Patricia](https://pleroma.patricia.no/@patricia) for the initial [Pleroma](https://github.com/patricia-gallardo/pleroma-setup/blob/main/README.md) guide I followed to get started.
+Special thanks to [Patricia](https://patricia.no/) for the initial [Pleroma](https://github.com/patricia-gallardo/pleroma-setup) guide I followed to get started.

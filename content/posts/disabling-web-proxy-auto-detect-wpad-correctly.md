@@ -35,7 +35,7 @@ Name        : WinHttpAutoProxySvc
 DisplayName : WinHTTP Web Proxy Auto-Discovery Service
 ```
 
-Disabling the WPAD service breaks some Windows components using WinHTTP. For instance, the [KDC proxying](https://syfuhs.net/kdc-proxy-for-remote-access) client often used with RDP, the RD Gateway, or DirectAccess to make Kerberos work outside of the corporate network will just... silently fail, causing a fallback to NTLM. I found out the hard way that IT fell into that trap when hardening our systems, and wasted quite a lot of time researching why Kerberos wouldn't kick in. The WPAD service is also required for [Windows Defender Application Guard (WDAG)](https://github.com/MicrosoftDocs/windows-itpro-docs/issues/2965).
+Disabling the WPAD service breaks some Windows components using WinHTTP. For instance, the [KDC proxying](https://syfuhs.net/kdc-proxy-for-remote-access) client often used with RDP, the RD Gateway, or DirectAccess to make Kerberos work outside of the corporate network will just... silently fail, causing a fallback to NTLM. I found out the hard way that IT fell into that trap when hardening our systems, and wasted quite a lot of time researching why Kerberos wouldn't kick in. The WPAD service is also required for [Windows Defender Application Guard (WDAG)](https://web.archive.org/web/20220222223025/https://github.com/MicrosoftDocs/windows-itpro-docs/issues/2965).
 
 In both cases, the components don't care about WPAD - the problem is caused by WinHTTP APIs checking if the WPAD service is simply *running*.
 

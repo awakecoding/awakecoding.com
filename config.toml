@@ -34,6 +34,12 @@ smart_punctuation = false
 
 # Configuration of the link checker.
 [link_checker]
+skip_prefixes = [
+    "https://twitter.com/",
+]
+skip_anchor_prefixes = [
+    "https://visualstudio.microsoft.com/",
+]
 
 # Treat internal link problems as either "error" or "warn", default is "error"
 internal_level = "error"
