@@ -58,13 +58,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           $IsMasterBranch = ('${{ github.ref_name }}' -eq 'master')
-          $REMOTE_REPO="https://${Env:GITHUB_ACTOR}:${Env:GITHUB_TOKEN}@${Env:GITHUB_HOSTNAME}/${Env:GITHUB_REPOSITORY}.git"
-          $REMOTE_BRANCH=$PAGES_BRANCH
+          $RemoteRepo="https://${Env:GITHUB_ACTOR}:${Env:GITHUB_TOKEN}@github.com/${Env:GITHUB_REPOSITORY}.git"
+          $RemoteBranch=$Env:PAGES_BRANCH
           git init
           git config user.name "GitHub Actions"
-          git config user.email "github-actions-bot@users.noreply.${Env:GITHUB_HOSTNAME}"
+          git config user.email "github-actions-bot@users.noreply.github.com"
           git add .
-          git commit -m "Deploy ${GITHUB_REPOSITORY} to ${GITHUB_REPOSITORY}:${REMOTE_BRANCH}"
+          git commit -m "Deploy ${Env:GITHUB_REPOSITORY} to ${Env:GITHUB_REPOSITORY}:${RemoteBranch}"
           if ($IsMasterBranch) {
-            git push --force "${REMOTE_REPO}" master:"${REMOTE_BRANCH}"
+            git push --force "${RemoteRepo}" "master`:${RemoteBranch}"
           }
