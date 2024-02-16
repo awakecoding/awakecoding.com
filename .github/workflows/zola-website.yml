@@ -13,7 +13,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-22.04
-    if: github.ref != 'refs/heads/master'
     steps:
       - name: Clone project
         uses: actions/checkout@v4
@@ -31,7 +30,7 @@ jobs:
         run: |
           Add-Content -Path "config.toml" -Value @(
             "[extra.analytics]",
-            "google = `${{ env.GOOGLE_ANALYTICS_ID }}`"
+            "google = `"${{ env.GOOGLE_ANALYTICS_ID }}`""
           )
 
       - name: Build website
@@ -49,7 +48,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: website
-          path: website.tar.xz
+          path: website.tar.gz
           
       - name: Publish website
         shell: pwsh
