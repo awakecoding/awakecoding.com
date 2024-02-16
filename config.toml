@@ -2,7 +2,7 @@
 base_url = "https://awakecoding.com"
 
 # The site title and description; used in feeds by default.
-title = "AwakeCoding ☀️💻 Adventures of a CTO"
+title = "AwakeCoding ☀️💻"
 description = "awakecoding - Adventures of a CTO"
 
 # The default language; used in feeds.
@@ -82,6 +82,3 @@ linkedin = "mamoreau"
 twitter = "awakecoding"
 bluesky = "awakecoding.com"
 email = "marcandre.moreau@gmail.com"
-
-[extra.analytics]
-google = "G-JT1V4R3MZD"
