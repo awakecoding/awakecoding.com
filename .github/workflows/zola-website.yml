@@ -23,7 +23,7 @@ jobs:
       - name: Install Zola
         uses: taiki-e/install-action@v2
         with:
-          tool: zola@0.18
+          tool: zola@0.19
 
       - name: Inject Google Analytics
         shell: pwsh
