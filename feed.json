@@ -1,0 +1,194 @@
+{
+  "version": "https://jsonfeed.org/version/1",
+  "title": "AwakeCoding ☀️💻",
+  "home_page_url": "https://awakecoding.com",
+  "feed_url": "https://awakecoding.com/feed.json",
+  "items": [
+    {
+      "id": "powershell-host-ipc-for-any-dotnet-application",
+      "url": "https://awakecoding.com/posts/powershell-host-ipc-for-any-dotnet-application/",
+      "title": "PowerShell Host IPC for any .NET application",
+      "date_published": "2024-09-25T00:00:00+00:00",
+      "image": "https://awakecoding.com/images/banners/powershell-host-ipc-for-any-dotnet-application-image.png",
+      "banner_image": "https://awakecoding.com/images/banners/powershell-host-ipc-for-any-dotnet-application.png",
+      "summary": "Explore how PowerShell enables interprocess communication (IPC) using named pipes in .NET applications, allowing seamless remote control and API access. This hands-on guide walks through creating custom named pipes, using Enter-PSHostProcess for connection, and integrating PowerShell with your .NET projects to enhance flexibility and streamline automation workflows with real-world examples.",
+      "tags": [
+        "PowerShell",
+        "CTO"
+      ]
+    },
+    {
+      "id": "mac-rdp-client-kerberos-and-protected-users-guide",
+      "url": "https://awakecoding.com/posts/mac-rdp-client-kerberos-and-protected-users-guide/",
+      "title": "Mac RDP Client: Kerberos and Protected Users Guide",
+      "date_published": "2024-06-13T00:00:00+00:00",
+      "image": "https://awakecoding.com/images/banners/mac-rdp-client-kerberos-and-protected-users-guide-image.png",
+      "banner_image": "https://awakecoding.com/images/banners/mac-rdp-client-kerberos-and-protected-users-guide.png",
+      "summary": "Explore the essential steps to secure Mac RDP connections using Kerberos authentication with a focus on troubleshooting Protected Users and NTLM issues. This guide provides practical solutions for configuring Kerberos in an Active Directory environment, ensuring robust security for remote desktop access.",
+      "tags": [
+        "RDP",
+        "Kerberos",
+        "ActiveDirectory",
+        "CTO"
+      ]
+    },
+    {
+      "id": "enable-powershell-winrm-remoting-in-powershell-7",
+      "url": "https://awakecoding.com/posts/enable-powershell-winrm-remoting-in-powershell-7/",
+      "title": "Enable PowerShell WinRM Remoting in PowerShell 7",
+      "date_published": "2024-02-07T00:00:00+00:00",
+      "image": "https://awakecoding.com/images/banners/enable-powershell-winrm-remoting-in-powershell-7-image.png",
+      "banner_image": "https://awakecoding.com/images/banners/enable-powershell-winrm-remoting-in-powershell-7.png",
+      "summary": "Enable PowerShell 7 WinRM remoting for efficient server management without relying on SSH. This post provides a straightforward method to incorporate PowerShell 7 into Windows environments, ensuring compatibility and simplifying remoting tasks with practical code snippets and configuration advice.",
+      "tags": [
+        "PowerShell",
+        "Hyper-V",
+        "CTO"
+      ]
+    },
+    {
+      "id": "decompiling-hyper-v-manager-to-rebuild-it-from-source",
+      "url": "https://awakecoding.com/posts/decompiling-hyper-v-manager-to-rebuild-it-from-source/",
+      "title": "Decompiling Hyper-V Manager to rebuild it from source",
+      "date_published": "2024-01-02T00:00:00+00:00",
+      "image": "https://awakecoding.com/images/banners/decompiling-hyper-v-manager-to-rebuild-it-from-source-image.png",
+      "banner_image": "https://awakecoding.com/images/banners/decompiling-hyper-v-manager-to-rebuild-it-from-source.png",
+      "summary": "This post guides through decompiling Hyper-V Manager to rebuild it from source, aiming to assess its value for potential open-sourcing. It explores manual and automated decompilation processes, including troubleshooting and enhancing the tool, advocating for community-led improvements to this widely-used but neglected software.",
+      "tags": [
+        "Hyper-V",
+        "Reversing",
+        "CTO"
+      ]
+    },
+    {
+      "id": "debugging-powershell-binary-modules-in-visual-studio",
+      "url": "https://awakecoding.com/posts/debugging-powershell-binary-modules-in-visual-studio/",
+      "title": "Debugging PowerShell Binary Modules in Visual Studio",
+      "date_published": "2023-10-21T00:00:00+00:00",
+      "image": "https://awakecoding.com/images/banners/debugging-powershell-binary-modules-in-visual-studio-image.png",
+      "banner_image": "https://awakecoding.com/images/banners/debugging-powershell-binary-modules-in-visual-studio.png",
+      "summary": "Learn to create and debug PowerShell binary modules in Visual Studio, covering both local and remote debugging. This guide simplifies the development process for PowerShell modules, enhancing productivity with practical examples and troubleshooting tips for common issues.",
+      "tags": [
+        "PowerShell",
+        "CTO"
+      ]
+    },
+    {
+      "id": "active-directory-kerberos-kdc-certificate-selection",
+      "url": "https://awakecoding.com/posts/active-directory-kerberos-kdc-certificate-selection/",
+      "title": "Active Directory Kerberos KDC certificate selection",
+      "date_published": "2023-09-06T00:00:00+00:00",
+      "image": "https://awakecoding.com/images/banners/active-directory-kerberos-kdc-certificate-selection-image.png",
+      "banner_image": "https://awakecoding.com/images/banners/active-directory-kerberos-kdc-certificate-selection.png",
+      "summary": "Discover the intricacies of Active Directory's Kerberos KDC certificate selection for PKINIT, including techniques for choosing a specific certificate, analysis using IDA Pro, and PowerShell cmdlets for managing certificates. This deep dive explores the challenges and solutions for ensuring the right KDC certificate is used, overcoming the unpredictability of certificate selection in Windows environments.",
+      "last_updated": "2023-09-07T00:00:00+00:00",
+      "tags": [
+        "Kerberos",
+        "ActiveDirectory",
+        "Windows",
+        "CTO"
+      ]
+    },
+    {
+      "id": "active-directory-ldaps-certificate-selection-deep-dive",
+      "url": "https://awakecoding.com/posts/active-directory-ldaps-certificate-selection-deep-dive/",
+      "title": "Active Directory LDAPS certificate selection deep dive",
+      "date_published": "2023-08-12T00:00:00+00:00",
+      "image": "https://awakecoding.com/images/banners/active-directory-ldaps-certificate-selection-deep-dive-image.png",
+      "banner_image": "https://awakecoding.com/images/banners/active-directory-ldaps-certificate-selection-deep-dive.png",
+      "summary": "A deep dive into Active Directory LDAPS certificate selection, detailing the technical intricacies of ensuring secure communications through TLS. This guide covers the validation and selection process, including PowerShell scripts for certificate management, aiming to clarify and resolve common issues with LDAPS implementation.",
+      "tags": [
+        "Kerberos",
+        "ActiveDirectory",
+        "Windows",
+        "CTO"
+      ]
+    },
+    {
+      "id": "rdp-nla-with-azure-ad-the-pku2u-nightmare",
+      "url": "https://awakecoding.com/posts/rdp-nla-with-azure-ad-the-pku2u-nightmare/",
+      "title": "RDP NLA with Azure AD: The PKU2U Nightmare",
+      "date_published": "2023-08-10T00:00:00+00:00",
+      "image": "https://awakecoding.com/images/banners/rdp-nla-with-azure-ad-the-pku2u-nightmare-image.png",
+      "banner_image": "https://awakecoding.com/images/banners/rdp-nla-with-azure-ad-the-pku2u-nightmare.png",
+      "summary": "This post tackles the challenges of RDP Network Level Authentication (NLA) with Azure AD, labeled as the PKU2U nightmare, offering detailed solutions for common problems. It addresses enabling PKU2U authentication, Azure AD workplace joining, the correct Azure AD username format, and third-party application support, providing both technical insights and practical steps to mitigate these issues in Azure AD environments.",
+      "tags": [
+        "RDP",
+        "Windows",
+        "Azure",
+        "CTO"
+      ]
+    },
+    {
+      "id": "rdp-smartcard-logon-user-name-does-not-exist",
+      "url": "https://awakecoding.com/posts/rdp-smartcard-logon-user-name-does-not-exist/",
+      "title": "RDP Smartcard Logon: User Name Does Not Exist",
+      "date_published": "2023-08-04T00:00:00+00:00",
+      "image": "https://awakecoding.com/images/banners/rdp-smartcard-logon-user-name-does-not-exist-image.png",
+      "banner_image": "https://awakecoding.com/images/banners/rdp-smartcard-logon-user-name-does-not-exist.png",
+      "summary": "Navigate through the confusion of \"the specified user name does not exist\" error during RDP smartcard logon, offering insights into common misinterpretations and actionable solutions. This post breaks down error messages, suggests disabling strict KDC validation, and guides on certificate trust validation, ensuring successful authentication with practical steps and PowerShell commands.",
+      "tags": [
+        "RDP",
+        "Kerberos",
+        "Windows",
+        "CTO"
+      ]
+    },
+    {
+      "id": "powershell-remoting-trusted-hosts-what-does-it-mean",
+      "url": "https://awakecoding.com/posts/powershell-remoting-trusted-hosts-what-does-it-mean/",
+      "title": "PowerShell Remoting Trusted Hosts: What does it mean?",
+      "date_published": "2023-06-17T00:00:00+00:00",
+      "image": "https://awakecoding.com/images/banners/powershell-remoting-trusted-hosts-what-does-it-mean-image.png",
+      "banner_image": "https://awakecoding.com/images/banners/powershell-remoting-trusted-hosts-what-does-it-mean.png",
+      "summary": "This guide demystifies the \"TrustedHosts\" setting in PowerShell remoting, explaining its significance and how to configure it to avoid common errors. It offers solutions for enabling remote connections, particularly when Kerberos or HTTPS isn't used, ensuring security and connectivity for non-domain-joined machines or across different domains.",
+      "tags": [
+        "PowerShell",
+        "Kerberos",
+        "CTO"
+      ]
+    },
+    {
+      "id": "windows-hello-cloud-kerberos-trust-or-key-trust",
+      "url": "https://awakecoding.com/posts/windows-hello-cloud-kerberos-trust-or-key-trust/",
+      "title": "Windows Hello: Cloud Kerberos Trust, or Key Trust?",
+      "date_published": "2023-05-15T00:00:00+00:00",
+      "image": "https://awakecoding.com/images/banners/windows-hello-cloud-kerberos-trust-or-key-trust-image.png",
+      "banner_image": "https://awakecoding.com/images/banners/windows-hello-cloud-kerberos-trust-or-key-trust.png",
+      "summary": "Unpack the dilemma between Cloud Kerberos Trust and Key Trust in Windows Hello for Business deployments. This post navigates through troubleshooting login issues, clarifying deployment types, and offering solutions for transitioning between deployment models with Group Policy and PowerShell, ensuring a smoother Windows Hello setup and operational reliability.",
+      "tags": [
+        "Windows",
+        "Azure",
+        "CTO"
+      ]
+    },
+    {
+      "id": "fix-kerberos-machine-tgt-fetching-on-startup",
+      "url": "https://awakecoding.com/posts/fix-kerberos-machine-tgt-fetching-on-startup/",
+      "title": "Fix Kerberos Machine TGT Fetching on Startup",
+      "date_published": "2023-02-26T00:00:00+00:00",
+      "image": "https://awakecoding.com/images/banners/fix-kerberos-machine-tgt-fetching-on-startup-image.png",
+      "banner_image": "https://awakecoding.com/images/banners/fix-kerberos-machine-tgt-fetching-on-startup.png",
+      "summary": "Resolve RDP NLA issues on domain-joined devices outside the corporate network by configuring a scheduled task to fetch the Kerberos machine TGT at startup. This practical solution ensures secure, remote desktop access without compromising network security, detailed with step-by-step instructions and troubleshooting tips.",
+      "tags": [
+        "Kerberos",
+        "ActiveDirectory",
+        "CTO"
+      ]
+    },
+    {
+      "id": "disabling-web-proxy-auto-detect-wpad-correctly",
+      "url": "https://awakecoding.com/posts/disabling-web-proxy-auto-detect-wpad-correctly/",
+      "title": "Disabling Web Proxy Auto Detect (WPAD) Correctly",
+      "date_published": "2022-02-22T00:00:00+00:00",
+      "image": "https://awakecoding.com/images/banners/disabling-web-proxy-auto-detect-wpad-correctly-image.png",
+      "banner_image": "https://awakecoding.com/images/banners/disabling-web-proxy-auto-detect-wpad-correctly.png",
+      "summary": "Explore the correct method to disable Web Proxy Auto Detect (WPAD) in Windows to enhance security without breaking essential components. This guide clarifies common misconceptions and provides a safe approach using registry modifications, avoiding potential pitfalls associated with service deactivation.",
+      "tags": [
+        "Windows",
+        "Kerberos",
+        "CTO"
+      ]
+    }
+  ]
+}
