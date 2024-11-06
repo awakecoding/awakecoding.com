@@ -48,7 +48,7 @@ internal_level = "error"
 external_level = "error"
 
 [slugify]
-paths = "on"
+paths = "off"
 taxonomies = "on"
 anchors = "on"
 paths_keep_dates = true
@@ -72,6 +72,7 @@ navbar_items = [
  { code = "en", nav_items = [
   { url = "$BASE_URL/", name = "Home" },
   { url = "$BASE_URL/posts", name = "Posts", feed = true },
+  { url = "$BASE_URL/docs", name = "Docs", feed = true },
   { url = "$BASE_URL/tags", name = "Tags", feed = true },
  ]},
 ]

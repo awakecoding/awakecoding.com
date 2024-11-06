@@ -36,7 +36,6 @@
           <link>{{ page.permalink | escape_xml | safe }}</link>
           <guid>{{ page.permalink | escape_xml | safe }}</guid>
           <description>{% if page.description %}{{ page.description }}{% else %}{{ page.title }}{% endif %}</description>
-          <bannerImage>{{ get_url(path=page.extra.banner, trailing_slash=false) }}</bannerImage>
           {%- if page.updated -%}
           <lastUpdated>{{ page.updated | date(format="%a, %d %b %Y %H:%M:%S %z") }}</lastUpdated>
           {%- endif -%}
