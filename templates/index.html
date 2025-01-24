@@ -1,5 +1,40 @@
 {% extends "base.html" %}
 
+{% block head_extra %}
+{% if config.generate_feed %}
+{% set feed_url = config.base_url ~ '/' ~ config.feed_filenames[0] %}
+<link rel="alternate" type="application/rss+xml" title="{{ config.title }} RSS Feed" href="{{ feed_url | safe }}" />
+{% endif %}
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": "{{ config.title }}",
+    "description": "{{ config.description | safe }}",
+    "url": "{{ config.base_url | safe }}",
+    "publisher": {
+      "@type": "Organization",
+      "name": "{{ config.extra.author.name }}",
+      "url": "{{ config.base_url | safe }}",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "{{ get_url(path=config.extra.author.avatar, trailing_slash=false) }}"
+      }
+    }
+  },
+  "hasPart": [
+    {
+      "@type": "DataFeed",
+      "name": "{{ config.title }} RSS Feed",
+      "encodingFormat": "application/rss+xml",
+      {%- set feed_url = config.base_url ~ '/rss.xml' %}
+      "url": "{{ feed_url | safe }}"
+    }
+  ]
+  </script>
+{% endblock head_extra %}
+
 {% block content %}
 <section class="section">
   <div class="container">
