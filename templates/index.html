@@ -1,5 +1,60 @@
 {% extends "base.html" %}
 
+{% block head_extra %}
+{% if config.generate_feed %}
+{% set feed_url = config.base_url ~ '/' ~ config.feed_filenames[0] %}
+<link rel="alternate" type="application/rss+xml" title="{{ config.title }} RSS Feed" href="{{ feed_url | safe }}" />
+{% endif %}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  "name": "{{ config.title }}",
+  "description": "{{ config.description | safe }}",
+  "url": "{{ config.base_url | safe }}",
+  "inLanguage": "{{ lang }}",
+  "publisher": {
+    "@type": "Person",
+    "name": "{{ config.extra.author.name }}",
+    "url": "{{ config.base_url | safe }}",
+    "image": "{{ get_url(path=config.extra.author.avatar, trailing_slash=false) }}",
+    "sameAs": [
+      {% if config.extra.social.twitter %}"https://twitter.com/{{ config.extra.social.twitter }}",{% endif %}
+      {% if config.extra.social.linkedin %}"https://www.linkedin.com/in/{{ config.extra.social.linkedin }}",{% endif %}
+      {% if config.extra.social.github %}"https://github.com/{{ config.extra.social.github }}",{% endif %}
+      {% if config.extra.social.bluesky %}"https://bsky.app/profile/{{ config.extra.social.bluesky }}"{% endif %}
+    ],
+    "description": "{{ section.description }}",
+    "jobTitle": "{{ section.extra.job_title }}",
+    "worksFor": {
+      "@type": "Organization",
+      "name": "{{ section.extra.works_for_name }}",
+      "url": "{{ section.extra.works_for_url | safe }}"
+    },
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "{{ section.extra.country_name }}",
+      "addressRegion": "{{ section.extra.region_name }}"
+    },
+    "knowsAbout": [
+      {%- for topic in section.extra.knows_about -%}
+        "{{ topic }}"{% if not loop.last %},{% endif %}
+      {%- endfor -%}
+    ]
+  },
+  "hasPart": [
+    {
+      "@type": "DataFeed",
+      "name": "{{ config.title }} RSS Feed",
+      {%- set feed_url = config.base_url ~ '/rss.xml' %}
+      "url": "{{ feed_url | safe }}"
+    }
+  ]
+}
+</script>
+{% endblock head_extra %}
+
 {% block content %}
 <section class="section">
   <div class="container">
