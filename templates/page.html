@@ -4,6 +4,33 @@
 {{ config.title }} | {{ page.title }}
 {% endblock %}
 
+{% block head_extra %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "{{ page.title | escape }}",
+  "description": "{{ page.description | safe }}",
+  "datePublished": "{{ page.date | date(format="%Y-%m-%d") }}",
+  "author": {
+    "@type": "Person",
+    "name": "{{ config.extra.author.name | escape }}"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "{{ config.extra.author.name | escape }}",
+    "image": "{{ get_url(path=config.extra.author.avatar, trailing_slash=false) }}"
+  },
+  "image": "{{ get_url(path=page.extra.banner, trailing_slash=false) }}",
+  "url": "{{ page.permalink | safe }}",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ page.permalink | safe }}"
+  }
+}
+</script>
+{% endblock head_extra %}
+
 {% block content %}
 <section class="section">
   <div class="container">
