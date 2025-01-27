@@ -76,6 +76,10 @@ navbar_items = [
  ]},
 ]
 
+[extra.favicon]
+favicon_16x16 = "/images/favicon-16x16.png"
+favicon_32x32 = "/images/favicon-32x32.png"
+
 # Author details
 [extra.author]
 name = "Marc-André Moreau"
