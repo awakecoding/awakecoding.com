@@ -1,17 +1,29 @@
 +++
 title = "KDC Proxying for RDP NLA: Making Kerberos Work"
 slug = "kdc-proxying-for-rdp-nla-making-kerberos-work"
-date = 2025-02-24
+date = 2025-02-25
 description = ""
 
 [taxonomies]
-tags = ["Windows", "Azure", "CTO"]
+tags = ["Windows", "RDP", "Kerberos", "CTO"]
 
 [extra]
-banner = "/images/banners/windows-hello-cloud-kerberos-trust-or-key-trust.png"
+banner = "/images/banners/kdc-proxying-for-rdp-nla-making-kerberos-work.png"
 +++
 
-## Bugs and limitations of mstsc
+Imagine you're in charge of hardening Active Directory at work, and decide to add all of your IT administrators into the Protected Users group. Within minutes, they start getting one of the following error messages when trying to RDP to Windows:
+
+ * A user account restriction (for example, a time-of-day restriction) is preventing you from logging on.
+ * An authentication error has occured, the function requested is not supported. This could be due to CredSSP encryption oracle remediation.
+ * The remote computer that you are trying to connect to requires Network Level Authentication (NLA), but your Windows domain controller cannot be contacted.
+
+Once you've verified that they are connecting using the fully-qualified domain name (FQDN) of the target computer and the user principal name (UPN) username format,you realize the problem won't go away easily and revert the change. Congratulations, you've discovered RDP NLA downgrades to NTLM, but you have no idea *why*.
+
+## KDC Proxying
+
+Kerberos, unlike NTLM, requires a line-of-sight with the Kerberos KDC for out-of-band traffic separate from the Kerberos exchange happening in RDP NLA. The same is true for all protocols using Windows authentication (RDP, LDAP, WinRM, MSRPC, etc). Simply put, if you cannot locate and connect to the Kerberos KDC on one of your Active Directory domain controllers, then Kerberos is not possible. This is where KDC proxying comes into play: it proxies Kerberos requests over HTTPS to the domain controller, providing the needed KDC line-of-sight for Kerberos to work.
+
+## Bugs, bugs everywhere
 
  * The KDCProxyName .RDP file option is ignored unless the connection is using an RD Gateway or Azure Virtual Desktop
  * The client assumes a KDC proxy is deployed on the RD Gateway, and fails to use a direct KDC line-of-sight
@@ -28,14 +40,15 @@ HRESULT CTscSslFilter::InitializeKDCProxyClient(CTscSslFilter* this)
     }
 
     // Only RD Gateway and Azure Virtual Desktop connections reach this point
-
-    if (RDGIsKDCProxy) {
-        // If the "RDGIsKDCProxy" .RDP file option is set to true,
-        // use the RD Gateway hostname as the KDC proxy.
-        SetKDCProxy(GatewayHostname);
-    } else {
-        // Otherwise, use the "KDCProxyName" .RDP file option value as the KDC proxy.
-        SetKDCProxy(KDCProxyName);
+    if (KDCProxyName) {
+        if (RDGIsKDCProxy) {
+            // If the "RDGIsKDCProxy" .RDP file option is set to true,
+            // use the RD Gateway hostname as the KDC proxy.
+            SetKDCProxy(GatewayHostname);
+        } else {
+            // Otherwise, use the "KDCProxyName" .RDP file option value as the KDC proxy.
+            SetKDCProxy(KDCProxyName);
+        }   
     }
 
     return S_OK;
@@ -171,3 +184,5 @@ https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-serve
 
 [MS-KKDCP]: Kerberos Key Distribution Center (KDC) Proxy Protocol
 https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-kkdcp/5bcebb8d-b747-4ee5-9453-428aec1c5c38
+
+https://x.com/jrog404/status/1782513032570065115
