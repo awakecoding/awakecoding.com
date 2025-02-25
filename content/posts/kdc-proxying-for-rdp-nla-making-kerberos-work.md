@@ -68,18 +68,94 @@ function Convert-KdcProxyUrlToName {
 }
 ```
 
+
 ```powershell
 @("https://kdc.contoso.com",
 "https://kdc.contoso.com:443",
 "https://kdc.contoso.com:443/KdcProxy",
-"https://kdc.contoso.com:8181/Custom/Path/With/Extra"
+"https://kdc.contoso.com:8181/Kerberos/Proxy/Service"
 ) | % { Convert-KdcProxyUrlToName $_ }
 ```
 
-kdc.contoso.com
-kdc.contoso.com:443
-kdc.contoso.com:443:KdcProxy
-kdc.contoso.com:8181:Custom/Path/With/Extra
+| KDC Proxy URL                                | KDC Proxy Name                           |
+|----------------------------------------------|------------------------------------------|
+| https://kdc.contoso.com                      | kdc.contoso.com                          |
+| https://kdc.contoso.com:443                  | kdc.contoso.com:443                      |
+| https://kdc.contoso.com:443/KdcProxy         | kdc.contoso.com:443:KdcProxy             |
+| https://kdc.contoso.com:8181/Kerberos/Proxy  | kdc.contoso.com:8181:Kerberos/Proxy      |
+
+```powershell
+netsh http add urlacl url=https://+:443/KdcProxy user="NT authority\Network Service"
+
+$KpsSvcSettingsReg = "HKLM:\SYSTEM\CurrentControlSet\Services\KPSSVC\Settings"
+New-ItemProperty -Path $KpsSvcSettingsReg -Name "HttpsClientAuth" -Type DWORD -Value 0 -Force
+New-ItemProperty -Path $KpsSvcSettingsReg -Name "DisallowUnprotectedPasswordAuth" -Type DWORD -Value 0 -Force
+New-ItemProperty -Path $KpsSvcSettingsReg -Name "HttpsUrlGroup" -Type MultiString -Value "+`:443" -Force
+
+Set-Service -Name KPSSVC -StartupType Automatic
+Start-Service -Name KPSSVC
+```
+
+```powershell
+function Set-KdcProxyServer {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true, Position = 0)]
+        [string] $KerberosRealm,
+        [Parameter(Mandatory = $true, Position = 1)]
+        [ValidatePattern('^https://.+$')]
+        [string] $KdcServerUrl,
+        [bool] $ForceProxy = $true
+    )
+
+    $KdcUrl = [Uri]$KdcServerUrl
+    $KdcHost = $KdcUrl.Host
+    $KdcPort = $KdcUrl.Port
+    $KdcPath = $KdcUrl.AbsolutePath.TrimStart('/')
+
+    if ([string]::IsNullOrEmpty($KdcPath)) {
+        $KdcPath = "KdcProxy"
+    }
+
+    $KdcProxyServer = "<https $KdcHost`:$KdcPort`:$KdcPath />"
+
+    $KerberosReg = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos"
+    New-Item -Path "$KerberosReg\Parameters" -Force | Out-Null
+    New-Item -Path "$KerberosReg\KdcProxy\ProxyServers" -Force | Out-Null
+    New-ItemProperty -Path $KerberosReg -Name "KdcProxyServer_Enabled" -Type DWORD -Value 1 -Force | Out-Null
+    New-ItemProperty -Path "$KerberosReg\KdcProxy\ProxyServers" -Name $KerberosRealm -Value $KdcProxyServer -Force | Out-Null
+
+    if ($ForceProxy) {
+        New-ItemProperty -Path "$KerberosReg\Parameters" -Name "ForceProxy" -Type DWORD -Value 1 -Force | Out-Null
+    }
+}
+
+function Reset-KdcProxyServer {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string] $KerberosRealm
+    )
+
+    $KerberosReg = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos"
+    Remove-ItemProperty -Path $KerberosReg -Name "KdcProxyServer_Enabled" -Force -ErrorAction SilentlyContinue
+    Remove-ItemProperty -Path "$KerberosReg\KdcProxy\ProxyServers" -Name $KerberosRealm -Force -ErrorAction SilentlyContinue
+    Remove-ItemProperty -Path "$KerberosReg\Parameters" -Name "ForceProxy" -Force -ErrorAction SilentlyContinue
+}
+
+# Set-KdcProxyServer "ad.it-help.ninja" "https://IT-HELP-GW.ad.it-help.ninja:443/KdcProxy"
+# Reset-KdcProxyServer "ad.it-help.ninja"
+```
+
+Applications and Services Logs / Microsoft / Windows / Kerberos-KDCProxy / Operational
+
+```powershell
+Stop-Service -Name KPSSVC
+Set-Service -Name KPSSVC -StartupType Disabled
+netsh http delete urlacl url=https://+:443/KdcProxy
+```
+
+## Links and references
 
 https://x.com/awakecoding/status/1788731401015005628
 
@@ -90,3 +166,8 @@ https://syfuhs.net/kdc-proxy-for-remote-access
 https://awakecoding.com/posts/disabling-web-proxy-auto-detect-wpad-correctly/
 
 https://learn.microsoft.com/en-us/azure/virtual-desktop/key-distribution-center-proxy
+
+https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/jj134148(v=ws.11)#132-plan-certificates-for-ip-https
+
+[MS-KKDCP]: Kerberos Key Distribution Center (KDC) Proxy Protocol
+https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-kkdcp/5bcebb8d-b747-4ee5-9453-428aec1c5c38
