@@ -48,7 +48,7 @@ Get-Service DPS | Get-ServiceProcessId
 6340
 ```
 
-Neat! Now you can use the process id to filter events in Process Monitor and learn more about what a specific services does.
+Neat! Now you can use the process id to filter events in Process Monitor and learn more what a specific services does.
 
 ## Finding the Service Group Name
 
@@ -207,7 +207,7 @@ Yes, it's a lot more complicated than the previous cmdlets. Let's just try it wi
 PS> Move-ServiceToNewGroup WinHttpAutoProxySvc LocalServiceNetworkRestricted WinHttpAutoProxySvc
 ```
 
-If everything worked, you just need to reboot the virtual machine. Don't try to manually start and stop this service, other services depend on it, it won't work well. If you look in the registry, you should now see a the new service group configuration under `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost\WinHttpAutoProxySvc`:
+If everything worked, you just need to reboot the virtual machine. Avoid manually starting or stopping this service - other services depend on it, and it may behave as unexpectedly. If you look in the registry, you should now see the new service group configuration under `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost\WinHttpAutoProxySvc`:
 
 ![service group configuration in registry](/images/posts/services-svchost-group-configuration.png)
 
@@ -263,7 +263,7 @@ Success! None of the running services share the same process.
 
 ## Taking a Shortcut I Wish I Knew Earlier
 
-The most observant of you will have noticed that the **wcmsvc** service has a different process id despite being a member of the **LocalServiceNetworkRestricted** service group. How can that be? Let's inspect the service more closely:
+The most observant of you will have noticed that the **wcmsvc** service has a different process id despite being a member of the **LocalServiceNetworkRestricted** service group. How can that be? Let's look at the **wcmsvc** service more closely:
 
 ```powershell
 PS> Get-Service wcmsvc | Format-List
