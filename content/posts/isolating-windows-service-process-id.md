@@ -1,7 +1,7 @@
 +++
 title = "Isolating Windows service process for easier debugging"
 slug = "isolating-windows-service-process-for-easier-debugging"
-date = 2025-04-02
+date = 2025-04-06
 description = ""
 
 [taxonomies]
@@ -11,7 +11,15 @@ tags = ["Windows", "PowerShell", "CTO"]
 banner = "/images/banners/windows-virtual-network-using-wintun-and-tun2socks.png"
 +++
 
-## Finding the service process id
+Have you ever wanted to identify which process hosts a specific system service, only to realize that they all show up as "svchost.exe" in [Process Monitor](https://learn.microsoft.com/en-us/sysinternals/downloads/procmon) or [Process Explorer](https://learn.microsoft.com/en-us/sysinternals/downloads/process-explorer)?
+
+![Process Explorer system services](/images/posts/services-svchost-process-explorer.png)
+
+Some system services like TermService (Remote Desktop Services) leave some obvious clues like a child "rdpclip.exe" process. However, most of the time, you won't be so lucky.
+
+## Finding the Service Process Id
+
+The most accurate method to find the process id matching a system service is through WMI. Here's a simple `Get-ServiceProcessId` PowerShell cmdlet you can paste and use wherever needed:
 
 ```powershell
 function Get-ServiceProcessId {
@@ -30,6 +38,8 @@ function Get-ServiceProcessId {
 }
 ```
 
+You can try it out with the Diagnostic Process Service (DPS), which should be in the running state on most systems:
+
 ```powershell
 PS> Get-ServiceProcessId DPS
 6340
@@ -38,7 +48,11 @@ Get-Service DPS | Get-ServiceProcessId
 6340
 ```
 
-## Finding the service group name
+Neat! Now you can use the process id to filter events in Process Monitor and learn more about what a specific services does.
+
+## Finding the Service Group Name
+
+Ah ha! You thought this was the end of it, didn't you? Unfortunately, you may notice that many system services share the *same* svchost.exe process. Uh oh - that's not good if you want to filter on a specific *service*. This is a side effect of service groups, a feature used to pool multiple services together for performance reasons. You can use the `Get-ServiceGroupName` PowerShell cmdlet to find the optional service group name associated with a service:
 
 ```powershell
 function Get-ServiceGroupName {
@@ -59,6 +73,8 @@ function Get-ServiceGroupName {
 }
 ```
 
+How does it work? Members of a service group register svchost.exe as their executable and pass the service group name in the `-k` command-line parameter. When the Service Control Manager (SCM) sees this parameter, it will launch a single process for all members of the same group. Let's try it with a few system services:
+
 ```powershell
 PS> Get-ServiceGroupName DPS
 LocalServiceNoNetwork
@@ -67,7 +83,15 @@ PS> Get-ServiceGroupName WinHttpAutoProxySvc
 LocalServiceNetworkRestricted
 ```
 
-## Finding service group members
+**LocalServiceNoNetwork** and **LocalServiceNetworkRestricted** are built-in service groups in Windows. There are several others which I'll let you discover on your own.
+
+## Finding Service Group Members
+
+Now that we know the service group name for the service of interest, how can we find other members of the same group? Luckily for us, service group membership is stored as a list in the registry:
+
+![service group members in registry](/images/posts/services-svchost-group-members.png)
+
+Here's the `Get-ServiceGroupMembers` PowerShell cmdlet that simplifies obtaining service group members:
 
 ```powershell
 function Get-ServiceGroupMembers {
@@ -87,6 +111,8 @@ function Get-ServiceGroupMembers {
 }
 ```
 
+The **LocalServiceNoNetwork** service group contains just a few services:
+
 ```powershell
 PS> Get-ServiceGroupMembers LocalServiceNoNetwork
 DPS
@@ -95,7 +121,38 @@ CoreMessagingRegistrar
 NcdAutoSetup
 ```
 
-## Moving Service to a new Group
+The **LocalServiceNetworkRestricted** service group, on the other hand, is quite big:
+
+```powershell
+Get-ServiceGroupMembers LocalServiceNetworkRestricted
+TimeBrokerSvc
+WarpJITSvc
+eventlog
+AudioSrv
+WinHttpAutoProxySvc
+wscsvc
+LmHosts
+AppIDSvc
+WFDSConMgrSvc
+vmictimesync
+btagservice
+SmsRouter
+NgcCtnrSvc
+icssvc
+RmSvc
+wlpasvc
+DusmSvc
+DHCP
+wcmsvc
+```
+
+If you were hoping to learn more about one of those services, this can make your work harder.
+
+## Moving Service to a New Group
+
+Welcome to the danger zone: for this last part, please use a test virtual machine, as we're going to be fiddling with service registrations, and there is a potential to break things.
+
+How can one isolate a system service such that it can run in its own process without other services in it? Service groups are not mandatory, but modifying a service registration to *not* use a service group can be difficult. The simplest approach is to create a new service group similar to the original one, and move the service of interest into it. Hold your breath for the `Move-ServiceToNewGroup` PowerShell cmdlet:
 
 ```powershell
 function Move-ServiceToNewGroup {
@@ -144,6 +201,62 @@ function Move-ServiceToNewGroup {
 }
 ```
 
+Yes, it's a lot more complicated than the previous cmdlets. Let's just try it with **WinHttpAutoProxySvc**, the Windows Proxy Auto Detect (WPAD) service in Windows. It is a member of the **LocalServiceNetworkRestricted** service group, but we'll move it to a new service group matching its own name (WinHttpAutoProxySvc). Run this command from an elevated PowerShell terminal:
+
 ```powershell
 PS> Move-ServiceToNewGroup WinHttpAutoProxySvc LocalServiceNetworkRestricted WinHttpAutoProxySvc
 ```
+
+If everything worked, you just need to reboot the virtual machine. Don't try to manually start and stop this service, other services depend on it, it won't work well. If you look in the registry, you should now see a the new service group configuration under `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost\WinHttpAutoProxySvc`:
+
+![service group configuration in registry](/images/posts/services-svchost-group-configuration.png)
+
+The service configuration under `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WinHttpAutoProxySvc` should also have a new value for **ImagePath**:
+
+![service configuration in registry](/images/posts/services-svchost-service-configuration.png)
+
+Now make sure that the **WinHttpAutoProxySvc** service is running:
+
+```powershell
+PS> Get-Service WinHttpAutoProxySvc | Format-List
+
+Name                : WinHttpAutoProxySvc
+DisplayName         : WinHTTP Web Proxy Auto-Discovery Service
+Status              : Running
+DependentServices   : {NcaSvc, iphlpsvc}
+ServicesDependedOn  : {Dhcp}
+CanPauseAndContinue : False
+CanShutdown         : True
+CanStop             : False
+ServiceType         : Win32ShareProcess
+```
+
+```powershell
+PS> Get-ServiceProcessId WinHttpAutoProxySvc
+1484
+```
+
+Last but not least, let's confirm that none of the other services in the original service group have a matching process id:
+
+```powershell
+PS> Get-ServiceGroupMembers LocalServiceNetworkRestricted | ForEach-Object {
+    [PSCustomObject]@{ ServiceName = $_; ProcessId = Get-ServiceProcessId $_ }
+}
+
+ServiceName   ProcessId
+-----------   ---------
+TimeBrokerSvc      1220
+WarpJITSvc
+eventlog           1220
+AudioSrv
+LmHosts            1220
+AppIDSvc
+vmictimesync       1220
+NgcCtnrSvc
+RmSvc
+wcmsvc             1820
+DHCP               1220
+AJRouter
+```
+
+Success! None of the running services share the same process.
