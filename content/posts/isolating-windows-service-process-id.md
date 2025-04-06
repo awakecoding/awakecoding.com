@@ -1,14 +1,14 @@
 +++
-title = "Isolating Windows service process for easier debugging"
-slug = "isolating-windows-service-process-for-easier-debugging"
+title = "Isolating a Windows Service Process for Easier Debugging"
+slug = "isolating-a-windows-service-process-for-easier-debugging"
 date = 2025-04-06
-description = ""
+description = "Learn how to isolate a Windows system service into its own process for easier debugging. This guide walks you through identifying service process IDs, listing service group members, and using PowerShell to move a service into a new, dedicated service group."
 
 [taxonomies]
 tags = ["Windows", "PowerShell", "CTO"]
 
 [extra]
-banner = "/images/banners/windows-virtual-network-using-wintun-and-tun2socks.png"
+banner = "/images/banners/isolating-a-windows-service-process-for-easier-debugging.png"
 +++
 
 Have you ever wanted to identify which process hosts a specific system service, only to realize that they all show up as "svchost.exe" in [Process Monitor](https://learn.microsoft.com/en-us/sysinternals/downloads/procmon) or [Process Explorer](https://learn.microsoft.com/en-us/sysinternals/downloads/process-explorer)?
@@ -260,3 +260,72 @@ AJRouter
 ```
 
 Success! None of the running services share the same process.
+
+## Taking a Shortcut I Wish I Knew Earlier
+
+The most observant of you will have noticed that the **wcmsvc** service has a different process id despite being a member of the **LocalServiceNetworkRestricted** service group. How can that be? Let's inspect the service more closely:
+
+```powershell
+PS> Get-Service wcmsvc | Format-List
+
+Name                : wcmsvc
+DisplayName         : Windows Connection Manager
+Status              : Running
+DependentServices   : {}
+ServicesDependedOn  : {RpcSs, NSI}
+CanPauseAndContinue : False
+CanShutdown         : True
+CanStop             : True
+ServiceType         : Win32OwnProcess
+```
+
+A service type of **Win32OwnProcess**, despite being a member of a service group? Does that mean one can just change this service type instead of moving the service to a new service group? Let's look in the registry:
+
+![service win32 own process type](/images/posts/services-svchost-win32-own-process.png)
+
+The **WinHttpAutoProxySvc** service has a type of **Win32ShareProcess** with corresponding value of 32 in the registry. Let's just change that to **Win32OwnProcess** with a value of 16 instead:
+
+```powershell
+function Set-ServiceTypeOwnProcess {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory, Position = 0)]
+        [string] $ServiceName
+    )
+
+    $ServiceRegPath = "HKLM:\SYSTEM\CurrentControlSet\Services\$ServiceName"
+    Set-ItemProperty -Path $ServiceRegPath -Name "Type" -Value 16 -Type DWORD
+}
+
+Set-ServiceTypeOwnProcess "WinHttpAutoProxySvc"
+```
+
+Run this on a machine where the service hasn't been moved to a different group, then reboot. List process ids for all services in the **LocalServiceNetworkRestricted** group:
+
+```powershell
+PS> Get-ServiceGroupMembers LocalServiceNetworkRestricted | ForEach-Object {
+    [PSCustomObject]@{ ServiceName = $_; ProcessId = Get-ServiceProcessId $_ }
+}
+
+ServiceName         ProcessId
+-----------         ---------
+TimeBrokerSvc            1072
+WarpJITSvc
+eventlog                 1072
+AudioSrv
+WinHttpAutoProxySvc      1920
+LmHosts                  1072
+AppIDSvc
+vmictimesync             1072
+NgcCtnrSvc
+RmSvc
+wcmsvc                   1960
+DHCP                     1072
+AJRouter
+```
+
+Congratulations, it worked! The **WinHttpAutoProxySvc** service is still a member of the **LocalServiceNetworkRestricted**, but it is now running in its own isolated process. This is obviously much simpler, and can be done manually with regedit.exe.
+
+## Closing Thoughts
+
+Being able to isolate a system service into its own process is incredibly useful when you're trying to understand what it actually does. Whether you go the long route by creating a new service group or take the shortcut by switching the service type to Win32OwnProcess, the end result is the same: less background noise, cleaner traces, and a much easier time in tools like Process Monitor.
