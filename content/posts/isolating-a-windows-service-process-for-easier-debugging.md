@@ -326,6 +326,44 @@ AJRouter
 
 Congratulations, it worked! The **WinHttpAutoProxySvc** service is still a member of the **LocalServiceNetworkRestricted**, but it is now running in its own isolated process. This is obviously much simpler, and can be done manually with regedit.exe.
 
+## Disabling Service Host Process Pooling
+
+The **SvcHostSplitThresholdInKB** registry key value under `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control` can be used to disable svchost.exe process pooling entirely. By default, the threshold is set to 3670016 (0x380000) KB, which corresponds to approximately 3.5 GB of RAM:
+
+![service svchost split threshold](/images/posts/services-svchost-split-threshold-in-kb.png)
+
+If your system has more memory than the configured threshold, separate svchost.exe processes will be created for all services, including those with the Win32ShareProcess service type. If you have limited RAM in a test virtual machine, the threshold will be too high. Set the **SvcHostSplitThresholdInKB** value to **1** and to disable service host process pooling:
+
+```powershell
+Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control' -Name 'SvcHostSplitThresholdInKB' -Value 1
+```
+
+Don't set **SvcHostSplitThresholdInKB** to **0** as it appears to be treated as a special value that doesn't do what we want. After rebooting, confirm that the change had the intended side effect:
+
+```powershell
+PS> Get-ServiceGroupMembers LocalServiceNetworkRestricted | ForEach-Object {
+    [PSCustomObject]@{ ServiceName = $_; ProcessId = Get-ServiceProcessId $_ }
+}
+
+ServiceName         ProcessId
+-----------         ---------
+TimeBrokerSvc            1360
+WarpJITSvc
+eventlog                 1340
+AudioSrv
+WinHttpAutoProxySvc      2640
+LmHosts                  1184
+AppIDSvc
+vmictimesync             1720
+NgcCtnrSvc
+RmSvc
+wcmsvc                   2448
+DHCP                     1412
+AJRouter
+```
+
+This is yet another trick I wish I knew earlier, and is much simpler to work with!
+
 ## Closing Thoughts
 
 Being able to isolate a system service into its own process is incredibly useful when you're trying to understand what it actually does. Whether you go the long route by creating a new service group or take the shortcut by switching the service type to Win32OwnProcess, the end result is the same: less background noise, cleaner traces, and a much easier time in tools like Process Monitor.
