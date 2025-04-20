@@ -30,7 +30,6 @@ But this time, it didn't work. You're in luck — here are some CRL-related pitf
  * CRL renewal may break if AD CS runs on a laptop with constrained resources
  * LDAP CRL distribution is the default, and only works for domain-joined machines
  * HTTP delta CRL distribution is broken with the default IIS configuration
- * HTTP CRLs are only checked if they are listed first inside the certificate
 
 ## Sporadic Problems
 
@@ -81,7 +80,7 @@ Start-IISSite -Name 'CertSrv'
 
 One very frustrating problem with CRL distribution over HTTP is the encoding of the '+' character in the *delta* CRL file. By default, IIS will not handle it properly, which is why we have to enable **allowDoubleEscaping**. Since the *base* CRL is first used, the problem only manifests itself later when the *delta* CRL is checked, and the client fails to fetch it.
 
-Next, add the HTTP CRL distribution point, and make it first in the list, **before the LDAP CRL distribution point**:
+Next, add the HTTP CRL distribution point, and remove the LDAP CRL distribution point:
 
 ```powershell
 $LdapCrlDP = Get-CACrlDistributionPoint | Where-Object { $_.Uri -Like "ldap://*" }
@@ -95,7 +94,9 @@ Restart-Service CertSvc
 Start-Sleep -Seconds 10 # Wait for CertSvc to become ready again
 ```
 
-Why does the HTTP CRL distribution point need to be *first* in the list? Believe it or not, if Windows sees the LDAP CRL distribution point listed first in a certificate and it fails to use it, it won't bother trying any of the other CRL distribution points. Last but not least, after restarting **CertSvc** and waiting a few seconds for it to become ready again, you can now force republishing the CRLs:
+Removing the LDAP CRL distribution point is largely a matter of preference. It only works for domain-joined machines, and there's no reason those machines can't use the HTTP-based CRL distribution point instead. The main benefit is simplicity: you only need to maintain a single HTTP CRL distribution point that should work for all machines, regardless of domain membership.
+
+After restarting **CertSvc** and waiting a few seconds for it to become ready again, you can now force republishing the CRLs:
 
 ```powershell
 $CAConfigName = (certutil -getconfig 2>&1 | Select-String 'Config String:').ToString().Split('"')[1]
