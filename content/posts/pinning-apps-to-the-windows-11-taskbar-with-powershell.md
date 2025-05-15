@@ -2,6 +2,7 @@
 title = "Pinning Apps to the Windows 11 Taskbar with PowerShell"
 slug = "pinning-apps-to-the-windows-11-taskbar-with-powershell"
 date = 2025-05-14
+updated = 2025-05-15
 description = "Learn how to automate taskbar app pinning in Windows 11 using PowerShell by generating a LayoutModification.xml file and forcing the shell to reinitialize the layout without creating new user profiles."
 
 [taxonomies]
@@ -104,6 +105,9 @@ function Reset-TaskbarLayout {
     Remove-Item "$Env:AppData\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\*" -Force -ErrorAction SilentlyContinue
     Remove-Item "$Env:AppData\Microsoft\Windows\Shell\*.dat" -Force -ErrorAction SilentlyContinue
     Remove-Item "$Env:AppData\Microsoft\Windows\Shell\LayoutModification.xml" -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Taskband" -Recurse -ErrorAction SilentlyContinue
+    Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\TrayNotify" -Name "IconStreams" -ErrorAction SilentlyContinue
+    Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\TrayNotify" -Name "PastIconsStream" -ErrorAction SilentlyContinue
 }
 ```
 
@@ -111,11 +115,11 @@ All you have to do is open a terminal, paste the cmdlet definition, then invoke 
 
 ![customized pinned apps in taskbar](/images/posts/taskbar-pinned-apps-customized.png)
 
-However, because it's a hack, you can often end up with blank icons:
+If you delete the files without deleting the registry keys, you can end up with blank icons:
 
 ![blank pinned app icons in taskbar](/images/posts/taskbar-pinned-apps-blank-icons.png)
 
-When this happens, just right-click and unpin all the blank icons, then use `Reset-TaskBarLayout` again. I suspect taskbar pinning relies on a background process (RuntimeBroker.exe) separate from explorer.exe which can't easily be forced to reload everything.
+If this happens, just right-click and unpin all the blank icons manually, then reset the taskbar layout again. While this approach has worked reliably in my testing, keep in mind that it's an unsupported workaround that could break in the future.
 
 ## Conclusion
 
