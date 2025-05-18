@@ -2,6 +2,7 @@
 title = "Automating Hyper-V Network Adapter Cleanup and IP Migration"
 slug = "automating-hyper-v-network-adapter-cleanup-migration"
 date = 2025-05-17
+updated = 2025-05-18
 description = "Learn how to automate the cleanup of ghost Hyper-V network adapters and migrate static IP configurations using PowerShell. This post walks through detecting stale adapters, reassigning IP settings, and setting up a scheduled task to keep your lab environments self-healing on boot."
 
 [taxonomies]
@@ -160,6 +161,7 @@ if ($OldAdapter -and $NewAdapter) {
     Write-Host "Configuring '$NetAdapterName':"
     Write-Host "`tIPAddress: $IPAddress`n`tSubnetMask: $SubnetMask`n`tDefaultGateway: $DefaultGateway"
     Set-NetIPInterface -InterfaceAlias $NetAdapterName -Dhcp Disabled
+    Get-NetIPAddress -InterfaceAlias $NetAdapterName -AddressFamily IPv4 -ErrorAction SilentlyContinue | Remove-NetIPAddress -Confirm:$false
     New-NetIPAddress @Params
     Write-Host "Setting DNS server: $NameServer"
     Set-DnsClientServerAddress -InterfaceAlias $NetAdapterName -ServerAddresses $NameServer
