@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+      <title>AwakeCoding ☀️💻 - Kerberos</title>
+      <link>https://awakecoding.com</link>
+      <description>awakecoding - Adventures of a CTO</description>
+      <generator>Zola</generator>
+      <language>en</language>
+      <atom:link href="https://awakecoding.com/tags/kerberos/rss.xml" rel="self" type="application/rss+xml"/>
+      <lastBuildDate>Sat, 26 Apr 2025 00:00:00 +0000</lastBuildDate>
+      <item>
+          <title>RD Gateway Without KDC Proxy Causes NTLM Downgrade</title>
+          <pubDate>Sat, 26 Apr 2025 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/rd-gateway-without-kdc-proxy-causes-ntlm-downgrade/</link>
+          <guid>https://awakecoding.com/posts/rd-gateway-without-kdc-proxy-causes-ntlm-downgrade/</guid>
+          <description>Learn why mstsc requires the RD Gateway to act as a KDC proxy for Kerberos authentication, how this undocumented behavior causes silent NTLM downgrades, and how to fix it by enabling the KDC proxy service.</description>
+          <bannerImage>https://awakecoding.com/images/banners/rd-gateway-without-kdc-proxy-causes-ntlm-downgrade.png</bannerImage><tags>
+              <tag>Windows</tag>
+              <tag>Kerberos</tag>
+              <tag>RDP</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>Mac RDP Client: Kerberos and Protected Users Guide</title>
+          <pubDate>Thu, 13 Jun 2024 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/mac-rdp-client-kerberos-and-protected-users-guide/</link>
+          <guid>https://awakecoding.com/posts/mac-rdp-client-kerberos-and-protected-users-guide/</guid>
+          <description>Explore the essential steps to secure Mac RDP connections using Kerberos authentication with a focus on troubleshooting Protected Users and NTLM issues. This guide provides practical solutions for configuring Kerberos in an Active Directory environment, ensuring robust security for remote desktop access.</description>
+          <bannerImage>https://awakecoding.com/images/banners/mac-rdp-client-kerberos-and-protected-users-guide.png</bannerImage><tags>
+              <tag>RDP</tag>
+              <tag>Kerberos</tag>
+              <tag>ActiveDirectory</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>Active Directory Kerberos KDC certificate selection</title>
+          <pubDate>Wed, 06 Sep 2023 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/active-directory-kerberos-kdc-certificate-selection/</link>
+          <guid>https://awakecoding.com/posts/active-directory-kerberos-kdc-certificate-selection/</guid>
+          <description>Discover the intricacies of Active Directory&#x27;s Kerberos KDC certificate selection for PKINIT, including techniques for choosing a specific certificate, analysis using IDA Pro, and PowerShell cmdlets for managing certificates. This deep dive explores the challenges and solutions for ensuring the right KDC certificate is used, overcoming the unpredictability of certificate selection in Windows environments.</description>
+          <bannerImage>https://awakecoding.com/images/banners/active-directory-kerberos-kdc-certificate-selection.png</bannerImage><lastUpdated>Thu, 07 Sep 2023 00:00:00 +0000</lastUpdated><tags>
+              <tag>Kerberos</tag>
+              <tag>ActiveDirectory</tag>
+              <tag>Windows</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>Active Directory LDAPS certificate selection deep dive</title>
+          <pubDate>Sat, 12 Aug 2023 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/active-directory-ldaps-certificate-selection-deep-dive/</link>
+          <guid>https://awakecoding.com/posts/active-directory-ldaps-certificate-selection-deep-dive/</guid>
+          <description>A deep dive into Active Directory LDAPS certificate selection, detailing the technical intricacies of ensuring secure communications through TLS. This guide covers the validation and selection process, including PowerShell scripts for certificate management, aiming to clarify and resolve common issues with LDAPS implementation.</description>
+          <bannerImage>https://awakecoding.com/images/banners/active-directory-ldaps-certificate-selection-deep-dive.png</bannerImage><tags>
+              <tag>Kerberos</tag>
+              <tag>ActiveDirectory</tag>
+              <tag>Windows</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>RDP Smartcard Logon: User Name Does Not Exist</title>
+          <pubDate>Fri, 04 Aug 2023 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/rdp-smartcard-logon-user-name-does-not-exist/</link>
+          <guid>https://awakecoding.com/posts/rdp-smartcard-logon-user-name-does-not-exist/</guid>
+          <description>Navigate through the confusion of &quot;the specified user name does not exist&quot; error during RDP smartcard logon, offering insights into common misinterpretations and actionable solutions. This post breaks down error messages, suggests disabling strict KDC validation, and guides on certificate trust validation, ensuring successful authentication with practical steps and PowerShell commands.</description>
+          <bannerImage>https://awakecoding.com/images/banners/rdp-smartcard-logon-user-name-does-not-exist.png</bannerImage><tags>
+              <tag>RDP</tag>
+              <tag>Kerberos</tag>
+              <tag>Windows</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>PowerShell Remoting Trusted Hosts: What does it mean?</title>
+          <pubDate>Sat, 17 Jun 2023 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/powershell-remoting-trusted-hosts-what-does-it-mean/</link>
+          <guid>https://awakecoding.com/posts/powershell-remoting-trusted-hosts-what-does-it-mean/</guid>
+          <description>This guide demystifies the &quot;TrustedHosts&quot; setting in PowerShell remoting, explaining its significance and how to configure it to avoid common errors. It offers solutions for enabling remote connections, particularly when Kerberos or HTTPS isn&#x27;t used, ensuring security and connectivity for non-domain-joined machines or across different domains.</description>
+          <bannerImage>https://awakecoding.com/images/banners/powershell-remoting-trusted-hosts-what-does-it-mean.png</bannerImage><tags>
+              <tag>PowerShell</tag>
+              <tag>Kerberos</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>Fix Kerberos Machine TGT Fetching on Startup</title>
+          <pubDate>Sun, 26 Feb 2023 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/fix-kerberos-machine-tgt-fetching-on-startup/</link>
+          <guid>https://awakecoding.com/posts/fix-kerberos-machine-tgt-fetching-on-startup/</guid>
+          <description>Resolve RDP NLA issues on domain-joined devices outside the corporate network by configuring a scheduled task to fetch the Kerberos machine TGT at startup. This practical solution ensures secure, remote desktop access without compromising network security, detailed with step-by-step instructions and troubleshooting tips.</description>
+          <bannerImage>https://awakecoding.com/images/banners/fix-kerberos-machine-tgt-fetching-on-startup.png</bannerImage><tags>
+              <tag>Kerberos</tag>
+              <tag>ActiveDirectory</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>Disabling Web Proxy Auto Detect (WPAD) Correctly</title>
+          <pubDate>Tue, 22 Feb 2022 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/disabling-web-proxy-auto-detect-wpad-correctly/</link>
+          <guid>https://awakecoding.com/posts/disabling-web-proxy-auto-detect-wpad-correctly/</guid>
+          <description>Explore the correct method to disable Web Proxy Auto Detect (WPAD) in Windows to enhance security without breaking essential components. This guide clarifies common misconceptions and provides a safe approach using registry modifications, avoiding potential pitfalls associated with service deactivation.</description>
+          <bannerImage>https://awakecoding.com/images/banners/disabling-web-proxy-auto-detect-wpad-correctly.png</bannerImage><tags>
+              <tag>Windows</tag>
+              <tag>Kerberos</tag>
+              <tag>CTO</tag>
+            </tags></item>
+    </channel>
+</rss>
