@@ -1,6 +1,6 @@
 +++
 title = "Marc-André Moreau"
-description = "Remote desktop protocol expert, open-source contributor and reverse engineer"
+description = "Remote desktop protocol expert, open-source contributor and Microsoft MVP"
 
 [extra]
 job_title = "Chief Technology Officer"
