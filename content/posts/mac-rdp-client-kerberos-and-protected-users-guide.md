@@ -69,7 +69,7 @@ EOF'
 
 In this case, 10.10.0.3 is IT-HELP-DC.ad.it-help.ninja, the domain controller for my "ad.it-help.ninja" Active Directory domain. Another solution is to create new entries manually in the /etc/hosts file of the client:
 
-```file
+```bash
 10.10.0.3       IT-HELP-DC.ad.it-help.ninja
 10.10.0.10      IT-HELP-TEST.ad.it-help.ninja
 ```
@@ -94,7 +94,7 @@ The DNS SRV record should point to the domain controller, or Kerberos KDC. If it
 
 Create the /etc/krb5.conf file with the following contents, replacing "IT-HELP-DC.ad.it-help.ninja" with your domain controller, and "ad.it-help.ninja", "AD.IT-HELP.NINJA" with your lowercase and uppercase Kerberos realm names:
 
-```file
+```bash
 [libdefaults]
     dns_lookup_kdc = false
     dns_lookup_realm = false
@@ -113,7 +113,7 @@ Create the /etc/krb5.conf file with the following contents, replacing "IT-HELP-D
 
 Let's explain the krb5.conf configuration file, section by section:
 
-```file
+```bash
 [libdefaults]
     dns_lookup_kdc = false
     dns_lookup_realm = false
@@ -121,7 +121,7 @@ Let's explain the krb5.conf configuration file, section by section:
 
 The dns_lookup_kdc, dns_lookup_realm options are disabled to properly test that the configuration works without accidentally using DNS-based detection. You can leave them enabled if you want DNS SRV detection to be attempted.
 
-```file
+```bash
 [realms]
     ad.it-help.ninja = {
         kdc = tcp/IT-HELP-DC.ad.it-help.ninja

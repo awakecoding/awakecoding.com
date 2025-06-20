@@ -62,12 +62,31 @@
       <h1 class="title is-2">{{ section.title }}</h1>
       <p class="subtitle is-4">{{ section.description }}</p>
       {% if config.extra.author.avatar %}
-      <figure class="image is-flex is-justify-content-center is-align-items-center">
-        <img class="is-rounded" src="{{ config.extra.author.avatar }}" style="max-width: 192px" />
+      <figure class="image is-flex is-justify-content-center is-align-items-center mb-5">
+        <img class="is-rounded" src="{{ config.extra.author.avatar }}" style="max-width: 192px;" />
       </figure>
       {% endif %}
-      {{ macros:: social_links( social_config=config.extra.social) }}
-    </div>
+
+      <div class="is-flex is-justify-content-center mb-5">
+        <a href="https://mvp.microsoft.com/en-US/mvp/profile/c4d4eb5e-a067-4747-9513-b1a12e50332c" target="_blank" rel="noopener">
+          <img src="/images/microsoft-mvp-badge.png" alt="Microsoft MVP Badge" style="max-width: 160px;" />
+        </a>
+      </div>
+
+      <p class="subtitle is-5 has-text-centered mb-5">
+        Proud to be CTO at <a href="https://devolutions.net" target="_blank" rel="noopener">Devolutions</a>
+      </p>
+
+      <div class="mb-6">
+        {{ macros:: social_links( social_config=config.extra.social) }}
+      </div>
+
+      <p class="is-size-6 has-text-centered mb-6">
+        <a href="{{ get_url(path='posts') }}" class="has-text-grey-dark has-text-weight-semibold">
+          Join me for a deep dive into Windows internals with a side of PowerShell.
+        </a>
+      </p>
+      
     <div class="content">
       {{ section.content | safe }}
     </div>
