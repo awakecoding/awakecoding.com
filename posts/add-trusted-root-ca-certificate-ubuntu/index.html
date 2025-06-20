@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/add-trusted-root-ca-certificate-ubuntu/">
+  <link rel="alternate" href="https://awakecoding.com/posts/add-trusted-root-ca-certificate-ubuntu/" hreflang="en" />
+  
+  <meta name="description" content="A concise guide on adding a trusted Root CA certificate on Ubuntu, ideal for those who frequently need to ensure their system trusts custom Root CAs. It offers a straightforward procedure, from verifying the certificate format with the file command to converting and installing it, ensuring system-wide trust with practical commands." />
+  <meta property="og:title" content="Add Trusted Root CA certificate on Ubuntu" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;add-trusted-root-ca-certificate-ubuntu&#x2F;" />
+  <meta property="og:description" content="A concise guide on adding a trusted Root CA certificate on Ubuntu, ideal for those who frequently need to ensure their system trusts custom Root CAs. It offers a straightforward procedure, from verifying the certificate format with the file command to converting and installing it, ensuring system-wide trust with practical commands." />
+  <meta name="twitter:title" content="Add Trusted Root CA certificate on Ubuntu" />
+  <meta name="twitter:description" content="A concise guide on adding a trusted Root CA certificate on Ubuntu, ideal for those who frequently need to ensure their system trusts custom Root CAs. It offers a straightforward procedure, from verifying the certificate format with the file command to converting and installing it, ensuring system-wide trust with practical commands." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;add-trusted-root-ca-certificate-ubuntu&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/add-trusted-root-ca-certificate-ubuntu.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/add-trusted-root-ca-certificate-ubuntu.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Add Trusted Root CA certificate on Ubuntu",
+  "description": "A concise guide on adding a trusted Root CA certificate on Ubuntu, ideal for those who frequently need to ensure their system trusts custom Root CAs. It offers a straightforward procedure, from verifying the certificate format with the file command to converting and installing it, ensuring system-wide trust with practical commands.",
+  "datePublished": "2022-11-24",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/add-trusted-root-ca-certificate-ubuntu.png",
+  "url": "https://awakecoding.com/posts/add-trusted-root-ca-certificate-ubuntu/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/add-trusted-root-ca-certificate-ubuntu/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | Add Trusted Root CA certificate on Ubuntu
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            Add Trusted Root CA certificate on Ubuntu
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2022-11-24">November 24, 2022</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>1 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>138 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/linux/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Linux</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>Do you need to add a custom trusted root CA on Ubuntu, and somehow always forget the correct procedure? Here's a quick reminder to use as reference!</p>
+<p>Certificates need to be in PEM (textual) format, with the .crt extension. Use the <code>file</code> command to tell if the certificate file is using the DER (binary) format:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">$</span><span style="color:#abb2bf;"> file</span><span style="color:#eb6772;"> -b</span><span style="color:#abb2bf;"> my-root-ca.cer
+</span><span style="color:#eb6772;">data
+</span></code></pre>
+<p>If the <code>file</code> command returns "data", or anything other than "PEM certificate", then convert it using OpenSSL:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">openssl</span><span style="color:#abb2bf;"> x509</span><span style="color:#eb6772;"> -inform</span><span style="color:#abb2bf;"> der</span><span style="color:#eb6772;"> -in</span><span style="color:#abb2bf;"> my-root-ca.cer</span><span style="color:#eb6772;"> -out</span><span style="color:#abb2bf;"> my-root-ca.crt
+</span></code></pre>
+<p>The .cer and .der file extensions are normally used for binary encoding, but the .crt file extension is used for both binary and textual encodings. Ensure that the resulting certificate uses PEM encoding with the .crt file extension:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">$</span><span style="color:#abb2bf;"> file</span><span style="color:#eb6772;"> -b</span><span style="color:#abb2bf;"> my-root-ca.crt
+</span><span style="color:#eb6772;">PEM</span><span style="color:#abb2bf;"> certificate
+</span></code></pre>
+<p>Move the certificate file to '/usr/local/share/ca-certificates/' and then call <code>update-ca-certificates</code>:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">sudo</span><span style="color:#abb2bf;"> mv my-root-ca.crt /usr/local/share/ca-certificates/
+</span><span style="color:#eb6772;">sudo</span><span style="color:#abb2bf;"> update-ca-certificates
+</span></code></pre>
+<p>That's it, your root CA certificate should now be trusted system-wide!</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;free-arm-server-4-cpus-24gb-ram-200gb-storage&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              Free ARM server with 4 CPUs, 24GB of RAM and 200GB storage!
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;pleroma-backup-and-restore-procedure&#x2F;">
+              Pleroma Backup and Restore Procedure<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>

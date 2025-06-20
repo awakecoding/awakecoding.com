@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/free-arm-server-4-cpus-24gb-ram-200gb-storage/">
+  <link rel="alternate" href="https://awakecoding.com/posts/free-arm-server-4-cpus-24gb-ram-200gb-storage/" hreflang="en" />
+  
+  <meta name="description" content="Discover how to leverage Oracle Cloud&#x27;s Free Tier to deploy an ARM server, complete with 4 CPUs, 24GB RAM, and 200GB storage, without any costs. This guide walks you through creating an Oracle Cloud account, setting up a virtual machine, and initial configurations to get you started on utilizing these robust free cloud resources for your projects." />
+  <meta property="og:title" content="Free ARM server with 4 CPUs, 24GB of RAM and 200GB storage!" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;free-arm-server-4-cpus-24gb-ram-200gb-storage&#x2F;" />
+  <meta property="og:description" content="Discover how to leverage Oracle Cloud&#x27;s Free Tier to deploy an ARM server, complete with 4 CPUs, 24GB RAM, and 200GB storage, without any costs. This guide walks you through creating an Oracle Cloud account, setting up a virtual machine, and initial configurations to get you started on utilizing these robust free cloud resources for your projects." />
+  <meta name="twitter:title" content="Free ARM server with 4 CPUs, 24GB of RAM and 200GB storage!" />
+  <meta name="twitter:description" content="Discover how to leverage Oracle Cloud&#x27;s Free Tier to deploy an ARM server, complete with 4 CPUs, 24GB RAM, and 200GB storage, without any costs. This guide walks you through creating an Oracle Cloud account, setting up a virtual machine, and initial configurations to get you started on utilizing these robust free cloud resources for your projects." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;free-arm-server-4-cpus-24gb-ram-200gb-storage&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/free-arm-server-4-cpus-24gb-ram-200gb-storage.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/free-arm-server-4-cpus-24gb-ram-200gb-storage.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Free ARM server with 4 CPUs, 24GB of RAM and 200GB storage!",
+  "description": "Discover how to leverage Oracle Cloud's Free Tier to deploy an ARM server, complete with 4 CPUs, 24GB RAM, and 200GB storage, without any costs. This guide walks you through creating an Oracle Cloud account, setting up a virtual machine, and initial configurations to get you started on utilizing these robust free cloud resources for your projects.",
+  "datePublished": "2022-11-23",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/free-arm-server-4-cpus-24gb-ram-200gb-storage.png",
+  "url": "https://awakecoding.com/posts/free-arm-server-4-cpus-24gb-ram-200gb-storage/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/free-arm-server-4-cpus-24gb-ram-200gb-storage/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | Free ARM server with 4 CPUs, 24GB of RAM and 200GB storage!
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            Free ARM server with 4 CPUs, 24GB of RAM and 200GB storage!
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2022-11-23">November 23, 2022</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>5 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>831 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/linux/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Linux</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>Have you ever dreamed of having your very own ARM server in the cloud for <em>FREE</em>?</p>
+<p><img src="/images/posts/free-ubuntu-arm-server-in-oracle-cloud.png" alt="Free ARM Server" /></p>
+<p>You're in luck! The <a rel="noopener nofollow noreferrer" target="_blank" href="https://www.oracle.com/cloud/free/">Oracle Cloud Free Tier</a> offers generous <a rel="noopener nofollow noreferrer" target="_blank" href="https://www.oracle.com/cloud/free">Always Free cloud services</a>, including <a rel="noopener nofollow noreferrer" target="_blank" href="https://amperecomputing.com/processors/ampere-altra/">Ampere Altra</a> ARM compute instances with enough RAM and storage to run decent workloads.</p>
+<p>What's the catch? Well, it's the <em>Oracle</em> cloud. To motivate users to give their cloud a chance, Oracle is rolling out the red carpet: several resources are <em>Always Free</em> (you'll never pay for them!). New accounts also get a 30-day trial with several hundred dollars of credits to try the paid resources.</p>
+<h2 id="account-creation">Account Creation</h2>
+<p>To get started, head over to the <a rel="noopener nofollow noreferrer" target="_blank" href="https://signup.cloud.oracle.com/?language=en&amp;sourceType=:ow:o:p:feb:0916FreePageFAQ&amp;intcmp=:ow:o:p:feb:0916FreePageFAQ">Oracle Free Tier sign up page</a>. Creating an account is straightforward, and you'll need to enter credit information. However, fear not: the platform makes it clear that you can't be charged unless the account is upgraded. As for paid resources using credits from the 30-day trial, they first get disabled, and then deallocated if you choose not to pay to keep them.</p>
+<p>If you still feel like it's too good to be true, the <a rel="noopener nofollow noreferrer" target="_blank" href="https://www.oracle.com/cloud/free/faq/">Oracle Cloud Free Tier FAQ</a> should help address your concerns like it did for me.</p>
+<h2 id="virtual-machine-creation">Virtual Machine Creation</h2>
+<p>With your new account, go to the <a rel="noopener nofollow noreferrer" target="_blank" href="https://www.oracle.com/cloud/sign-in.html">Oracle Cloud sign in page</a>.</p>
+<p>From the Oracle Cloud <strong>Compute</strong> menu, click <em>Instances</em>, then click <strong>Create instance</strong></p>
+<p>Enter a name for your new compute instance, select the root compartment, then click <strong>Edit</strong> in the <strong>Image and shape</strong> section.</p>
+<p>Click <strong>Change image</strong>, then select the "Canonical Ubuntu" image name, then change the OS version to "22.04 Minimal aarch64" and then click <strong>Select image</strong>. The new ARM64 image will be automatically changed to a compatible shape (VM.Standard.A1.Flex).</p>
+<p>Click <strong>Change shape</strong>, then increase the OCPU count to 4, and the amount of memory to 24 GB, which is the maximum available under the <em>Always Free</em> resources, then click <strong>Select shape</strong>.</p>
+<p>Under <strong>Networking</strong>, create or select a Virtual Cloud Network (VCN) with default settings. Ensure that the <strong>Assign a public IPv4 address</strong> option is selected.</p>
+<p>Under <strong>Add SSH keys</strong>, leave the <strong>Generate a key pair for me</strong> option selected, and then click <strong>Save private key</strong> and <strong>Save public key</strong>. Rename and move the files to the ~/.ssh directory on your computer. Make sure not to lose the SSH private key, as this is the only time it will be available for download.</p>
+<p>Once you are done reviewing the VM configuration, click <strong>Create</strong>. The provisioning process should take just a few minutes, and was faster than I would have expected.</p>
+<h2 id="initial-connection">Initial Connection</h2>
+<p>Connect to the new virtual machine using its public IP address, and the SSH private key file saved previously. The default username is "ubuntu":</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">ssh</span><span style="color:#abb2bf;"> ubuntu@168.138.68.44</span><span style="color:#eb6772;"> -i ~</span><span style="color:#abb2bf;">/.ssh/ssh-packet-social.key
+</span><span style="color:#eb6772;">Welcome</span><span style="color:#abb2bf;"> to Ubuntu 22.04.1 LTS (GNU/Linux 5.15.0-1022-oracle aarch64)
+</span></code></pre>
+<p>Update the package cache, upgrade existing packages, and then install a few tools:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">sudo</span><span style="color:#abb2bf;"> apt update </span><span style="color:#adb7c9;">&amp;&amp; </span><span style="color:#eb6772;">sudo</span><span style="color:#abb2bf;"> apt upgrade</span><span style="color:#eb6772;"> -y
+</span><span style="color:#eb6772;">sudo</span><span style="color:#abb2bf;"> apt install</span><span style="color:#eb6772;"> -y</span><span style="color:#abb2bf;"> screenfetch nano git curl net-tools
+</span></code></pre>
+<h2 id="system-information">System Information</h2>
+<p>It had been a while since I last did Linux system administration, so I reviewed the commands to use to print system information:</p>
+<p>Print system information using <code>screenfetch -n -N</code>:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#abb2bf;"> </span><span style="color:#eb6772;">OS:</span><span style="color:#abb2bf;"> Ubuntu 22.04 jammy
+</span><span style="color:#abb2bf;"> </span><span style="color:#eb6772;">Kernel:</span><span style="color:#abb2bf;"> aarch64 Linux 5.15.0-1022-oracle
+</span><span style="color:#abb2bf;"> </span><span style="color:#eb6772;">Uptime:</span><span style="color:#abb2bf;"> 2d 17h 6m
+</span><span style="color:#abb2bf;"> </span><span style="color:#eb6772;">Packages:</span><span style="color:#abb2bf;"> 702
+</span><span style="color:#abb2bf;"> </span><span style="color:#eb6772;">Shell:</span><span style="color:#abb2bf;"> bash 5.1.16
+</span><span style="color:#abb2bf;"> </span><span style="color:#eb6772;">Disk:</span><span style="color:#abb2bf;"> 3.7G / 46G (9%)
+</span><span style="color:#abb2bf;"> </span><span style="color:#eb6772;">CPU:</span><span style="color:#abb2bf;"> 4x ARM Neoverse-N1
+</span><span style="color:#abb2bf;"> </span><span style="color:#eb6772;">RAM:</span><span style="color:#abb2bf;"> 912MiB / 23988MiB
+</span></code></pre>
+<p>Print CPU information using <code>lscpu</code>:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">Architecture:</span><span style="color:#abb2bf;">            aarch64
+</span><span style="color:#abb2bf;">  </span><span style="color:#eb6772;">CPU</span><span style="color:#abb2bf;"> op-mode(s)</span><span style="color:#5ebfcc;">:</span><span style="color:#abb2bf;">        32-bit, 64-bit
+</span><span style="color:#abb2bf;">  </span><span style="color:#eb6772;">Byte</span><span style="color:#abb2bf;"> Order:            Little Endian
+</span><span style="color:#eb6772;">CPU</span><span style="color:#abb2bf;">(s)</span><span style="color:#5ebfcc;">:</span><span style="color:#abb2bf;">                  4
+</span><span style="color:#abb2bf;">  </span><span style="color:#eb6772;">On-line</span><span style="color:#abb2bf;"> CPU(s) </span><span style="color:#eb6772;">list:</span><span style="color:#abb2bf;">   0-3
+</span><span style="color:#eb6772;">Vendor</span><span style="color:#abb2bf;"> ID:               ARM
+</span><span style="color:#abb2bf;">  </span><span style="color:#eb6772;">Model</span><span style="color:#abb2bf;"> name:            Neoverse-N1
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">Model:</span><span style="color:#abb2bf;">               1
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">Thread</span><span style="color:#abb2bf;">(s) </span><span style="color:#eb6772;">per</span><span style="color:#abb2bf;"> core:  1
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">Core</span><span style="color:#abb2bf;">(s) </span><span style="color:#eb6772;">per</span><span style="color:#abb2bf;"> cluster: 4
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">Socket</span><span style="color:#abb2bf;">(s)</span><span style="color:#5ebfcc;">:</span><span style="color:#abb2bf;">           -
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">Cluster</span><span style="color:#abb2bf;">(s)</span><span style="color:#5ebfcc;">:</span><span style="color:#abb2bf;">          1
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">Stepping:</span><span style="color:#abb2bf;">            r3p1
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">BogoMIPS:</span><span style="color:#abb2bf;">            50.00
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">Flags:</span><span style="color:#abb2bf;">               fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp ssbs
+</span><span style="color:#eb6772;">NUMA:
+</span><span style="color:#abb2bf;">  </span><span style="color:#eb6772;">NUMA</span><span style="color:#abb2bf;"> node(s)</span><span style="color:#5ebfcc;">:</span><span style="color:#abb2bf;">          1
+</span><span style="color:#abb2bf;">  </span><span style="color:#eb6772;">NUMA</span><span style="color:#abb2bf;"> node0 CPU(s)</span><span style="color:#5ebfcc;">:</span><span style="color:#abb2bf;">     0-3
+</span></code></pre>
+<p>It should be noted that the "OCPU" in Oracle terminology means 2 <em>Intel</em> vCPUs, and 1 <em>ARM</em> vCPU. It's a bit confusing, but in the case of ARM, 1 OCPU = 1 vCPU.</p>
+<p>Print dynamic memory information using <code>free -h</code>:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">ubuntu@packet-social:~$</span><span style="color:#abb2bf;"> free</span><span style="color:#eb6772;"> -h
+</span><span style="color:#abb2bf;">               </span><span style="color:#eb6772;">total</span><span style="color:#abb2bf;">        used        free      shared  buff/cache   available
+</span><span style="color:#eb6772;">Mem:</span><span style="color:#abb2bf;">            23Gi       566Mi        21Gi       143Mi       1.4Gi        22Gi
+</span><span style="color:#eb6772;">Swap:</span><span style="color:#abb2bf;">             0B          0B          0B
+</span></code></pre>
+<p>Print disk usage information using <code>df -T -h</code>:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">ubuntu@packet-social:~$</span><span style="color:#abb2bf;"> df</span><span style="color:#eb6772;"> -T -h
+</span><span style="color:#eb6772;">Filesystem</span><span style="color:#abb2bf;">     Type   Size  Used Avail Use% Mounted on
+</span><span style="color:#eb6772;">tmpfs</span><span style="color:#abb2bf;">          tmpfs  2.4G  1.5M  2.4G   1% /run
+</span><span style="color:#eb6772;">/dev/sda1</span><span style="color:#abb2bf;">      ext4    45G  3.5G   42G   8% /
+</span><span style="color:#eb6772;">tmpfs</span><span style="color:#abb2bf;">          tmpfs   12G   28K   12G   1% /dev/shm
+</span><span style="color:#eb6772;">tmpfs</span><span style="color:#abb2bf;">          tmpfs  5.0M     0  5.0M   0% /run/lock
+</span><span style="color:#eb6772;">/dev/sda15</span><span style="color:#abb2bf;">     vfat    98M  5.1M   93M   6% /boot/efi
+</span><span style="color:#eb6772;">tmpfs</span><span style="color:#abb2bf;">          tmpfs  2.4G  4.0K  2.4G   1% /run/user/1001
+</span></code></pre>
+<h2 id="firewall-configuration">Firewall Configuration</h2>
+<p>Ubuntu images on the Oracle Cloud don't come with <code>ufw</code> installed: iptables should be used instead. Use the following commands to allow HTTP (TCP/80) and HTTPS (TCP/443) in the firewall using iptables:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">sudo</span><span style="color:#abb2bf;"> iptables</span><span style="color:#eb6772;"> -I</span><span style="color:#abb2bf;"> INPUT 6</span><span style="color:#eb6772;"> -m</span><span style="color:#abb2bf;"> state</span><span style="color:#eb6772;"> --state</span><span style="color:#abb2bf;"> NEW</span><span style="color:#eb6772;"> -p</span><span style="color:#abb2bf;"> tcp</span><span style="color:#eb6772;"> --dport</span><span style="color:#abb2bf;"> 80</span><span style="color:#eb6772;"> -j</span><span style="color:#abb2bf;"> ACCEPT
+</span><span style="color:#eb6772;">sudo</span><span style="color:#abb2bf;"> iptables</span><span style="color:#eb6772;"> -I</span><span style="color:#abb2bf;"> INPUT 6</span><span style="color:#eb6772;"> -m</span><span style="color:#abb2bf;"> state</span><span style="color:#eb6772;"> --state</span><span style="color:#abb2bf;"> NEW</span><span style="color:#eb6772;"> -p</span><span style="color:#abb2bf;"> tcp</span><span style="color:#eb6772;"> --dport</span><span style="color:#abb2bf;"> 443</span><span style="color:#eb6772;"> -j</span><span style="color:#abb2bf;"> ACCEPT
+</span><span style="color:#eb6772;">sudo</span><span style="color:#abb2bf;"> netfilter-persistent save
+</span></code></pre>
+<p>You will also need to create corresponding ingress rules for your Virtual Cloud Network to expose TCP ports 80 and 443 on the Internet. Follow the steps from the "Enable Internet Access" section of the <a rel="noopener nofollow noreferrer" target="_blank" href="https://docs.oracle.com/en-us/iaas/developer-tutorials/tutorials/apache-on-ubuntu/01oci-ubuntu-apache-summary.htm">Free Tier: Install Apache and PHP on an Ubuntu Instance</a> guide.</p>
+<h2 id="next-steps">Next Steps</h2>
+<p>The default OS disk has limited space, but the <em>Always Free</em> resources include up to 200GB of block storage, so you can add more disks as needed. There are a LOT of services available in the Oracle cloud which you can explore through <a rel="noopener nofollow noreferrer" target="_blank" href="https://docs.oracle.com/en-us/iaas/developer-tutorials/tutorials/home.htm">step-by-step tutorials</a>.</p>
+<p>This guide shows how to allocate the maximum number of resources to a single virtual machine, but it is possible to create up to 4 separate virtual machines with the same amount of OCPUs and RAM. A small VM with 1 OCPU and 6GB of RAM should be sufficient for a personal <a rel="noopener nofollow noreferrer" target="_blank" href="https://cohost.org/awakecoding/post/390625-pleroma-same-fedive">Pleroma/Mastodon fediverse instance</a>.</p>
+<p>It's up to you to decide how to split the available compute resources you have for free, so knock yourself out!</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;pleroma-same-fediverse-better-than-mastodon&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              Pleroma: same fediverse, better than Mastodon!
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;add-trusted-root-ca-certificate-ubuntu&#x2F;">
+              Add Trusted Root CA certificate on Ubuntu<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/rdp-nla-with-azure-ad-the-pku2u-nightmare/">
+  <link rel="alternate" href="https://awakecoding.com/posts/rdp-nla-with-azure-ad-the-pku2u-nightmare/" hreflang="en" />
+  
+  <meta name="description" content="This post tackles the challenges of RDP Network Level Authentication (NLA) with Azure AD, labeled as the PKU2U nightmare, offering detailed solutions for common problems. It addresses enabling PKU2U authentication, Azure AD workplace joining, the correct Azure AD username format, and third-party application support, providing both technical insights and practical steps to mitigate these issues in Azure AD environments." />
+  <meta property="og:title" content="RDP NLA with Azure AD: The PKU2U Nightmare" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;rdp-nla-with-azure-ad-the-pku2u-nightmare&#x2F;" />
+  <meta property="og:description" content="This post tackles the challenges of RDP Network Level Authentication (NLA) with Azure AD, labeled as the PKU2U nightmare, offering detailed solutions for common problems. It addresses enabling PKU2U authentication, Azure AD workplace joining, the correct Azure AD username format, and third-party application support, providing both technical insights and practical steps to mitigate these issues in Azure AD environments." />
+  <meta name="twitter:title" content="RDP NLA with Azure AD: The PKU2U Nightmare" />
+  <meta name="twitter:description" content="This post tackles the challenges of RDP Network Level Authentication (NLA) with Azure AD, labeled as the PKU2U nightmare, offering detailed solutions for common problems. It addresses enabling PKU2U authentication, Azure AD workplace joining, the correct Azure AD username format, and third-party application support, providing both technical insights and practical steps to mitigate these issues in Azure AD environments." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;rdp-nla-with-azure-ad-the-pku2u-nightmare&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/rdp-nla-with-azure-ad-the-pku2u-nightmare.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/rdp-nla-with-azure-ad-the-pku2u-nightmare.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "RDP NLA with Azure AD: The PKU2U Nightmare",
+  "description": "This post tackles the challenges of RDP Network Level Authentication (NLA) with Azure AD, labeled as the PKU2U nightmare, offering detailed solutions for common problems. It addresses enabling PKU2U authentication, Azure AD workplace joining, the correct Azure AD username format, and third-party application support, providing both technical insights and practical steps to mitigate these issues in Azure AD environments.",
+  "datePublished": "2023-08-10",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/rdp-nla-with-azure-ad-the-pku2u-nightmare.png",
+  "url": "https://awakecoding.com/posts/rdp-nla-with-azure-ad-the-pku2u-nightmare/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/rdp-nla-with-azure-ad-the-pku2u-nightmare/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | RDP NLA with Azure AD: The PKU2U Nightmare
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            RDP NLA with Azure AD: The PKU2U Nightmare
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2023-08-10">August 10, 2023</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>7 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>1223 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/rdp/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>RDP</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/windows/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Windows</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/azure/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Azure</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>So, you've decided to joining systems to Azure AD, either as hybrid-joined (HAADJ) or as pure Azure AD joined (AADJ). The future is in the cloud, and the cloud is better (as long as it is Azure)! That's until you try using RDP to connect to your systems, only to receive a frustratingly persistent "Your credentials did not work" error. You've triple checked the password, and it really should work, but it just won't. Why? Welcome to the PKU2U nightmare: a temporary solution that became permanent in the Azure AD world. Yes, I know it's called Entra ID now, but for simplicy I'll stick to the terminlogy and acronyms most people are familiar with.</p>
+<h2 id="solution-1-disable-rdp-nla-and-move-on-with-your-life">Solution 1: Disable RDP NLA, and move on with your life</h2>
+<p>That's what <a rel="noopener nofollow noreferrer" target="_blank" href="https://www.hanselman.com/blog/how-to-remote-desktop-rdp-into-a-windows-10-azure-ad-joined-machine">Scott Hanselman blogged about in 2020 when he hit the problem himself</a>, so maybe just do the same? I'm only half-kidding: disabling RDP NLA is obviously bad, but Microsoft is guilty of creating a problem that didn't exist before without providing a suitable alternative solution. The reason why disabling RDP NLA works well is because you end up sending credentials to Winlogon on the server without doing any of the authentication process on the client. It turns out that's the way most people would like RDP to work in practice, except at Microsoft.</p>
+<h2 id="solution-2-don-t-disable-rdp-nla-and-make-your-life-harder">Solution 2: Don't Disable RDP NLA, and make your life harder</h2>
+<p>So, you want to do the right thing, and make it work with RDP NLA? Fasten your seatbelt, as PKU2U is one hell of a beast from a parallel universe where common sense doesn't apply:</p>
+<h3 id="problem-1-pku2u-is-not-enabled-on-both-client-and-server">Problem 1: PKU2U is not enabled on both client and server</h3>
+<p>PKU2U needs to be enabled on <em>both</em> the RDP client and server. Even though PKU2U is mandatory for RDP NLA + Azure AD to work, it is disabled by default in Windows.</p>
+<p>Open the Group Policy Editor (gpedit.msc) and navigate to <strong>Computer Configuration / Windows Settings / Security Settings / Local Policies / Security Options</strong>, then enable <strong>Network security: Allow PKU2U authentication requests to this computer to use online identities</strong>:</p>
+<p><img src="/images/posts/rdp-nla-aad-allow-pku2u-gpo.png" alt="Allow PKU2U Group Policy" /></p>
+<p>Alternatively, you can enable PKU2U using the registry key using PowerShell:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$Pku2uRegPath </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&#39;HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\Pku2u&#39;
+</span><span style="color:#5ebfcc;">New-Item </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$Pku2uRegPath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Out-Null
+</span><span style="color:#5ebfcc;">Set-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$Pku2uRegPath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#9acc76;">&#39;AllowOnlineID&#39; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#9acc76;">&#39;1&#39; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Type DWORD
+</span></code></pre>
+<p>Instead of using PowerShell, you can also download and import <a href="/files/EnablePku2u.reg">EnablePku2u.reg</a> to set the registry key.</p>
+<p>While the change should be applied immediately, a reboot is required on the server.</p>
+<figure>
+    <video controls>
+        <source src="https:&#x2F;&#x2F;awakecoding.com&#x2F;videos&#x2F;posts&#x2F;rdp-nla-aad-pku2u-disabled-issue.mp4" type="video/mp4">
+    </video>
+    <figcaption>RDP NLA + Azure AD: PKU2U disabled issue</figcaption>
+</figure><h3 id="problem-2-client-not-azure-ad-workplace-joined-with-same-user">Problem 2: Client not Azure AD workplace joined with same user</h3>
+<p>The second requirement for RDP NLA + Azure AD to work is that you are either logged in to Windows using the same Azure AD account, or that you are "workplace joined" with the same Azure AD user. There is unfortunately no way to automate this process, and it needs to be done in addition to supplying the full credentials during the RDP NLA connection process.</p>
+<p>In the Settings app, naviguate to "Accounts &gt; Email &amp; Accounts", then click "Add a work or school account":</p>
+<p><img src="/images/posts/rdp-nla-aad-workplace-join1.png" alt="AAD Workplace Join - 1" /></p>
+<p>Enter your Azure AD credentials to sign in:</p>
+<p><img src="/images/posts/rdp-nla-aad-workplace-join2.png" alt="AAD Workplace Join - 2" /></p>
+<p>Wait for the Azure AD workplace join to complete:</p>
+<p><img src="/images/posts/rdp-nla-aad-workplace-join3.png" alt="AAD Workplace Join - 3" /></p>
+<p>If it worked, you should see the "You're all set!" dialog. Click "Done":</p>
+<p><img src="/images/posts/rdp-nla-aad-workplace-join4.png" alt="AAD Workplace Join - 4" /></p>
+<p>Once this is done, "dsregcmd /status" should return a "work account" entry.</p>
+<p><img src="/images/posts/rdp-nla-aad-workplace-join5.png" alt="AAD Workplace Join - 5" /></p>
+<p>The workplace join details can also be found in the registry:</p>
+<p><img src="/images/posts/rdp-nla-aad-workplace-join6.png" alt="AAD Workplace Join - 6" /></p>
+<p>You can query the Azure AD workplace join information using <code>dsregcmd.exe /status</code> or with PowerShell:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$WorkplaceJoinReg </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;HKCU:\Software\Microsoft\Windows NT\CurrentVersion\WorkplaceJoin&quot;
+</span><span style="color:#abb2bf;">(</span><span style="color:#5ebfcc;">Get-Item </span><span style="color:#9acc76;">&quot;</span><span style="color:#eb6772;">$WorkplaceJoinReg</span><span style="color:#9acc76;">\JoinInfo&quot;</span><span style="color:#abb2bf;">).GetSubkeyNames() </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">ForEach-Object </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$WorkplaceThumbprint </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">$_
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$WorkplaceCertificate </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-Item </span><span style="color:#9acc76;">&quot;cert:\CurrentUser\My\</span><span style="color:#eb6772;">$WorkplaceThumbprint</span><span style="color:#9acc76;">&quot;
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$JoinInfo </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-ItemProperty </span><span style="color:#9acc76;">&quot;</span><span style="color:#eb6772;">$WorkplaceJoinReg</span><span style="color:#9acc76;">\JoinInfo\</span><span style="color:#eb6772;">$WorkplaceThumbprint</span><span style="color:#9acc76;">&quot;
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$WorkplaceTenantId </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$JoinInfo.TenantId
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$WorkplaceUserEmail </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$JoinInfo.UserEmail
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$TenantInfo </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-ItemProperty </span><span style="color:#9acc76;">&quot;</span><span style="color:#eb6772;">$WorkplaceJoinReg</span><span style="color:#9acc76;">\TenantInfo\</span><span style="color:#eb6772;">$WorkplaceTenantId</span><span style="color:#9acc76;">&quot;
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$WorkplaceTenantName </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$TenantInfo.DisplayName
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Write-Host </span><span style="color:#9acc76;">&quot;WorkplaceThumbprint: </span><span style="color:#eb6772;">$WorkplaceThumbprint</span><span style="color:#9acc76;">&quot;
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Write-Host </span><span style="color:#9acc76;">&quot;WorkplaceCertificate: </span><span style="color:#eb6772;">$WorkplaceCertificate</span><span style="color:#9acc76;">&quot;
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Write-Host </span><span style="color:#9acc76;">&quot;WorkplaceUserEmail: </span><span style="color:#eb6772;">$WorkplaceUserEmail</span><span style="color:#9acc76;">&quot;
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Write-Host </span><span style="color:#9acc76;">&quot;WorkplaceTenantId: </span><span style="color:#eb6772;">$WorkplaceTenantId</span><span style="color:#9acc76;">&quot;
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Write-Host </span><span style="color:#9acc76;">&quot;WorkplaceTenantName: </span><span style="color:#eb6772;">$WorkplaceTenantName</span><span style="color:#9acc76;">&quot;
+</span><span style="color:#abb2bf;">}
+</span></code></pre>
+<p>As if this wasn't enough of a problem, you can only be workplace joined with up to 3 users at the same time:</p>
+<figure>
+    <video controls>
+        <source src="https:&#x2F;&#x2F;awakecoding.com&#x2F;videos&#x2F;posts&#x2F;rdp-nla-aad-workplace-join-limit.mp4" type="video/mp4">
+    </video>
+    <figcaption>Azure AD workplace join account limit</figcaption>
+</figure><h3 id="problem-3-incorrect-azure-ad-username-format">Problem 3: Incorrect Azure AD username format</h3>
+<p>The Microsoft RDP client needs to know that you are connecting with an Azure AD user, otherwise it won't use <a rel="noopener nofollow noreferrer" target="_blank" href="https://syfuhs.net/how-azure-ad-windows-sign-in-works">CloudAP, this little black box that talks to Azure</a>. In mstsc, you need to use 'AzureAD\user@contoso.com', if you use 'user@contoso.com', authentication will fail. The 'AzureAD' prefix is the only thing that tells mstsc it's an Azure AD user and not a "regular" user account.</p>
+<p>In a .RDP file, it's a bit trickier. You need to use the ".\AzureAD" prefix instead of "AzureAD" like in the mstsc UI, and leave the domain empty:</p>
+<pre style="background-color:#2b303b;color:#6c7079;"><code><span style="color:#abb2bf;">username:s:.\AzureAD\user@contoso.com
+</span><span style="color:#abb2bf;">domain:s:
+</span></code></pre>
+<p>In Remote Desktop Manager, we've added the "Azure AD Host" option to automatically set the correct "AzureAD" prefix with different connection modes (embedded, external, etc):</p>
+<p><img src="/images/posts/rdp-nla-aad-rdm-azure-ad-host.png" alt="RDM RDP Azure AD Host Option" /></p>
+<p>Don't forget that even if PKU2U is enabled, it is <em>not</em> doing SSO: you still need to provide the full credentials when connecting.</p>
+<h3 id="problem-4-third-party-application-support">Problem 4: Third-Party Application Support</h3>
+<p>You're on Linux, using FreeRDP? Microsoft says "tough luck" and never bothered properly documenting PKU2U. Yes, there are some links to <a rel="noopener nofollow noreferrer" target="_blank" href="https://tools.ietf.org/id/draft-zhu-pku2u-09.txt">generic underlying specifications</a>, but a <em>real</em> implementation requires a complete equivalent of the CloudAP black box mentioned earlier with X.509 certificates obtained from Azure AD. This means opening up the part of the Azure AD workplace join process such that third-party applications can do it all without Windows, and maintain their own <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/azure/active-directory/devices/concept-primary-refresh-token">Primary Refresh Token (PRT) cache</a>. To be fair, even if Microsoft were to provide an open source SDK for this, it would still be incredibly complex when all the user wants is to pass full credentials to an RDP client. This has nothing to do with NTLM versus Kerberos, as PKU2U is an entirely different thing that simply has no tangible third-party vendor support.</p>
+<h2 id="closing-thoughts-what-about-rds-aad-sso">Closing Thoughts: What about RDS AAD SSO?</h2>
+<p><a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/azure/virtual-desktop/configure-single-sign-on">What about it?</a> It doesn't use PKU2U which is good, but that's about it. It's not ready for prime time is all I can say, there is not even a way to logout from the client right now, so once you're logged in with that fancy FIDO2 key... your client system will keep doing SSO to that target machine, no questions asked, until some administrator invalidates your token from the Azure AD tenant. As for third-party integration, it's non-existing and not possible at this point, beyond setting <code>enablerdsaadauth:i:1</code> in the .RDP file to turn it on. In Remote Desktop Manager, we've exposed RDS AAD authentication as the "Enable Azure AD SSO" option:</p>
+<p><img src="/images/posts/rdp-nla-aad-rdm-enable-aad-sso.png" alt="RDM RDP Azure AD SSO" /></p>
+<p>RDS AAD authentication is a longer topic that I'll come back to another time. For now, unless you want FIDO2 support, you're probably better off with the older PKU2U protocol.</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;rdp-smartcard-logon-user-name-does-not-exist&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              RDP Smartcard Logon: User Name Does Not Exist
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;active-directory-ldaps-certificate-selection-deep-dive&#x2F;">
+              Active Directory LDAPS certificate selection deep dive<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/rd-gateway-without-kdc-proxy-causes-ntlm-downgrade/">
+  <link rel="alternate" href="https://awakecoding.com/posts/rd-gateway-without-kdc-proxy-causes-ntlm-downgrade/" hreflang="en" />
+  
+  <meta name="description" content="Learn why mstsc requires the RD Gateway to act as a KDC proxy for Kerberos authentication, how this undocumented behavior causes silent NTLM downgrades, and how to fix it by enabling the KDC proxy service." />
+  <meta property="og:title" content="RD Gateway Without KDC Proxy Causes NTLM Downgrade" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;rd-gateway-without-kdc-proxy-causes-ntlm-downgrade&#x2F;" />
+  <meta property="og:description" content="Learn why mstsc requires the RD Gateway to act as a KDC proxy for Kerberos authentication, how this undocumented behavior causes silent NTLM downgrades, and how to fix it by enabling the KDC proxy service." />
+  <meta name="twitter:title" content="RD Gateway Without KDC Proxy Causes NTLM Downgrade" />
+  <meta name="twitter:description" content="Learn why mstsc requires the RD Gateway to act as a KDC proxy for Kerberos authentication, how this undocumented behavior causes silent NTLM downgrades, and how to fix it by enabling the KDC proxy service." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;rd-gateway-without-kdc-proxy-causes-ntlm-downgrade&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/rd-gateway-without-kdc-proxy-causes-ntlm-downgrade.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/rd-gateway-without-kdc-proxy-causes-ntlm-downgrade.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "RD Gateway Without KDC Proxy Causes NTLM Downgrade",
+  "description": "Learn why mstsc requires the RD Gateway to act as a KDC proxy for Kerberos authentication, how this undocumented behavior causes silent NTLM downgrades, and how to fix it by enabling the KDC proxy service.",
+  "datePublished": "2025-04-26",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/rd-gateway-without-kdc-proxy-causes-ntlm-downgrade.png",
+  "url": "https://awakecoding.com/posts/rd-gateway-without-kdc-proxy-causes-ntlm-downgrade/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/rd-gateway-without-kdc-proxy-causes-ntlm-downgrade/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | RD Gateway Without KDC Proxy Causes NTLM Downgrade
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            RD Gateway Without KDC Proxy Causes NTLM Downgrade
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2025-04-26">April 26, 2025</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>5 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>929 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/windows/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Windows</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/kerberos/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Kerberos</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/rdp/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>RDP</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>If you have an RD Gateway deployed, did you know that unless a KDC proxy is also deployed on the same host and port, you have a guaranteed NTLM downgrade for the RD Gateway connection from mstsc, despite having a KDC line-of-sight or setting KDCProxyName in the .RDP file?</p>
+<p><img src="/images/posts/rdg-kdc-proxy-service-unavailable.png" alt="RD Gateway KDC Proxy service unavailable" /></p>
+<p>It turns out that mstsc always sets the RD Gateway host as the KDC proxy to use for the Kerberos authentication made over HTTP with the RD Gateway. If there's no KDC proxy on the RD Gateway host, it downgrades to NTLM. Oopsie!</p>
+<h2 id="what-s-a-kdc-proxy-anyway">What's a KDC Proxy Anyway?</h2>
+<p>Kerberos requires out-of-band communication with the Kerberos Key Distribution Center (KDC) to obtain tickets. In Active Directory, the KDC is on the domain controller. If you're on the same network as the domain controller, you have a KDC line-of-sight, and Kerberos works.</p>
+<p>If you're outside of the local network, such as when connecting through an RD Gateway, you most likely don't have a KDC line-of-sight. The <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/openspecs/windows_protocols/MS-KKDCP/5bcebb8d-b747-4ee5-9453-428aec1c5c38">KDC Proxy is a simple protocol</a> that relays Kerberos requests and responses over HTTPS, providing the required KDC line-of-sight for Kerberos to work.</p>
+<h2 id="rd-gateway-authentication">RD Gateway authentication</h2>
+<p>The <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-tsgu/0007d661-a86d-4e8f-89f7-7f77f8824188">RD Gateway protocol</a> is really a tunneling protocol, or an application-specific "VPN". Simply put, the RDP client (mstsc) authenticates against the RD Gateway using Windows authentication over HTTP, and then requests to open a tunnel for the connection to the destination RDP server.</p>
+<p>Once the tunnel is established, RDP authentication happens independently, in the same way it would during a direct connection, often using the same Active Directory credentials used for the RD Gateway authentication.</p>
+<h2 id="rdp-authentication">RDP Authentication</h2>
+<p>Kerberos in RDP NLA is not affected by the baked-in assumption that the RD Gateway must be a KDC proxy. This means that if you have direct KDC line-of-sight, or if you set the <strong>KDCProxyName</strong> .RDP file option to point to a different KDC proxy, Kerberos will work for RDP NLA even if it fails for the RD Gateway.</p>
+<p>The key problem for RD Gateway authentication is that it only expects the KDC line-of-sight to be provided by the KDC proxy, and won't use anything else, including a direct KDC line-of-sight usable for RDP NLA.</p>
+<h2 id="how-to-fix-it">How To Fix It</h2>
+<p>Unless someone at Microsoft wakes up from their slumber, I think we can rule out a fix in mstsc. After all, this undocumented behavior has most likely been present from the beginning, and nobody complained, right?</p>
+<p>In the meantime, on the RD Gateway host, run this PowerShell code snippet elevated to enable the <a rel="noopener nofollow noreferrer" target="_blank" href="https://syfuhs.net/kdc-proxy-for-remote-access">KDC proxy service</a>:</p>
+<pre data-lang="PowerShell" style="background-color:#2b303b;color:#6c7079;" class="language-PowerShell "><code class="language-PowerShell" data-lang="PowerShell"><span style="color:#abb2bf;">netsh http add urlacl url</span><span style="color:#adb7c9;">=</span><span style="color:#abb2bf;">https:</span><span style="color:#adb7c9;">//+</span><span style="color:#abb2bf;">:</span><span style="color:#db9d63;">443</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">KdcProxy user</span><span style="color:#adb7c9;">=</span><span style="color:#9acc76;">&quot;NT authority\Network Service&quot;
+</span><span style="color:#eb6772;">$KpsSvcSettingsReg </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;HKLM:\SYSTEM\CurrentControlSet\Services\KPSSVC\Settings&quot;
+</span><span style="color:#5ebfcc;">New-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$KpsSvcSettingsReg </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#9acc76;">&quot;HttpsClientAuth&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Type DWORD </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#db9d63;">0 </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force
+</span><span style="color:#5ebfcc;">New-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$KpsSvcSettingsReg </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#9acc76;">&quot;DisallowUnprotectedPasswordAuth&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Type DWORD </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#db9d63;">0 </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force
+</span><span style="color:#5ebfcc;">New-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$KpsSvcSettingsReg </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#9acc76;">&quot;HttpsUrlGroup&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Type MultiString </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#9acc76;">&quot;+`:443&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force
+</span><span style="color:#5ebfcc;">Set-Service </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name KPSSVC </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">StartupType Automatic
+</span><span style="color:#5ebfcc;">Start-Service </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name KPSSVC
+</span></code></pre>
+<p>If you work at Microsoft and want to fix this undocumented behavior, take a look at <code>mstscax!CHttpIoRequestWinHttp::EnableNativeAuthentication</code>:</p>
+<p><img src="/images/posts/rdg-kdc-proxy-forced-mstsc-windbg.png" alt="RD Gateway KDC Proxy forced in mstsc" /></p>
+<p>KDC proxying settings are set using <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows/win32/api/sspi/nf-sspi-setcredentialsattributesw">SetCredentialsAttribute</a> with the <code>SECPKG_CRED_ATTR_KDC_PROXY_SETTINGS</code> attribute and <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows/win32/api/sspi/ns-sspi-secpkgcredentials_kdcproxysettingsw">SecPkgCredentials_KdcProxySettings structure</a>.</p>
+<p>The <strong>Flags</strong> member of the SecPkgCredentials_KdcProxySettings structure accepts the value <code>KDC_PROXY_SETTINGS_FLAGS_FORCEPROXY</code> (0x1), even if the documentation fails to mention it. This is what's causing the KDC proxy to be <em>forced</em> rather than simply <em>attempted</em>. That's right, all it takes is a one-liner fix, and you'll be my hero!</p>
+<h2 id="kdcproxyname-file-option">KDCProxyName File Option</h2>
+<p>Speaking of one-liner bug fixes in mstsc, there's another important undocumented behavior you should probably know about: the <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/azure/virtual-desktop/key-distribution-center-proxy">KDCProxyName .RDP file option</a> is only used by mstsc when using an RD Gateway transport.</p>
+<p>In other words, mstsc assumes the RD Gateway is a KDC proxy for the RD Gateway authentication, but it will also ignore an explicit KDC proxy passed through KDCProxyName if you're not using an RD Gateway. This means you can't set a KDC proxy using a .RDP file for direct or "regular" RDP connections. Again, if you work at Microsoft, take a look at <code>mstscax!CTscSslFilter::InitializeKDCProxyClient</code>:</p>
+<p><img src="/images/posts/rdg-kdc-proxy-kdcproxyname-ignored.png" alt="RD Gateway KDCProxyName ignored" /></p>
+<p>If you could remove that "if" statement, then the function would not return early when not using an RD Gateway transport, and accept KDC proxying settings from the .RDP file for all connection transport types. Since my multiple attempts at getting this bug fixed over the years didn't bear fruit, I ended up API hooking a fix myself in <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/Devolutions/MsRdpEx">MsRdpEx</a>:</p>
+<p><img src="/images/posts/rdg-kdc-proxy-kdcproxyname-msrdpex.png" alt="RD Gateway KDCProxyName MsRdpEx" /></p>
+<p>If you want mstsc without the bugs, then <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/Devolutions/MsRdpEx">install MsRdpEx today</a>, and you'll be set! Just remember to launch mstscex.exe instead of mstsc.exe for the MsRdpEx API hooking to work.</p>
+<h2 id="closing-thoughts">Closing Thoughts</h2>
+<p>If you are deploying an RD Gateway and want to enforce Kerberos authentication, it is important to understand that mstsc expects the RD Gateway to act as a KDC proxy. Without a KDC proxy service running on the gateway, Kerberos authentication will silently fail and fall back to NTLM, even if direct line-of-sight to a domain controller exists.</p>
+<p>Until this behavior is formally documented or addressed, it is recommended to configure KDC proxy support as part of any RD Gateway deployment that requires Kerberos authentication.</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;fix-crl-not-published-when-revocation-server-is-offline&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              Fix CRL Not Published When Revocation Server Is Offline
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;pinning-apps-to-the-windows-11-taskbar-with-powershell&#x2F;">
+              Pinning Apps to the Windows 11 Taskbar with PowerShell<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>

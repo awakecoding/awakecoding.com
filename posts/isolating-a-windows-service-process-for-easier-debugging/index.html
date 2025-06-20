@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/isolating-a-windows-service-process-for-easier-debugging/">
+  <link rel="alternate" href="https://awakecoding.com/posts/isolating-a-windows-service-process-for-easier-debugging/" hreflang="en" />
+  
+  <meta name="description" content="Learn how to isolate a Windows system service into its own process for easier debugging. This guide walks you through identifying service process IDs, listing service group members, and using PowerShell to move a service into a new, dedicated service group." />
+  <meta property="og:title" content="Isolating a Windows Service Process for Easier Debugging" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;isolating-a-windows-service-process-for-easier-debugging&#x2F;" />
+  <meta property="og:description" content="Learn how to isolate a Windows system service into its own process for easier debugging. This guide walks you through identifying service process IDs, listing service group members, and using PowerShell to move a service into a new, dedicated service group." />
+  <meta name="twitter:title" content="Isolating a Windows Service Process for Easier Debugging" />
+  <meta name="twitter:description" content="Learn how to isolate a Windows system service into its own process for easier debugging. This guide walks you through identifying service process IDs, listing service group members, and using PowerShell to move a service into a new, dedicated service group." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;isolating-a-windows-service-process-for-easier-debugging&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/isolating-a-windows-service-process-for-easier-debugging.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/isolating-a-windows-service-process-for-easier-debugging.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Isolating a Windows Service Process for Easier Debugging",
+  "description": "Learn how to isolate a Windows system service into its own process for easier debugging. This guide walks you through identifying service process IDs, listing service group members, and using PowerShell to move a service into a new, dedicated service group.",
+  "datePublished": "2025-04-06",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/isolating-a-windows-service-process-for-easier-debugging.png",
+  "url": "https://awakecoding.com/posts/isolating-a-windows-service-process-for-easier-debugging/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/isolating-a-windows-service-process-for-easier-debugging/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | Isolating a Windows Service Process for Easier Debugging
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            Isolating a Windows Service Process for Easier Debugging
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2025-04-06">April 06, 2025</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>6 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>1132 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/windows/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Windows</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/powershell/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>PowerShell</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>Have you ever wanted to identify which process hosts a specific system service, only to realize that they all show up as "svchost.exe" in <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/sysinternals/downloads/procmon">Process Monitor</a> or <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/sysinternals/downloads/process-explorer">Process Explorer</a>?</p>
+<p><img src="/images/posts/services-svchost-process-explorer.png" alt="Process Explorer system services" /></p>
+<p>Some system services like TermService (Remote Desktop Services) leave some obvious clues like a child "rdpclip.exe" process. However, most of the time, you won't be so lucky.</p>
+<h2 id="finding-the-service-process-id">Finding the Service Process Id</h2>
+<p>The most accurate method to find the process id matching a system service is through WMI. Here's a simple <code>Get-ServiceProcessId</code> PowerShell cmdlet you can paste and use wherever needed:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#cd74e8;">function </span><span style="color:#5cb3fa;">Get-ServiceProcessId </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    [</span><span style="color:#5ebfcc;">CmdletBinding</span><span style="color:#abb2bf;">()]
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">param </span><span style="color:#abb2bf;">(
+</span><span style="color:#abb2bf;">        [</span><span style="color:#5ebfcc;">Parameter</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">Mandatory</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">ValueFromPipelineByPropertyName</span><span style="color:#abb2bf;">)]
+</span><span style="color:#abb2bf;">        [</span><span style="color:#cd74e8;">string</span><span style="color:#abb2bf;">] </span><span style="color:#eb6772;">$Name
+</span><span style="color:#abb2bf;">    )
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">process </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$svc </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-CimInstance</span><span style="color:#abb2bf;"> Win32_Service </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Filter </span><span style="color:#9acc76;">&quot;Name=&#39;</span><span style="color:#eb6772;">$Name</span><span style="color:#9acc76;">&#39;&quot;
+</span><span style="color:#abb2bf;">        </span><span style="color:#cd74e8;">if </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$svc </span><span style="color:#adb7c9;">-and </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$svc.ProcessId </span><span style="color:#adb7c9;">-ne </span><span style="color:#db9d63;">0</span><span style="color:#abb2bf;">)) {
+</span><span style="color:#abb2bf;">            </span><span style="color:#eb6772;">$svc.ProcessId
+</span><span style="color:#abb2bf;">        }
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">}
+</span></code></pre>
+<p>You can try it out with the Diagnostic Process Service (DPS), which should be in the running state on most systems:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS</span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-ServiceProcessId</span><span style="color:#abb2bf;"> DPS
+</span><span style="color:#db9d63;">6340
+</span><span style="color:#abb2bf;">
+</span><span style="color:#5ebfcc;">Get-Service</span><span style="color:#abb2bf;"> DPS </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Get-ServiceProcessId
+</span><span style="color:#db9d63;">6340
+</span></code></pre>
+<p>Neat! Now you can use the process id to filter events in Process Monitor and learn more what a specific services does.</p>
+<h2 id="finding-the-service-group-name">Finding the Service Group Name</h2>
+<p>Ah ha! You thought this was the end of it, didn't you? Unfortunately, you may notice that many system services share the <em>same</em> svchost.exe process. Uh oh - that's not good if you want to filter on a specific <em>service</em>. This is a side effect of service groups, a feature used to pool multiple services together for performance reasons. You can use the <code>Get-ServiceGroupName</code> PowerShell cmdlet to find the optional service group name associated with a service:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#cd74e8;">function </span><span style="color:#5cb3fa;">Get-ServiceGroupName </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    [</span><span style="color:#5ebfcc;">CmdletBinding</span><span style="color:#abb2bf;">()]
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">param </span><span style="color:#abb2bf;">(
+</span><span style="color:#abb2bf;">        [</span><span style="color:#5ebfcc;">Parameter</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">Mandatory</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">ValueFromPipelineByPropertyName</span><span style="color:#abb2bf;">)]
+</span><span style="color:#abb2bf;">        [</span><span style="color:#cd74e8;">string</span><span style="color:#abb2bf;">] </span><span style="color:#eb6772;">$Name
+</span><span style="color:#abb2bf;">    )
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">process </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$svc </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-CimInstance</span><span style="color:#abb2bf;"> Win32_Service </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Filter </span><span style="color:#9acc76;">&quot;Name=&#39;</span><span style="color:#eb6772;">$Name</span><span style="color:#9acc76;">&#39;&quot;
+</span><span style="color:#abb2bf;">        </span><span style="color:#cd74e8;">if </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$svc</span><span style="color:#abb2bf;">) {
+</span><span style="color:#abb2bf;">            </span><span style="color:#cd74e8;">if </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$svc.PathName </span><span style="color:#adb7c9;">-match </span><span style="color:#9acc76;">&#39;-k\s+(\w+)&#39;</span><span style="color:#abb2bf;">) {
+</span><span style="color:#abb2bf;">                $matches[</span><span style="color:#db9d63;">1</span><span style="color:#abb2bf;">]
+</span><span style="color:#abb2bf;">            }
+</span><span style="color:#abb2bf;">        }
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">}
+</span></code></pre>
+<p>How does it work? Members of a service group register svchost.exe as their executable and pass the service group name in the <code>-k</code> command-line parameter. When the Service Control Manager (SCM) sees this parameter, it will launch a single process for all members of the same group. Let's try it with a few system services:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS</span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-ServiceGroupName</span><span style="color:#abb2bf;"> DPS
+</span><span style="color:#abb2bf;">LocalServiceNoNetwork
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">PS</span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-ServiceGroupName</span><span style="color:#abb2bf;"> WinHttpAutoProxySvc
+</span><span style="color:#abb2bf;">LocalServiceNetworkRestricted
+</span></code></pre>
+<p><strong>LocalServiceNoNetwork</strong> and <strong>LocalServiceNetworkRestricted</strong> are built-in service groups in Windows. There are several others which I'll let you discover on your own.</p>
+<h2 id="finding-service-group-members">Finding Service Group Members</h2>
+<p>Now that we know the service group name for the service of interest, how can we find other members of the same group? Luckily for us, service group membership is stored as a list in the registry:</p>
+<p><img src="/images/posts/services-svchost-group-members.png" alt="service group members in registry" /></p>
+<p>Here's the <code>Get-ServiceGroupMembers</code> PowerShell cmdlet that simplifies obtaining service group members:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#cd74e8;">function </span><span style="color:#5cb3fa;">Get-ServiceGroupMembers </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    [</span><span style="color:#5ebfcc;">CmdletBinding</span><span style="color:#abb2bf;">()]
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">param </span><span style="color:#abb2bf;">(
+</span><span style="color:#abb2bf;">        [</span><span style="color:#5ebfcc;">Parameter</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">Mandatory</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">ValueFromPipeline</span><span style="color:#abb2bf;">)]
+</span><span style="color:#abb2bf;">        [</span><span style="color:#cd74e8;">string</span><span style="color:#abb2bf;">] </span><span style="color:#eb6772;">$GroupName
+</span><span style="color:#abb2bf;">    )
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">try </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$SvchostRegPath </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&#39;HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost&#39;
+</span><span style="color:#abb2bf;">        </span><span style="color:#5ebfcc;">Get-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$SvchostRegPath </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Select-Object </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ExpandProperty </span><span style="color:#eb6772;">$GroupName </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ErrorAction Stop
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">catch </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">        </span><span style="color:#5ebfcc;">Write-Error </span><span style="color:#9acc76;">&quot;Group &#39;</span><span style="color:#eb6772;">$GroupName</span><span style="color:#9acc76;">&#39; not found in svchost registry.&quot;
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">}
+</span></code></pre>
+<p>The <strong>LocalServiceNoNetwork</strong> service group contains just a few services:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS</span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-ServiceGroupMembers</span><span style="color:#abb2bf;"> LocalServiceNoNetwork
+</span><span style="color:#abb2bf;">DPS
+</span><span style="color:#abb2bf;">PLA
+</span><span style="color:#abb2bf;">CoreMessagingRegistrar
+</span><span style="color:#abb2bf;">NcdAutoSetup
+</span></code></pre>
+<p>The <strong>LocalServiceNetworkRestricted</strong> service group, on the other hand, is quite big:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Get-ServiceGroupMembers</span><span style="color:#abb2bf;"> LocalServiceNetworkRestricted
+</span><span style="color:#abb2bf;">TimeBrokerSvc
+</span><span style="color:#abb2bf;">WarpJITSvc
+</span><span style="color:#abb2bf;">eventlog
+</span><span style="color:#abb2bf;">AudioSrv
+</span><span style="color:#abb2bf;">WinHttpAutoProxySvc
+</span><span style="color:#abb2bf;">wscsvc
+</span><span style="color:#abb2bf;">LmHosts
+</span><span style="color:#abb2bf;">AppIDSvc
+</span><span style="color:#abb2bf;">WFDSConMgrSvc
+</span><span style="color:#abb2bf;">vmictimesync
+</span><span style="color:#abb2bf;">btagservice
+</span><span style="color:#abb2bf;">SmsRouter
+</span><span style="color:#abb2bf;">NgcCtnrSvc
+</span><span style="color:#abb2bf;">icssvc
+</span><span style="color:#abb2bf;">RmSvc
+</span><span style="color:#abb2bf;">wlpasvc
+</span><span style="color:#abb2bf;">DusmSvc
+</span><span style="color:#abb2bf;">DHCP
+</span><span style="color:#abb2bf;">wcmsvc
+</span></code></pre>
+<p>If you were hoping to learn more about one of those services, this can make your work harder.</p>
+<h2 id="moving-service-to-a-new-group">Moving Service to a New Group</h2>
+<p>Welcome to the danger zone: for this last part, please use a test virtual machine, as we're going to be fiddling with service registrations, and there is a potential to break things.</p>
+<p>How can one isolate a system service such that it can run in its own process without other services in it? Service groups are not mandatory, but modifying a service registration to <em>not</em> use a service group can be difficult. The simplest approach is to create a new service group similar to the original one, and move the service of interest into it. Hold your breath for the <code>Move-ServiceToNewGroup</code> PowerShell cmdlet:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#cd74e8;">function </span><span style="color:#5cb3fa;">Move-ServiceToNewGroup </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    [</span><span style="color:#5ebfcc;">CmdletBinding</span><span style="color:#abb2bf;">()]
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">param </span><span style="color:#abb2bf;">(
+</span><span style="color:#abb2bf;">        [</span><span style="color:#5ebfcc;">Parameter</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">Mandatory</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">Position </span><span style="color:#adb7c9;">= </span><span style="color:#db9d63;">0</span><span style="color:#abb2bf;">)]
+</span><span style="color:#abb2bf;">        [</span><span style="color:#cd74e8;">string</span><span style="color:#abb2bf;">] </span><span style="color:#eb6772;">$ServiceName</span><span style="color:#adb7c9;">,
+</span><span style="color:#abb2bf;">        [</span><span style="color:#5ebfcc;">Parameter</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">Mandatory</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">Position </span><span style="color:#adb7c9;">= </span><span style="color:#db9d63;">1</span><span style="color:#abb2bf;">)]
+</span><span style="color:#abb2bf;">        [</span><span style="color:#cd74e8;">string</span><span style="color:#abb2bf;">] </span><span style="color:#eb6772;">$OldGroupName</span><span style="color:#adb7c9;">,
+</span><span style="color:#abb2bf;">        [</span><span style="color:#5ebfcc;">Parameter</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">Mandatory</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">Position </span><span style="color:#adb7c9;">= </span><span style="color:#db9d63;">2</span><span style="color:#abb2bf;">)]
+</span><span style="color:#abb2bf;">        [</span><span style="color:#cd74e8;">string</span><span style="color:#abb2bf;">] </span><span style="color:#eb6772;">$NewGroupName
+</span><span style="color:#abb2bf;">    )
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$SvchostRegPath </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&#39;HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost&#39;
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$ServiceRegPath </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;HKLM:\SYSTEM\CurrentControlSet\Services\</span><span style="color:#eb6772;">$ServiceName</span><span style="color:#9acc76;">&quot;
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="font-style:italic;color:#5f697a;"># Remove from old service group
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$OldGroupMembers </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$SvchostRegPath </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Select-Object </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ExpandProperty </span><span style="color:#eb6772;">$OldGroupName </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ErrorAction Stop
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$OldGroupMembers </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$OldGroupMembers </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Where-Object </span><span style="color:#abb2bf;">{ $_ </span><span style="color:#adb7c9;">-ne </span><span style="color:#eb6772;">$ServiceName </span><span style="color:#abb2bf;">}
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Set-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$SvchostRegPath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#eb6772;">$OldGroupName </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#eb6772;">$OldGroupMembers
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="font-style:italic;color:#5f697a;"># Add to new service group
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$NewGroupMembers </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$SvchostRegPath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#eb6772;">$NewGroupName </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ErrorAction SilentlyContinue
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">if </span><span style="color:#abb2bf;">(</span><span style="color:#adb7c9;">-Not </span><span style="color:#eb6772;">$NewGroupMembers</span><span style="color:#abb2bf;">) {
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$NewGroupMembers </span><span style="color:#adb7c9;">= </span><span style="color:#cd74e8;">@</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$ServiceName</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">        </span><span style="color:#5ebfcc;">New-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$SvchostRegPath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#eb6772;">$NewGroupName </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">PropertyType MultiString </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#eb6772;">$NewGroupMembers </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Out-Null
+</span><span style="color:#abb2bf;">    } </span><span style="color:#cd74e8;">else </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$NewGroupMembers </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$NewGroupMembers </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Select-Object </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ExpandProperty </span><span style="color:#eb6772;">$NewGroupName
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$NewGroupMembers </span><span style="color:#adb7c9;">= </span><span style="color:#cd74e8;">@</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$NewGroupMembers</span><span style="color:#abb2bf;">) </span><span style="color:#adb7c9;">+ </span><span style="color:#eb6772;">$ServiceName
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$NewGroupMembers </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$NewGroupMembers </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Sort-Object </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Unique
+</span><span style="color:#abb2bf;">        </span><span style="color:#5ebfcc;">Set-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$SvchostRegPath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#eb6772;">$NewGroupName </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#eb6772;">$NewGroupMembers
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="font-style:italic;color:#5f697a;"># Update ImagePath with -k parameter (group name) passed to svchost.exe
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$ImagePath </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-ItemPropertyValue </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$ServiceRegPath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name ImagePath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ErrorAction Stop
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$ImagePath </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$ImagePath </span><span style="color:#adb7c9;">-Replace </span><span style="color:#9acc76;">&quot;\s*-k\s+</span><span style="color:#eb6772;">$OldGroupName</span><span style="color:#9acc76;">&quot;</span><span style="color:#adb7c9;">, </span><span style="color:#9acc76;">&quot; -k </span><span style="color:#eb6772;">$NewGroupName</span><span style="color:#9acc76;">&quot;
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Set-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$ServiceRegPath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name ImagePath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#eb6772;">$ImagePath
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="font-style:italic;color:#5f697a;"># Copy service group configuration values
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$OldGroupConfig </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost\</span><span style="color:#eb6772;">$OldGroupName</span><span style="color:#9acc76;">&quot;
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$TempReg </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Join-Path </span><span style="color:#eb6772;">$Env:TEMP </span><span style="color:#9acc76;">&quot;svchost-</span><span style="color:#eb6772;">$NewGroupName</span><span style="color:#9acc76;">.reg&quot;
+</span><span style="color:#abb2bf;">    reg export </span><span style="color:#9acc76;">&quot;</span><span style="color:#eb6772;">$OldGroupConfig</span><span style="color:#9acc76;">&quot; &quot;</span><span style="color:#eb6772;">$TempReg</span><span style="color:#9acc76;">&quot; </span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">y </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Out-Null
+</span><span style="color:#abb2bf;">    (</span><span style="color:#5ebfcc;">Get-Content </span><span style="color:#eb6772;">$TempReg</span><span style="color:#abb2bf;">) </span><span style="color:#adb7c9;">-replace </span><span style="color:#9acc76;">&quot;\\</span><span style="color:#eb6772;">$OldGroupName</span><span style="color:#9acc76;">&quot;</span><span style="color:#adb7c9;">, </span><span style="color:#9acc76;">&quot;\\</span><span style="color:#eb6772;">$NewGroupName</span><span style="color:#9acc76;">&quot; </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Set-Content </span><span style="color:#eb6772;">$TempReg
+</span><span style="color:#abb2bf;">    reg import </span><span style="color:#9acc76;">&quot;</span><span style="color:#eb6772;">$TempReg</span><span style="color:#9acc76;">&quot; </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Out-Null
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Remove-Item </span><span style="color:#eb6772;">$TempReg </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force
+</span><span style="color:#abb2bf;">}
+</span></code></pre>
+<p>Yes, it's a lot more complicated than the previous cmdlets. Let's just try it with <strong>WinHttpAutoProxySvc</strong>, the Windows Proxy Auto Detect (WPAD) service in Windows. It is a member of the <strong>LocalServiceNetworkRestricted</strong> service group, but we'll move it to a new service group matching its own name (WinHttpAutoProxySvc). Run this command from an elevated PowerShell terminal:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS</span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Move-ServiceToNewGroup</span><span style="color:#abb2bf;"> WinHttpAutoProxySvc LocalServiceNetworkRestricted WinHttpAutoProxySvc
+</span></code></pre>
+<p>If everything worked, you just need to reboot the virtual machine. Avoid manually starting or stopping this service - other services depend on it, and it may behave as unexpectedly. If you look in the registry, you should now see the new service group configuration under <code>HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost\WinHttpAutoProxySvc</code>:</p>
+<p><img src="/images/posts/services-svchost-group-configuration.png" alt="service group configuration in registry" /></p>
+<p>The service configuration under <code>HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WinHttpAutoProxySvc</code> should also have a new value for <strong>ImagePath</strong>:</p>
+<p><img src="/images/posts/services-svchost-service-configuration.png" alt="service configuration in registry" /></p>
+<p>Now make sure that the <strong>WinHttpAutoProxySvc</strong> service is running:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS</span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-Service</span><span style="color:#abb2bf;"> WinHttpAutoProxySvc </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Format-List
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">Name                : WinHttpAutoProxySvc
+</span><span style="color:#abb2bf;">DisplayName         : WinHTTP Web Proxy Auto</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Discovery Service
+</span><span style="color:#abb2bf;">Status              : Running
+</span><span style="color:#abb2bf;">DependentServices   : {NcaSvc</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;"> iphlpsvc}
+</span><span style="color:#abb2bf;">ServicesDependedOn  : {Dhcp}
+</span><span style="color:#abb2bf;">CanPauseAndContinue : False
+</span><span style="color:#abb2bf;">CanShutdown         : True
+</span><span style="color:#abb2bf;">CanStop             : False
+</span><span style="color:#abb2bf;">ServiceType         : Win32ShareProcess
+</span></code></pre>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS</span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-ServiceProcessId</span><span style="color:#abb2bf;"> WinHttpAutoProxySvc
+</span><span style="color:#db9d63;">1484
+</span></code></pre>
+<p>Last but not least, let's confirm that none of the other services in the original service group have a matching process id:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS</span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-ServiceGroupMembers</span><span style="color:#abb2bf;"> LocalServiceNetworkRestricted </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">ForEach-Object </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    [</span><span style="color:#cd74e8;">PSCustomObject</span><span style="color:#abb2bf;">]</span><span style="color:#cd74e8;">@</span><span style="color:#abb2bf;">{ </span><span style="color:#eb6772;">ServiceName </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">$_; </span><span style="color:#eb6772;">ProcessId </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-ServiceProcessId </span><span style="color:#abb2bf;">$_ }
+</span><span style="color:#abb2bf;">}
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">ServiceName   ProcessId
+</span><span style="color:#adb7c9;">-----------   ---------
+</span><span style="color:#abb2bf;">TimeBrokerSvc      </span><span style="color:#db9d63;">1220
+</span><span style="color:#abb2bf;">WarpJITSvc
+</span><span style="color:#abb2bf;">eventlog           </span><span style="color:#db9d63;">1220
+</span><span style="color:#abb2bf;">AudioSrv
+</span><span style="color:#abb2bf;">LmHosts            </span><span style="color:#db9d63;">1220
+</span><span style="color:#abb2bf;">AppIDSvc
+</span><span style="color:#abb2bf;">vmictimesync       </span><span style="color:#db9d63;">1220
+</span><span style="color:#abb2bf;">NgcCtnrSvc
+</span><span style="color:#abb2bf;">RmSvc
+</span><span style="color:#abb2bf;">wcmsvc             </span><span style="color:#db9d63;">1820
+</span><span style="color:#abb2bf;">DHCP               </span><span style="color:#db9d63;">1220
+</span><span style="color:#abb2bf;">AJRouter
+</span></code></pre>
+<p>Success! None of the running services share the same process.</p>
+<h2 id="taking-a-shortcut-i-wish-i-knew-earlier">Taking a Shortcut I Wish I Knew Earlier</h2>
+<p>The most observant of you will have noticed that the <strong>wcmsvc</strong> service has a different process id despite being a member of the <strong>LocalServiceNetworkRestricted</strong> service group. How can that be? Let's look at the <strong>wcmsvc</strong> service more closely:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS</span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-Service</span><span style="color:#abb2bf;"> wcmsvc </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Format-List
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">Name                : wcmsvc
+</span><span style="color:#abb2bf;">DisplayName         : Windows Connection Manager
+</span><span style="color:#abb2bf;">Status              : Running
+</span><span style="color:#abb2bf;">DependentServices   : {}
+</span><span style="color:#abb2bf;">ServicesDependedOn  : {RpcSs</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;"> NSI}
+</span><span style="color:#abb2bf;">CanPauseAndContinue : False
+</span><span style="color:#abb2bf;">CanShutdown         : True
+</span><span style="color:#abb2bf;">CanStop             : True
+</span><span style="color:#abb2bf;">ServiceType         : Win32OwnProcess
+</span></code></pre>
+<p>A service type of <strong>Win32OwnProcess</strong>, despite being a member of a service group? Does that mean one can just change this service type instead of moving the service to a new service group? Let's look in the registry:</p>
+<p><img src="/images/posts/services-svchost-win32-own-process.png" alt="service win32 own process type" /></p>
+<p>The <strong>WinHttpAutoProxySvc</strong> service has a type of <strong>Win32ShareProcess</strong> with corresponding value of 32 in the registry. Let's just change that to <strong>Win32OwnProcess</strong> with a value of 16 instead:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#cd74e8;">function </span><span style="color:#5cb3fa;">Set-ServiceTypeOwnProcess </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    [</span><span style="color:#5ebfcc;">CmdletBinding</span><span style="color:#abb2bf;">()]
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">param </span><span style="color:#abb2bf;">(
+</span><span style="color:#abb2bf;">        [</span><span style="color:#5ebfcc;">Parameter</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">Mandatory</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">Position </span><span style="color:#adb7c9;">= </span><span style="color:#db9d63;">0</span><span style="color:#abb2bf;">)]
+</span><span style="color:#abb2bf;">        [</span><span style="color:#cd74e8;">string</span><span style="color:#abb2bf;">] </span><span style="color:#eb6772;">$ServiceName
+</span><span style="color:#abb2bf;">    )
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$ServiceRegPath </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;HKLM:\SYSTEM\CurrentControlSet\Services\</span><span style="color:#eb6772;">$ServiceName</span><span style="color:#9acc76;">&quot;
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Set-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$ServiceRegPath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#9acc76;">&quot;Type&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#db9d63;">16 </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Type DWORD
+</span><span style="color:#abb2bf;">}
+</span><span style="color:#abb2bf;">
+</span><span style="color:#5ebfcc;">Set-ServiceTypeOwnProcess </span><span style="color:#9acc76;">&quot;WinHttpAutoProxySvc&quot;
+</span></code></pre>
+<p>Run this on a machine where the service hasn't been moved to a different group, then reboot. List process ids for all services in the <strong>LocalServiceNetworkRestricted</strong> group:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS</span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-ServiceGroupMembers</span><span style="color:#abb2bf;"> LocalServiceNetworkRestricted </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">ForEach-Object </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    [</span><span style="color:#cd74e8;">PSCustomObject</span><span style="color:#abb2bf;">]</span><span style="color:#cd74e8;">@</span><span style="color:#abb2bf;">{ </span><span style="color:#eb6772;">ServiceName </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">$_; </span><span style="color:#eb6772;">ProcessId </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-ServiceProcessId </span><span style="color:#abb2bf;">$_ }
+</span><span style="color:#abb2bf;">}
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">ServiceName         ProcessId
+</span><span style="color:#adb7c9;">-----------         ---------
+</span><span style="color:#abb2bf;">TimeBrokerSvc            </span><span style="color:#db9d63;">1072
+</span><span style="color:#abb2bf;">WarpJITSvc
+</span><span style="color:#abb2bf;">eventlog                 </span><span style="color:#db9d63;">1072
+</span><span style="color:#abb2bf;">AudioSrv
+</span><span style="color:#abb2bf;">WinHttpAutoProxySvc      </span><span style="color:#db9d63;">1920
+</span><span style="color:#abb2bf;">LmHosts                  </span><span style="color:#db9d63;">1072
+</span><span style="color:#abb2bf;">AppIDSvc
+</span><span style="color:#abb2bf;">vmictimesync             </span><span style="color:#db9d63;">1072
+</span><span style="color:#abb2bf;">NgcCtnrSvc
+</span><span style="color:#abb2bf;">RmSvc
+</span><span style="color:#abb2bf;">wcmsvc                   </span><span style="color:#db9d63;">1960
+</span><span style="color:#abb2bf;">DHCP                     </span><span style="color:#db9d63;">1072
+</span><span style="color:#abb2bf;">AJRouter
+</span></code></pre>
+<p>Congratulations, it worked! The <strong>WinHttpAutoProxySvc</strong> service is still a member of the <strong>LocalServiceNetworkRestricted</strong>, but it is now running in its own isolated process. This is obviously much simpler, and can be done manually with regedit.exe.</p>
+<h2 id="disabling-service-host-process-pooling">Disabling Service Host Process Pooling</h2>
+<p>The <strong>SvcHostSplitThresholdInKB</strong> registry key value under <code>HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control</code> can be used to disable svchost.exe process pooling entirely. By default, the threshold is set to 3670016 (0x380000) KB, which corresponds to approximately 3.5 GB of RAM:</p>
+<p><img src="/images/posts/services-svchost-split-threshold-in-kb.png" alt="service svchost split threshold" /></p>
+<p>If your system has more memory than the configured threshold, separate svchost.exe processes will be created for all services, including those with the Win32ShareProcess service type. If you have limited RAM in a test virtual machine, the threshold will be too high. Set the <strong>SvcHostSplitThresholdInKB</strong> value to <strong>1</strong> and to disable service host process pooling:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Set-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#9acc76;">&#39;HKLM:\SYSTEM\CurrentControlSet\Control&#39; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#9acc76;">&#39;SvcHostSplitThresholdInKB&#39; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#db9d63;">1
+</span></code></pre>
+<p>Don't set <strong>SvcHostSplitThresholdInKB</strong> to <strong>0</strong> as it appears to be treated as a special value that doesn't do what we want. After rebooting, confirm that the change had the intended side effect:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS</span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-ServiceGroupMembers</span><span style="color:#abb2bf;"> LocalServiceNetworkRestricted </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">ForEach-Object </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    [</span><span style="color:#cd74e8;">PSCustomObject</span><span style="color:#abb2bf;">]</span><span style="color:#cd74e8;">@</span><span style="color:#abb2bf;">{ </span><span style="color:#eb6772;">ServiceName </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">$_; </span><span style="color:#eb6772;">ProcessId </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-ServiceProcessId </span><span style="color:#abb2bf;">$_ }
+</span><span style="color:#abb2bf;">}
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">ServiceName         ProcessId
+</span><span style="color:#adb7c9;">-----------         ---------
+</span><span style="color:#abb2bf;">TimeBrokerSvc            </span><span style="color:#db9d63;">1360
+</span><span style="color:#abb2bf;">WarpJITSvc
+</span><span style="color:#abb2bf;">eventlog                 </span><span style="color:#db9d63;">1340
+</span><span style="color:#abb2bf;">AudioSrv
+</span><span style="color:#abb2bf;">WinHttpAutoProxySvc      </span><span style="color:#db9d63;">2640
+</span><span style="color:#abb2bf;">LmHosts                  </span><span style="color:#db9d63;">1184
+</span><span style="color:#abb2bf;">AppIDSvc
+</span><span style="color:#abb2bf;">vmictimesync             </span><span style="color:#db9d63;">1720
+</span><span style="color:#abb2bf;">NgcCtnrSvc
+</span><span style="color:#abb2bf;">RmSvc
+</span><span style="color:#abb2bf;">wcmsvc                   </span><span style="color:#db9d63;">2448
+</span><span style="color:#abb2bf;">DHCP                     </span><span style="color:#db9d63;">1412
+</span><span style="color:#abb2bf;">AJRouter
+</span></code></pre>
+<p>This is yet another trick I wish I knew earlier, and is much simpler to work with!</p>
+<h2 id="closing-thoughts">Closing Thoughts</h2>
+<p>Being able to isolate a system service into its own process is incredibly useful when you're trying to understand what it actually does. Whether you go the long route by creating a new service group or take the shortcut by switching the service type to Win32OwnProcess, the end result is the same: less background noise, cleaner traces, and a much easier time in tools like Process Monitor.</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;windows-virtual-network-using-wintun-and-tun2socks&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              Windows Virtual Network using Wintun and tun2socks
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;disable-bing-search-in-start-menu-for-faster-results&#x2F;">
+              Disable Bing Search in Start Menu for Faster Results<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>

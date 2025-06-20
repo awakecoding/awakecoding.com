@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/powershell-host-ipc-for-any-dotnet-application/">
+  <link rel="alternate" href="https://awakecoding.com/posts/powershell-host-ipc-for-any-dotnet-application/" hreflang="en" />
+  
+  <meta name="description" content="Explore how PowerShell enables interprocess communication (IPC) using named pipes in .NET applications, allowing seamless remote control and API access. This hands-on guide walks through creating custom named pipes, using Enter-PSHostProcess for connection, and integrating PowerShell with your .NET projects to enhance flexibility and streamline automation workflows with real-world examples." />
+  <meta property="og:title" content="PowerShell Host IPC for any .NET application" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;powershell-host-ipc-for-any-dotnet-application&#x2F;" />
+  <meta property="og:description" content="Explore how PowerShell enables interprocess communication (IPC) using named pipes in .NET applications, allowing seamless remote control and API access. This hands-on guide walks through creating custom named pipes, using Enter-PSHostProcess for connection, and integrating PowerShell with your .NET projects to enhance flexibility and streamline automation workflows with real-world examples." />
+  <meta name="twitter:title" content="PowerShell Host IPC for any .NET application" />
+  <meta name="twitter:description" content="Explore how PowerShell enables interprocess communication (IPC) using named pipes in .NET applications, allowing seamless remote control and API access. This hands-on guide walks through creating custom named pipes, using Enter-PSHostProcess for connection, and integrating PowerShell with your .NET projects to enhance flexibility and streamline automation workflows with real-world examples." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;powershell-host-ipc-for-any-dotnet-application&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/powershell-host-ipc-for-any-dotnet-application.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/powershell-host-ipc-for-any-dotnet-application.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "PowerShell Host IPC for any .NET application",
+  "description": "Explore how PowerShell enables interprocess communication (IPC) using named pipes in .NET applications, allowing seamless remote control and API access. This hands-on guide walks through creating custom named pipes, using Enter-PSHostProcess for connection, and integrating PowerShell with your .NET projects to enhance flexibility and streamline automation workflows with real-world examples.",
+  "datePublished": "2024-09-25",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/powershell-host-ipc-for-any-dotnet-application.png",
+  "url": "https://awakecoding.com/posts/powershell-host-ipc-for-any-dotnet-application/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/powershell-host-ipc-for-any-dotnet-application/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | PowerShell Host IPC for any .NET application
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            PowerShell Host IPC for any .NET application
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2024-09-25">September 25, 2024</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>4 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>678 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/powershell/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>PowerShell</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>What if I told you that PowerShell can do interprocess communication over named pipes out of the box? Don't believe me? Try it out:</p>
+<ol>
+<li>Open a first PowerShell terminal and print its process id using <code>$PID</code> (10832 in this case)</li>
+<li>Open a second PowerShell terminal and call <code>Enter-PSHostProcess</code> with the first process id</li>
+<li>Congratulations, you are now running PowerShell inside the first process!</li>
+</ol>
+<p><img src="/images/posts/pshost-ipc-quick-start.png" alt="PowerShell Host IPC Quick Start" /></p>
+<h2 id="powershell-host-default-pipe-name">PowerShell Host Default Pipe Name</h2>
+<p>Let's start at the beginning: how does <code>Enter-PSHostProcess</code> connect to a PowerShell host process using nothing but its process id? Every PowerShell process has a default named pipe listener with a name that can be reconstructed using the process id, process start time and name, like this:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#cd74e8;">function </span><span style="color:#5cb3fa;">Get-PSHostNamedPipeName </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">param </span><span style="color:#abb2bf;">(
+</span><span style="color:#abb2bf;">        [</span><span style="color:#cd74e8;">int</span><span style="color:#abb2bf;">] </span><span style="color:#eb6772;">$ProcessId</span><span style="color:#adb7c9;">,
+</span><span style="color:#abb2bf;">        [</span><span style="color:#cd74e8;">switch</span><span style="color:#abb2bf;">] </span><span style="color:#eb6772;">$WithPrefix
+</span><span style="color:#abb2bf;">    )
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$Process </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-Process </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Id </span><span style="color:#eb6772;">$ProcessId
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">if </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$IsWindows</span><span style="color:#abb2bf;">) {
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$DefaultAppDomainName </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;DefaultAppDomain&quot;
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$PrefixPath </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;\\.\pipe\&quot;
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$StartTime </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$Process.StartTime.ToFileTime</span><span style="color:#abb2bf;">().ToString([</span><span style="color:#cd74e8;">System.Globalization.CultureInfo</span><span style="color:#abb2bf;">]::InvariantCulture)
+</span><span style="color:#abb2bf;">    } </span><span style="color:#cd74e8;">else </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$DefaultAppDomainName </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;None&quot;
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$PrefixPath </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">System.IO.Path</span><span style="color:#abb2bf;">]::GetTempPath() </span><span style="color:#adb7c9;">+ </span><span style="color:#9acc76;">&quot;CoreFxPipe_&quot;
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$StartTime </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$Process.StartTime.ToFileTime</span><span style="color:#abb2bf;">().ToString(</span><span style="color:#9acc76;">&quot;X8&quot;</span><span style="color:#abb2bf;">).Substring(</span><span style="color:#db9d63;">1</span><span style="color:#adb7c9;">, </span><span style="color:#db9d63;">8</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$PipeName </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;PSHost.{0}.{1}.{2}.{3}&quot; </span><span style="color:#adb7c9;">-f </span><span style="color:#eb6772;">$StartTime</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">$Process.Id</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">$DefaultAppDomainName</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">$Process.ProcessName
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">if </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$WithPrefix</span><span style="color:#abb2bf;">) {
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$PrefixPath </span><span style="color:#adb7c9;">+ </span><span style="color:#eb6772;">$PipeName
+</span><span style="color:#abb2bf;">    } </span><span style="color:#cd74e8;">else </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$PipeName
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">}
+</span></code></pre>
+<p>The above code snippet matches what <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.powershell.commands.pshostprocessinfo.getpipenamefilepath">PSHostProcessInfo.GetPipeNameFilePath</a> does, but I have replicated the logic here for reference.</p>
+<p>On Windows, the named pipe names look like this:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS </span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-PSHostNamedPipeName </span><span style="color:#db9d63;">10832
+</span><span style="color:#abb2bf;">PSHost.</span><span style="color:#db9d63;">133717527448573874.10832</span><span style="color:#abb2bf;">.DefaultAppDomain.pwsh
+</span><span style="color:#abb2bf;">PS </span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-PSHostNamedPipeName </span><span style="color:#db9d63;">10832 </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">WithPrefix
+</span><span style="color:#abb2bf;">\\.\pipe\PSHost.</span><span style="color:#db9d63;">133717527448573874.10832</span><span style="color:#abb2bf;">.DefaultAppDomain.pwsh
+</span><span style="color:#abb2bf;">PS </span><span style="color:#adb7c9;">&gt; </span><span style="color:#abb2bf;">(</span><span style="color:#5ebfcc;">Get-PSHostProcessInfo </span><span style="color:#db9d63;">10832</span><span style="color:#abb2bf;">).GetPipeNameFilePath()
+</span><span style="color:#abb2bf;">\\.\pipe\PSHost.</span><span style="color:#db9d63;">133717527448573874.10832</span><span style="color:#abb2bf;">.DefaultAppDomain.pwsh
+</span></code></pre>
+<p>On macOS and Linux, the named pipe names look like this instead:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS </span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-PSHostNamedPipeName </span><span style="color:#abb2bf;">$PID
+</span><span style="color:#abb2bf;">PSHost.DB0F7210.</span><span style="color:#db9d63;">746.</span><span style="color:#abb2bf;">None.pwsh
+</span><span style="color:#abb2bf;">PS </span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-PSHostNamedPipeName </span><span style="color:#abb2bf;">$PID </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">WithPrefix
+</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">tmp</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">CoreFxPipe_PSHost.DB0F7210.</span><span style="color:#db9d63;">746.</span><span style="color:#abb2bf;">None.pwsh
+</span><span style="color:#abb2bf;">PS </span><span style="color:#adb7c9;">&gt; </span><span style="color:#abb2bf;">(</span><span style="color:#5ebfcc;">Get-PSHostProcessInfo </span><span style="color:#abb2bf;">$PID).GetPipeNameFilePath()
+</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">tmp</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">CoreFxPipe_PSHost.DB0F7210.</span><span style="color:#db9d63;">746.</span><span style="color:#abb2bf;">None.pwsh
+</span></code></pre>
+<h2 id="powershell-host-custom-pipe-name">PowerShell Host Custom Pipe Name</h2>
+<p>Now that we know how to construct the PowerShell host pipe name from the process id, you can try using the <code>-CustomPipeName</code> parameter of <code>Enter-PSHostProcess</code> instead of the process id:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS </span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-PSHostNamedPipeName </span><span style="color:#db9d63;">10832
+</span><span style="color:#abb2bf;">PSHost.</span><span style="color:#db9d63;">133717527448573874.10832</span><span style="color:#abb2bf;">.DefaultAppDomain.pwsh
+</span><span style="color:#abb2bf;">PS </span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Enter-PSHostProcess </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">CustomPipeName (</span><span style="color:#5ebfcc;">Get-PSHostNamedPipeName </span><span style="color:#db9d63;">10832</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">Process</span><span style="color:#abb2bf;">:</span><span style="color:#db9d63;">10832</span><span style="color:#abb2bf;">]: PS C:\Users\awakecoding\Documents</span><span style="color:#adb7c9;">&gt;
+</span></code></pre>
+<p>This is obviously much more work because <code>Enter-PSHostProcess</code> can do the same with just the process id, so why bother? Because PowerShell can be launched with a custom pipe name following the convention of your choosing, which can make it much easier to predict without figuring out what the process id is.</p>
+<p>First, spawn a new PowerShell process with the <code>-CustomPipeName MyTest</code>:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">pwsh </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">NoLogo </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">NoExit </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">CustomPipeName MyTest
+</span></code></pre>
+<p>From another PowerShell terminal, use <code>Enter-PSHostProcess</code> with <code>-CustomPipeName MyTest</code>:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS </span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Enter-PSHostProcess </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">CustomPipeName MyTest
+</span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">Process</span><span style="color:#abb2bf;">:</span><span style="color:#db9d63;">6928</span><span style="color:#abb2bf;">]: PS C:\Users\awakecoding\Documents</span><span style="color:#adb7c9;">&gt;
+</span></code></pre>
+<p>We can see that the process id is now 6928, but all we needed to connect was the custom pipe name.</p>
+<h2 id="net-powershell-host-demo">.NET PowerShell Host Demo</h2>
+<p>PowerShell is a .NET language. Wouldn't it be awesome if you could just... expose your .NET application to be controlled remotely through PowerShell? You're in luck, because this can be done with <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/dotnet/api/system.management.automation.remoting.remotesessionnamedpipeserver.createcustomnamedpipeserver"><code>RemoteSessionNamedPipeServer.CreateCustomNamedPipeServer</code></a>!</p>
+<p>Create a new project called <code>PSHostDemo</code>, then add a reference to the PowerShell SDK:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">dotnet new console </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">n PSHostDemo
+</span><span style="color:#abb2bf;">cd PSHostDemo
+</span><span style="color:#abb2bf;">dotnet add package Microsoft.PowerShell.SDK </span><span style="color:#adb7c9;">--</span><span style="color:#abb2bf;">version </span><span style="color:#db9d63;">7.4
+</span></code></pre>
+<p>Replace the contents of Program.cs with the following:</p>
+<pre data-lang="cs" style="background-color:#2b303b;color:#6c7079;" class="language-cs "><code class="language-cs" data-lang="cs"><span style="color:#cd74e8;">using </span><span style="color:#abb2bf;">System.Diagnostics;
+</span><span style="color:#cd74e8;">using </span><span style="color:#abb2bf;">System.Management.Automation.Remoting;
+</span><span style="color:#abb2bf;">
+</span><span style="color:#cd74e8;">namespace </span><span style="color:#abb2bf;">PSHostDemo
+</span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">class </span><span style="color:#f0c678;">Program
+</span><span style="color:#adb7c9;">    {
+</span><span style="color:#adb7c9;">        </span><span style="color:#cd74e8;">static void </span><span style="color:#5cb3fa;">Main</span><span style="color:#adb7c9;">(</span><span style="color:#cd74e8;">string</span><span style="color:#adb7c9;">[] </span><span style="color:#eb6772;">args</span><span style="color:#adb7c9;">)
+</span><span style="color:#adb7c9;">        {
+</span><span style="color:#adb7c9;">            </span><span style="color:#cd74e8;">int </span><span style="color:#eb6772;">processId </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">Process</span><span style="color:#adb7c9;">.</span><span style="color:#eb6772;">GetCurrentProcess</span><span style="color:#adb7c9;">().</span><span style="color:#eb6772;">Id</span><span style="color:#adb7c9;">;
+</span><span style="color:#adb7c9;">            </span><span style="color:#cd74e8;">string </span><span style="color:#eb6772;">pipeName </span><span style="color:#adb7c9;">= (</span><span style="color:#eb6772;">args</span><span style="color:#adb7c9;">.</span><span style="color:#eb6772;">Length </span><span style="color:#adb7c9;">&gt; </span><span style="color:#db9d63;">0</span><span style="color:#adb7c9;">) ? </span><span style="color:#eb6772;">args</span><span style="color:#adb7c9;">[</span><span style="color:#db9d63;">0</span><span style="color:#adb7c9;">] : </span><span style="color:#9acc76;">&quot;PSHostDemo&quot;</span><span style="color:#adb7c9;">;
+</span><span style="color:#adb7c9;">            </span><span style="color:#eb6772;">Console</span><span style="color:#adb7c9;">.</span><span style="color:#eb6772;">WriteLine</span><span style="color:#adb7c9;">(</span><span style="color:#9acc76;">&quot;PipeName: &#39;</span><span style="color:#db9d63;">{0}</span><span style="color:#9acc76;">&#39;, ProcessId: </span><span style="color:#db9d63;">{1}</span><span style="color:#9acc76;">&quot;</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">pipeName</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">processId</span><span style="color:#adb7c9;">);
+</span><span style="color:#adb7c9;">            </span><span style="color:#eb6772;">RemoteSessionNamedPipeServer</span><span style="color:#adb7c9;">.</span><span style="color:#eb6772;">CreateCustomNamedPipeServer</span><span style="color:#adb7c9;">(</span><span style="color:#eb6772;">pipeName</span><span style="color:#adb7c9;">);
+</span><span style="color:#adb7c9;">            </span><span style="color:#eb6772;">Console</span><span style="color:#adb7c9;">.</span><span style="color:#eb6772;">ReadLine</span><span style="color:#adb7c9;">(); </span><span style="font-style:italic;color:#5f697a;">// Wait for user input to exit
+</span><span style="color:#adb7c9;">        }
+</span><span style="color:#adb7c9;">    }
+</span><span style="color:#abb2bf;">}
+</span></code></pre>
+<p>Build and run the PSHostDemo project, and leave it running:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">dotnet run
+</span><span style="color:#abb2bf;">PipeName: </span><span style="color:#9acc76;">&#39;PSHostDemo&#39;</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;"> ProcessId: </span><span style="color:#db9d63;">4503
+</span></code></pre>
+<p>From another PowerShell terminal, connect to your .NET PowerShell host process:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS </span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Enter-PSHostProcess </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">CustomPipeName PSHostDemo
+</span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">Process</span><span style="color:#abb2bf;">:</span><span style="color:#db9d63;">4503</span><span style="color:#abb2bf;">]: PS </span><span style="color:#adb7c9;">&gt;
+</span></code></pre>
+<p>You are now successfully connected to your .NET process with an interactive PowerShell terminal! This is a big deal, because since PowerShell can access .NET APIs, this gives you a quick and dirty way to call your <em>existing</em> .NET APIs without manually instrumenting your application for IPC. If you have a large GUI application, this can be used to access everything that is not exposed properly, like internal properties, or new properties currently in development that haven't been exposed through the GUI yet. Of course, you may need to write additional code to make things easier to call from PowerShell, but the effort should be minimal.</p>
+<h2 id="going-further">Going Further</h2>
+<p>Can we load .NET in a native process that isn't using a .NET language and <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/Devolutions/pwsh-host-rs">make it a PowerShell host process</a>? Yes, but it is unfortunately too much for the current blog post. If you're interested, I suggest you look into <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/jborean93/PSDetour">PSDetour</a> which does this already. Is it possible to create a PSSession object that can be passed to Invoke-Command? Yes, but unfortunately you'll need to write a bit of code to do it. There's the sample <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/PowerShell/PowerShell/blob/master/test/tools/NamedPipeConnection/src/code/NamedPipeConnection.cs">NamedPipeConnection module</a> in the PowerShell repository that does this, it's just a shame that it isn't supported out of the box. The current PSHost cmdlets are focused on interactive usage, but a desirable improvement for the future would be cmdlets that can return PSSession objects for non-interactive usage. Imagine what you could do with PowerShell scripts that can drive your existing .NET applications out-of-process, this is the only thing missing to make it happen.</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;mac-rdp-client-kerberos-and-protected-users-guide&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              Mac RDP Client: Kerberos and Protected Users Guide
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;windows-virtual-network-using-wintun-and-tun2socks&#x2F;">
+              Windows Virtual Network using Wintun and tun2socks<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>
