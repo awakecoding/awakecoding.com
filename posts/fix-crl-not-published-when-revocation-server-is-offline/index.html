@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/fix-crl-not-published-when-revocation-server-is-offline/">
+  <link rel="alternate" href="https://awakecoding.com/posts/fix-crl-not-published-when-revocation-server-is-offline/" hreflang="en" />
+  
+  <meta name="description" content="Learn why AD CS may silently skip CRL publishing when the server is turned off or running with constrained resources, leading to revocation errors like CRYPT_E_REVOCATION_OFFLINE. This post breaks down the root cause, highlights overlooked pitfalls in default AD CS configurations, and provides practical fixes using PowerShell, HTTP CRL distribution, and scheduled tasks." />
+  <meta property="og:title" content="Fix CRL Not Published When Revocation Server Is Offline" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;fix-crl-not-published-when-revocation-server-is-offline&#x2F;" />
+  <meta property="og:description" content="Learn why AD CS may silently skip CRL publishing when the server is turned off or running with constrained resources, leading to revocation errors like CRYPT_E_REVOCATION_OFFLINE. This post breaks down the root cause, highlights overlooked pitfalls in default AD CS configurations, and provides practical fixes using PowerShell, HTTP CRL distribution, and scheduled tasks." />
+  <meta name="twitter:title" content="Fix CRL Not Published When Revocation Server Is Offline" />
+  <meta name="twitter:description" content="Learn why AD CS may silently skip CRL publishing when the server is turned off or running with constrained resources, leading to revocation errors like CRYPT_E_REVOCATION_OFFLINE. This post breaks down the root cause, highlights overlooked pitfalls in default AD CS configurations, and provides practical fixes using PowerShell, HTTP CRL distribution, and scheduled tasks." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;fix-crl-not-published-when-revocation-server-is-offline&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/fix-crl-not-published-when-revocation-server-is-offline.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/fix-crl-not-published-when-revocation-server-is-offline.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Fix CRL Not Published When Revocation Server Is Offline",
+  "description": "Learn why AD CS may silently skip CRL publishing when the server is turned off or running with constrained resources, leading to revocation errors like CRYPT_E_REVOCATION_OFFLINE. This post breaks down the root cause, highlights overlooked pitfalls in default AD CS configurations, and provides practical fixes using PowerShell, HTTP CRL distribution, and scheduled tasks.",
+  "datePublished": "2025-04-19",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/fix-crl-not-published-when-revocation-server-is-offline.png",
+  "url": "https://awakecoding.com/posts/fix-crl-not-published-when-revocation-server-is-offline/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/fix-crl-not-published-when-revocation-server-is-offline/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | Fix CRL Not Published When Revocation Server Is Offline
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            Fix CRL Not Published When Revocation Server Is Offline
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2025-04-19">April 19, 2025</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>6 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>1007 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/activedirectory/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>ActiveDirectory</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/windows/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Windows</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/powershell/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>PowerShell</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <blockquote>
+<p><strong>TL;DR:</strong> If your CRL isn't getting published and clients are failing revocation checks, your CA may have missed its scheduled publish time while offline — and end up in a bad state where it won't retry. This blog post explains how to fix that and avoid other common pitfalls.</p>
+</blockquote>
+<p>Certificate revocation issues are fairly unpleasant to diagnose and fix, and in the Windows world, the investigation usually begins with a <code>certutil.exe -verify</code> command on a certificate file that outputs the following:</p>
+<blockquote>
+<p>The revocation function was unable to check revocation because the revocation server was offline. 0x80092013 (-2146885613 CRYPT_E_REVOCATION_OFFLINE)</p>
+</blockquote>
+<p>If you've done this before, you will likely try flushing the CRL cache to resynchronize it now:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">certutil.exe </span><span style="color:#9acc76;">&quot;-urlcache&quot; &quot;crl&quot; &quot;delete&quot;
+</span><span style="color:#5ebfcc;">certutil.exe </span><span style="color:#9acc76;">&quot;-setreg&quot; &quot;chain\ChainCacheResyncFiletime&quot; &quot;@now&quot;
+</span></code></pre>
+<p>But this time, it didn't work. You're in luck — here are some CRL-related pitfalls in AD CS you probably didn't know about:</p>
+<ul>
+<li>CRL renewal may break if AD CS runs on a laptop with constrained resources</li>
+<li>LDAP CRL distribution is the default, and only works for domain-joined machines</li>
+<li>HTTP delta CRL distribution is broken with the default IIS configuration</li>
+</ul>
+<h2 id="sporadic-problems">Sporadic Problems</h2>
+<p>In my particular case, I run a <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/Devolutions/devolutions-labs">self-contained Hyper-V lab on my laptop</a>. Over the years, I have hit sporadic issues where the CRL was not renewed:</p>
+<p><img src="/images/posts/crl-publish-certsrv-crl-cannot-be-retrieved.png" alt="certsrv crl cannot be retrieved" /></p>
+<p>While it appeared that the issue was caused by the VM being off during the scheduled CRL renewal time, it is more likely that the constrained resources of the laptop caused AD CS service to enter a bad state it would not automatically recover from. In certsvr.msc, when trying to access <strong>Revoked Certificates</strong> properties, I would get the following error:</p>
+<blockquote>
+<p>CRL cannot be retrieved. The parameter is incorrect. 0x80070057 (WIN32: 87 ERROR_INVALID_PARAMETER)</p>
+</blockquote>
+<p>Even if AD CS failed to renew the CRL, it should still return the expired one, so something went wrong in the AD CS service. In other conditions such as a virtual machine suspended or saved state, <a rel="noopener nofollow noreferrer" target="_blank" href="https://www.sysadmins.lv/blog-en/ms-certificate-services-virtualization-issues.aspx">restarting the service may be enough to put it back on its feet</a>.</p>
+<p>In both cases, running <code>certutil.exe -crl</code> manually and restarting the service or rebooting the virtual machine will likely resolve the CRL publishing issue, regardless of the root cause.</p>
+<h2 id="installing-active-directory-certificate-services">Installing Active Directory Certificate Services</h2>
+<p>If you've never installed Active Directory Certificate Services (AD CS) before, here's a quick way to do it for a lab environment using the <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/powershell/module/adcsdeployment/install-adcscertificationauthority">Install-AdcsCertificationAuthority</a> PowerShell cmdlet:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$ConfirmPreference </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;High&quot;
+</span><span style="color:#5ebfcc;">Install-WindowsFeature </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name AD</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Certificate </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">IncludeManagementTools
+</span><span style="color:#eb6772;">$Params </span><span style="color:#adb7c9;">= </span><span style="color:#cd74e8;">@</span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">CAType </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;EnterpriseRootCa&quot;</span><span style="color:#abb2bf;">;
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">CryptoProviderName </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;RSA#Microsoft Software Key Storage Provider&quot;</span><span style="color:#abb2bf;">;
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">HashAlgorithmName </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;SHA256&quot;</span><span style="color:#abb2bf;">;
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">KeyLength </span><span style="color:#adb7c9;">= </span><span style="color:#db9d63;">2048</span><span style="color:#abb2bf;">;
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">CACommonName </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$Env:ComputerName</span><span style="color:#abb2bf;">;
+</span><span style="color:#abb2bf;">}
+</span><span style="color:#5ebfcc;">Install-AdcsCertificationAuthority </span><span style="color:#eb6772;">@Params </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force
+</span></code></pre>
+<p>Simple, right? You now have a certificate authority that <em>should</em> work just fine with domain-joined machines. For a production environment, please read <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows-server/identity/ad-cs/pki-design-considerations">PKI design considerations using Active Directory Certificate Services</a>.</p>
+<h2 id="properly-distributing-crl-over-http">Properly Distributing CRL over HTTP</h2>
+<p>By default, AD CS only distributes the Certificate Revocation List (CRL) over LDAP, which is only usable from domain-joined machines. If you want certificate revocation checks to work from anywhere, you'll need to distribute the CRL over HTTP. Here's a PowerShell code snippet to install IIS and create a site for CRL distribution over HTTP:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Install-WindowsFeature </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#9acc76;">&#39;Web-Server&#39; </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Out-Null
+</span><span style="color:#5ebfcc;">Remove-IISSite </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#9acc76;">&quot;Default Web Site&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Confirm:</span><span style="color:#db9d63;">$false
+</span><span style="color:#eb6772;">$CertSrvPath </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;</span><span style="color:#eb6772;">${Env:SystemRoot}</span><span style="color:#9acc76;">\System32\CertSrv&quot;
+</span><span style="color:#5ebfcc;">New-IISSite </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#9acc76;">&#39;CertSrv&#39; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">PhysicalPath </span><span style="color:#eb6772;">$CertSrvPath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">BindingInformation </span><span style="color:#9acc76;">&quot;*:80:&quot;
+</span><span style="color:#adb7c9;">&amp; </span><span style="color:#9acc76;">&quot;</span><span style="color:#eb6772;">${Env:SystemRoot}</span><span style="color:#9acc76;">\system32\inetsrv\appcmd.exe&quot;</span><span style="color:#abb2bf;"> set config </span><span style="color:#adb7c9;">`
+</span><span style="color:#abb2bf;">    </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">section:system.webServer</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">security</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">requestFiltering </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">allowDoubleEscaping:True </span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">commit:apphost
+</span><span style="color:#5ebfcc;">Start-IISSite </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#9acc76;">&#39;CertSrv&#39;
+</span></code></pre>
+<p>One very frustrating problem with CRL distribution over HTTP is the encoding of the '+' character in the <em>delta</em> CRL file. By default, IIS will not handle it properly, which is why we have to enable <strong>allowDoubleEscaping</strong>. Since the <em>base</em> CRL is first used, the problem only manifests itself later when the <em>delta</em> CRL is checked, and the client fails to fetch it.</p>
+<p>Next, add the HTTP CRL distribution point, and remove the LDAP CRL distribution point:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$LdapCrlDP </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-CACrlDistributionPoint </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Where-Object </span><span style="color:#abb2bf;">{ $_</span><span style="color:#eb6772;">.Uri </span><span style="color:#adb7c9;">-Like </span><span style="color:#9acc76;">&quot;ldap://*&quot; </span><span style="color:#abb2bf;">}
+</span><span style="color:#5ebfcc;">Remove-CACrlDistributionPoint </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Uri </span><span style="color:#eb6772;">$LdapCrlDP.Uri </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force
+</span><span style="color:#eb6772;">$HttpCrlDP </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-CACrlDistributionPoint </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Where-Object </span><span style="color:#abb2bf;">{ $_</span><span style="color:#eb6772;">.Uri </span><span style="color:#adb7c9;">-Like </span><span style="color:#9acc76;">&quot;http://*/CertEnroll/*&quot; </span><span style="color:#abb2bf;">}
+</span><span style="color:#5ebfcc;">Remove-CACrlDistributionPoint </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Uri </span><span style="color:#eb6772;">$HttpCrlDP.Uri </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force
+</span><span style="color:#5ebfcc;">Add-CACrlDistributionPoint </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Uri </span><span style="color:#eb6772;">$HttpCrlDP.URI </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">AddToCertificateCdp </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">AddToFreshestCrl </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force
+</span><span style="color:#eb6772;">$LdapAIA </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-CAAuthorityInformationAccess </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Where-Object </span><span style="color:#abb2bf;">{ $_</span><span style="color:#eb6772;">.Uri </span><span style="color:#adb7c9;">-Like </span><span style="color:#9acc76;">&quot;ldap://*&quot; </span><span style="color:#abb2bf;">}
+</span><span style="color:#5ebfcc;">Remove-CAAuthorityInformationAccess </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Uri </span><span style="color:#eb6772;">$LdapAIA.Uri </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force
+</span><span style="color:#5ebfcc;">Restart-Service</span><span style="color:#abb2bf;"> CertSvc
+</span><span style="color:#5ebfcc;">Start-Sleep </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Seconds </span><span style="color:#db9d63;">10 </span><span style="font-style:italic;color:#5f697a;"># Wait for CertSvc to become ready again
+</span></code></pre>
+<p>Removing the LDAP CRL distribution point is largely a matter of preference. It only works for domain-joined machines, and there's no reason those machines can't use the HTTP-based CRL distribution point instead. The main benefit is simplicity: you only need to maintain a single HTTP CRL distribution point that should work for all machines, regardless of domain membership.</p>
+<p>After restarting <strong>CertSvc</strong> and waiting a few seconds for it to become ready again, you can now force republishing the CRLs:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$CAConfigName </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">(certutil </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">getconfig </span><span style="color:#adb7c9;">2&gt;&amp;1 | </span><span style="color:#5ebfcc;">Select-String </span><span style="color:#9acc76;">&#39;Config String:&#39;</span><span style="color:#abb2bf;">).ToString().Split(</span><span style="color:#9acc76;">&#39;&quot;&#39;</span><span style="color:#abb2bf;">)[</span><span style="color:#db9d63;">1</span><span style="color:#abb2bf;">]
+</span><span style="color:#eb6772;">$CertAdmin </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">New-Object </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">COM </span><span style="color:#9acc76;">&quot;CertificateAuthority.Admin&quot;
+</span><span style="color:#eb6772;">$CertAdmin.PublishCRLs</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$CAConfigName</span><span style="color:#adb7c9;">, </span><span style="color:#abb2bf;">$([</span><span style="color:#cd74e8;">DateTime</span><span style="color:#abb2bf;">]::UtcNow)</span><span style="color:#adb7c9;">, </span><span style="color:#db9d63;">17</span><span style="color:#abb2bf;">)
+</span><span style="color:#eb6772;">$CertSrvPath </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;</span><span style="color:#eb6772;">${Env:SystemRoot}</span><span style="color:#9acc76;">\System32\CertSrv&quot;
+</span><span style="color:#5ebfcc;">Get-ChildItem </span><span style="color:#9acc76;">&quot;</span><span style="color:#eb6772;">$CertSrvPath</span><span style="color:#9acc76;">\CertEnroll\*.crl&quot; </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">ForEach-Object </span><span style="color:#abb2bf;">{ </span><span style="color:#5ebfcc;">certutil.exe </span><span style="color:#adb7c9;">-f -</span><span style="color:#abb2bf;">dspublish $_</span><span style="color:#eb6772;">.FullName </span><span style="color:#abb2bf;">}
+</span></code></pre>
+<p>If you try to run this without waiting after the service restarts, you may occasionally hit RPC errors. Waiting for the service to restart isn't enough for it to be fully ready — unfortunately, there's no obvious way to check for readiness.</p>
+<h2 id="fixing-crl-publishing-after-it-breaks">Fixing CRL Publishing After It Breaks</h2>
+<p>Let's manually inspect the CRL using the <code>certutil.exe -URL</code> command and the HTTP URL for the CRL:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">certutil.exe </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">URL </span><span style="color:#9acc76;">&quot;http://IT-HELP-DC.ad.it-help.ninja/CertEnroll/IT-HELP-DC.crl&quot;
+</span></code></pre>
+<p>Click <strong>Retrieve</strong>, then double-click the Base CRL or Delta CRL from the list to inspect its properties:</p>
+<p><img src="/images/posts/crl-publish-certutil-next-crl-publish.png" alt="CRL next publish date" /></p>
+<p>In that screenshot, we can see that the next CRL will be published on April 26th, 2025, at 10:29AM. Here's what took me years to figure out: <strong>if the machine running AD CS is constrained on resources and is turned off during the next scheduled CRL publishing time, it may enter a bad state where it won't renew the CRL</strong>.</p>
+<p>To fix it, create a scheduled task to run <code>certutil.exe -crl</code> on system startup, forcing AD CS to renew and publish CRLs:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$TaskAction </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">New-ScheduledTaskAction </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Execute </span><span style="color:#9acc76;">&quot;certutil.exe&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Argument </span><span style="color:#9acc76;">&quot;-crl&quot;
+</span><span style="color:#eb6772;">$TaskTrigger </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">New-ScheduledTaskTrigger </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">AtStartup
+</span><span style="color:#eb6772;">$Params </span><span style="color:#adb7c9;">= </span><span style="color:#cd74e8;">@</span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">Action      </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$TaskAction
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">Trigger     </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$TaskTrigger
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">User        </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;NT AUTHORITY\SYSTEM&quot;
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">TaskName    </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;Force AD CS CRL renewal&quot;
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">Description </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;Force AD CS CRL renewal&quot;
+</span><span style="color:#abb2bf;">}
+</span><span style="color:#5ebfcc;">Register-ScheduledTask </span><span style="color:#eb6772;">@Params
+</span></code></pre>
+<p>In a production environment, you may want to use a more intelligent trick to avoid a renewal when it is not needed. However, for a lab environment, this will make the sporadic CRL renewal failures causing revocation check errors go away.</p>
+<h2 id="closing-thoughts">Closing thoughts</h2>
+<p>If you didn't find the answer you were looking for, I suggest reading <a rel="noopener nofollow noreferrer" target="_blank" href="https://stealthpuppy.com/resolving-issues-starting-ca-offline-crl/">Resolving Issues Starting a CA due to an Offline CRL</a> by Aaron Parker, and bookmarking it. Active Directory Certificate Services is a product frozen in time, but it is the only one deeply integrated in Active Directory. One may wonder why it has so many pitfalls that didn't get fixed over the years despite being so widely used. Special thanks to Vadims Podāns from <a rel="noopener nofollow noreferrer" target="_blank" href="https://www.pkisolutions.com/">PKI Solutions</a> for pointing out the flaws in my original blog post.</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;disable-bing-search-in-start-menu-for-faster-results&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              Disable Bing Search in Start Menu for Faster Results
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;rd-gateway-without-kdc-proxy-causes-ntlm-downgrade&#x2F;">
+              RD Gateway Without KDC Proxy Causes NTLM Downgrade<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>

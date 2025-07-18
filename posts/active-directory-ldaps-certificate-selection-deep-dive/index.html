@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/active-directory-ldaps-certificate-selection-deep-dive/">
+  <link rel="alternate" href="https://awakecoding.com/posts/active-directory-ldaps-certificate-selection-deep-dive/" hreflang="en" />
+  
+  <meta name="description" content="A deep dive into Active Directory LDAPS certificate selection, detailing the technical intricacies of ensuring secure communications through TLS. This guide covers the validation and selection process, including PowerShell scripts for certificate management, aiming to clarify and resolve common issues with LDAPS implementation." />
+  <meta property="og:title" content="Active Directory LDAPS certificate selection deep dive" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;active-directory-ldaps-certificate-selection-deep-dive&#x2F;" />
+  <meta property="og:description" content="A deep dive into Active Directory LDAPS certificate selection, detailing the technical intricacies of ensuring secure communications through TLS. This guide covers the validation and selection process, including PowerShell scripts for certificate management, aiming to clarify and resolve common issues with LDAPS implementation." />
+  <meta name="twitter:title" content="Active Directory LDAPS certificate selection deep dive" />
+  <meta name="twitter:description" content="A deep dive into Active Directory LDAPS certificate selection, detailing the technical intricacies of ensuring secure communications through TLS. This guide covers the validation and selection process, including PowerShell scripts for certificate management, aiming to clarify and resolve common issues with LDAPS implementation." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;active-directory-ldaps-certificate-selection-deep-dive&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/active-directory-ldaps-certificate-selection-deep-dive.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/active-directory-ldaps-certificate-selection-deep-dive.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Active Directory LDAPS certificate selection deep dive",
+  "description": "A deep dive into Active Directory LDAPS certificate selection, detailing the technical intricacies of ensuring secure communications through TLS. This guide covers the validation and selection process, including PowerShell scripts for certificate management, aiming to clarify and resolve common issues with LDAPS implementation.",
+  "datePublished": "2023-08-12",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/active-directory-ldaps-certificate-selection-deep-dive.png",
+  "url": "https://awakecoding.com/posts/active-directory-ldaps-certificate-selection-deep-dive/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/active-directory-ldaps-certificate-selection-deep-dive/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | Active Directory LDAPS certificate selection deep dive
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            Active Directory LDAPS certificate selection deep dive
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2023-08-12">August 12, 2023</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>7 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>1329 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/kerberos/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Kerberos</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/activedirectory/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>ActiveDirectory</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/windows/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Windows</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>The LDAPS certificate is used by the LDAP server to secure communications using TLS over TCP/636, as an alternative to LDAP over TCP/389 that uses SPNEGO-based security. Enabling and enforcing LDAPS is a common security hardening task in Windows Active Directory environments today. Using <a rel="noopener nofollow noreferrer" target="_blank" href="https://blog.devolutions.net/2021/03/how-to-configure-secure-ldap-ldaps-in-active-directory-with-lets-encrypt/">Let's Encrypt certificates is popular for LDAPS</a> because it is much simpler than using <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows-server/identity/ad-cs/">Active Directory Certificate Services (AD CS)</a> if you don't already have it deployed.</p>
+<p>In theory, it all looks great, until you realize that not only you can't explicitly select the LDAPS certificate to use, but there are no logs to enable, and no way to diagnose the problem. The next best thing is a detailed explanation of the internal process used to validate and select the final LDAPS certificate which is used on TCP port 636, so you can go over the list until you find what's wrong.</p>
+<h2 id="analysis-technique">Analysis Technique</h2>
+<p>For such a detailed analysis, I have used <a rel="noopener nofollow noreferrer" target="_blank" href="https://blog.devolutions.net/2021/12/finding-secret-rdp-registry-keys-using-ida-free/">IDA</a> and looked at the specific private functions located in ntdsai.dll:</p>
+<ul>
+<li>InitializeSSL</li>
+<li>SearchForCertificate</li>
+<li>ValidateLdapCertificate</li>
+<li>RenewServerAuthCertificate</li>
+</ul>
+<p>I then proceeded to write a lot of PowerShell code snippets matching what I could observe to confirm the LDAPS certificate selection and loading behavior.</p>
+<h2 id="certificate-subject-name">Certificate Subject Name</h2>
+<p>The certificate needs to match the FQDN of the domain controller, with trailing '.' removed, if present:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">System.Net.Dns</span><span style="color:#abb2bf;">]::GetHostEntry(</span><span style="color:#9acc76;">&quot;localhost&quot;</span><span style="color:#abb2bf;">).HostName.TrimEnd(</span><span style="color:#9acc76;">&#39;.&#39;</span><span style="color:#abb2bf;">)
+</span></code></pre>
+<p>Under the hood, a private GetLocalMachineName function calls <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-getcomputernameexw">GetComputerNameEx</a> with ComputerNameDnsFullyQualified (3) as <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows/win32/api/sysinfoapi/ne-sysinfoapi-computer_name_format">computer name format</a>. Here's a longer code snippet that uses the same APIs as the original GetLocalMachineName function:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Add-Type </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">TypeDefinition </span><span style="color:#9acc76;">@&quot;
+</span><span style="color:#9acc76;">using System;
+</span><span style="color:#9acc76;">using System.Runtime.InteropServices;
+</span><span style="color:#9acc76;">using System.Text;
+</span><span style="color:#9acc76;">
+</span><span style="color:#9acc76;">public class ntdsai
+</span><span style="color:#9acc76;">{
+</span><span style="color:#9acc76;">    [DllImport(&quot;kernel32.dll&quot;, CharSet = CharSet.Auto)]
+</span><span style="color:#9acc76;">    static extern bool GetComputerNameEx(int NameType, StringBuilder lpBuffer, ref uint lpnSize);
+</span><span style="color:#9acc76;">
+</span><span style="color:#9acc76;">    public static string GetLocalMachineName()
+</span><span style="color:#9acc76;">    {
+</span><span style="color:#9acc76;">        const int ComputerNameDnsFullyQualified = 3;
+</span><span style="color:#9acc76;">        StringBuilder buffer = new StringBuilder(256);
+</span><span style="color:#9acc76;">        uint size = (uint)buffer.Capacity;
+</span><span style="color:#9acc76;">        GetComputerNameEx(ComputerNameDnsFullyQualified, buffer, ref size);
+</span><span style="color:#9acc76;">        return buffer.ToString().TrimEnd(&#39;.&#39;);
+</span><span style="color:#9acc76;">    }
+</span><span style="color:#9acc76;">}
+</span><span style="color:#9acc76;">&quot;@
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">ntdsai</span><span style="color:#abb2bf;">]::GetLocalMachineName()
+</span></code></pre>
+<p>If the subject name on the certificate you are trying to use for LDAPS does not match the machine name as returned by GetLocalMachineName, it will be excluded from the selection.</p>
+<h2 id="certificate-chain-validation">Certificate Chain Validation</h2>
+<p>In order to be selected, the certificate is validated against its certificate chain, checking for the server authentication key usage (OID 1.3.6.1.5.5.7.3.1). Under the hood, <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-certverifycertificatechainpolicy">CertVerifyCertificateChainPolicy</a> is called with CERT_CHAIN_POLICY_SSL (4) with extra policy parameters to match the leaf certificate against the expected subject name mentioned previously.</p>
+<p>This is a fairly standard certificate validation process that looks like what would be done by any application, so the common issues with certificate validation apply. Since browsers perform certificate validation quite differently from desktop applications using the Windows APIs, we'll use the following code snippet from <a rel="noopener nofollow noreferrer" target="_blank" href="https://www.bloggingforlogging.com/">Jordan Borean</a> to fetch the current certificate used by the LDAPS server, and then validate it using <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/certutil#-verify">certutil -verify</a>:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#cd74e8;">function </span><span style="color:#5cb3fa;">Get-CertificateFromTlsHandshake </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">param</span><span style="color:#abb2bf;">(
+</span><span style="color:#abb2bf;">        [</span><span style="color:#5ebfcc;">Parameter</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">Mandatory</span><span style="color:#adb7c9;">=</span><span style="color:#db9d63;">$true</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">Position</span><span style="color:#adb7c9;">=</span><span style="color:#db9d63;">0</span><span style="color:#abb2bf;">)]
+</span><span style="color:#abb2bf;">        [</span><span style="color:#cd74e8;">string</span><span style="color:#abb2bf;">] </span><span style="color:#eb6772;">$HostName</span><span style="color:#adb7c9;">,
+</span><span style="color:#abb2bf;">        [</span><span style="color:#cd74e8;">int</span><span style="color:#abb2bf;">] </span><span style="color:#eb6772;">$Port </span><span style="color:#adb7c9;">= </span><span style="color:#db9d63;">443</span><span style="color:#adb7c9;">,
+</span><span style="color:#abb2bf;">        [</span><span style="color:#cd74e8;">string</span><span style="color:#abb2bf;">] </span><span style="color:#eb6772;">$Destination
+</span><span style="color:#abb2bf;">    )
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$tcp </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">New-Object</span><span style="color:#abb2bf;"> System.Net.Sockets.TcpClient(</span><span style="color:#eb6772;">$HostName</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">$Port</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$state </span><span style="color:#adb7c9;">= </span><span style="color:#cd74e8;">@</span><span style="color:#abb2bf;">{}
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$ssl </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">New-Object</span><span style="color:#abb2bf;"> System.Net.Security.SslStream(</span><span style="color:#eb6772;">$tcp.GetStream</span><span style="color:#abb2bf;">()</span><span style="color:#adb7c9;">, </span><span style="color:#db9d63;">$false</span><span style="color:#adb7c9;">, </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">        </span><span style="color:#cd74e8;">param</span><span style="color:#abb2bf;">($Sender</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">$Certificate</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">$Chain</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">$SslPolicyErrors</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$state.cert </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">New-Object</span><span style="color:#abb2bf;"> System.Security.Cryptography.X509Certificates.X509Certificate2(</span><span style="color:#eb6772;">$Certificate</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">        </span><span style="color:#cd74e8;">return </span><span style="color:#db9d63;">$true
+</span><span style="color:#abb2bf;">    })
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$ssl.AuthenticateAsClient</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$HostName</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$ssl.Dispose</span><span style="color:#abb2bf;">()
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$tcp.Dispose</span><span style="color:#abb2bf;">()
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">if </span><span style="color:#abb2bf;">(</span><span style="color:#adb7c9;">-Not </span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">string</span><span style="color:#abb2bf;">]::IsNullOrEmpty(</span><span style="color:#eb6772;">$Destination</span><span style="color:#abb2bf;">)) {
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$AsByteStream </span><span style="color:#adb7c9;">= </span><span style="color:#cd74e8;">if </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$PSEdition </span><span style="color:#adb7c9;">-eq </span><span style="color:#9acc76;">&#39;Core&#39;</span><span style="color:#abb2bf;">) { </span><span style="color:#cd74e8;">@</span><span style="color:#abb2bf;">{</span><span style="color:#eb6772;">AsByteStream </span><span style="color:#adb7c9;">= </span><span style="color:#db9d63;">$true</span><span style="color:#abb2bf;">} } </span><span style="color:#cd74e8;">else </span><span style="color:#abb2bf;">{ </span><span style="color:#cd74e8;">@</span><span style="color:#abb2bf;">{</span><span style="color:#9acc76;">&#39;Encoding&#39; </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&#39;Byte&#39;</span><span style="color:#abb2bf;">} }
+</span><span style="color:#abb2bf;">        </span><span style="color:#5ebfcc;">Set-Content </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$Destination </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#eb6772;">$cert.GetRawCertData</span><span style="color:#abb2bf;">() </span><span style="color:#eb6772;">@AsByteStream
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">return </span><span style="color:#eb6772;">$state.cert
+</span><span style="color:#abb2bf;">}
+</span></code></pre>
+<p>Let's start by downloading the <a rel="noopener nofollow noreferrer" target="_blank" href="https://letsencrypt.org">letsencrypt.org</a> certificate to validate it manually:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$cert </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-CertificateFromTlsHandshake </span><span style="color:#9acc76;">&#39;letsencrypt.org&#39; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Port </span><span style="color:#db9d63;">443 </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Destination </span><span style="color:#9acc76;">&quot;.\letsencrypt.org.cer&quot;
+</span><span style="color:#5ebfcc;">certutil.exe </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">verify </span><span style="color:#9acc76;">&quot;.\letsencrypt.org.cer&quot;
+</span></code></pre>
+<p>We can now do the same with our LDAP server, using the host name of the domain controller and TCP port 636 used for LDAPS. Alternatively, manually export the certificate that isn't getting selected to a file and call certutil.exe -verify on it in a similar way:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$LdapServer </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">System.Net.Dns</span><span style="color:#abb2bf;">]::GetHostEntry(</span><span style="color:#9acc76;">&quot;localhost&quot;</span><span style="color:#abb2bf;">).HostName.TrimEnd(</span><span style="color:#9acc76;">&#39;.&#39;</span><span style="color:#abb2bf;">)
+</span><span style="color:#eb6772;">$cert </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-CertificateFromTlsHandshake </span><span style="color:#eb6772;">$LdapServer </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Port </span><span style="color:#db9d63;">636 </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Destination </span><span style="color:#9acc76;">&quot;.\ldap-server.cer&quot;
+</span><span style="color:#5ebfcc;">certutil.exe </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">verify </span><span style="color:#9acc76;">&quot;.\ldap-server.cer&quot;
+</span></code></pre>
+<p>Are you seeing an error related to a missing certificate in the chain, or a revocation checking error? You need to fix this for your certificate to be selected for LDAPS, otherwise it'll be skipped.</p>
+<p>If you're using a certificate authority like <a rel="noopener nofollow noreferrer" target="_blank" href="https://letsencrypt.org/">Let's Encrypt</a> with a PowerShell module like <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/rmbolger/Posh-ACME">Posh-ACME</a>, make sure that you import the leaf certificate <em>with its complete chain</em> (use the fullchain.pfx file) to ensure there is a copy of the issuer CA in the local certificate store.</p>
+<p>If the issue is with certificate revocation checking, make sure that you're not blocking CRL or OCSP URLs contained in the certificate chain. You can also read this <a rel="noopener nofollow noreferrer" target="_blank" href="https://stealthpuppy.com/resolving-issues-starting-ca-offline-crl/">excellent blog from Aaron Parker</a> for advanced debugging of certificate revocation issues.</p>
+<h2 id="certificate-store-search-order">Certificate Store Search Order</h2>
+<p>Here's where it gets tricky: the certificates are first searched in the NTDS service personal certificate store, and if no suitable certificate is found, then certificates are searched in the local machine personal certificate store (cert:\LocalMachine\My). In each store, search is performed by enumerating the certificates, checking that they validate properly according the rules described previously, <strong>selecting the certificate with the most distant expiration date in the future</strong>.</p>
+<p>That last point is critical, since there is a very high chance that the local machine personal certificate store contains a server certificate suitable for LDAPS that isn't the one you want to use, and with an expiration date much further in the future (1 year) than the one you might be trying to use (3 months with letsencrypt). The best way to accurately configure the certificate that you want for LDAPS is to use the NTDS personal certificate store, which is not visible in the GUI (<a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/dotnet/framework/wcf/feature-details/how-to-view-certificates-with-the-mmc-snap-in">certlm.msc</a>) or using the <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/about/about_certificate_provider">PowerShell cert:\ provider</a>.</p>
+<h2 id="certificate-importing">Certificate Importing</h2>
+<p>To open the "NTDS\MY" certificate store, we'll use the <a rel="noopener nofollow noreferrer" target="_blank" href="https://gist.github.com/jborean93/9758823e0546abf561b07d380bc60c53"><code>Get-ServiceCertStore</code> cmdlet from Jordan Borean</a> for which I have included an abridged copy inline here:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Import-Module </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name Microsoft.PowerShell.Security
+</span><span style="color:#abb2bf;">
+</span><span style="color:#cd74e8;">function </span><span style="color:#5cb3fa;">Get-ServiceCertStore </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    [</span><span style="color:#5ebfcc;">CmdletBinding</span><span style="color:#abb2bf;">()]
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">param </span><span style="color:#abb2bf;">(
+</span><span style="color:#abb2bf;">        [</span><span style="color:#5ebfcc;">Parameter</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">Mandatory</span><span style="color:#adb7c9;">=</span><span style="color:#db9d63;">$true</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">ValueFromPipeline</span><span style="color:#adb7c9;">=</span><span style="color:#db9d63;">$true</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">ValueFromPipelineByPropertyName</span><span style="color:#adb7c9;">=</span><span style="color:#db9d63;">$true</span><span style="color:#abb2bf;">)]
+</span><span style="color:#abb2bf;">        [</span><span style="color:#cd74e8;">string</span><span style="color:#abb2bf;">] </span><span style="color:#eb6772;">$ServiceName</span><span style="color:#adb7c9;">,
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">        [</span><span style="color:#5ebfcc;">Parameter</span><span style="color:#abb2bf;">()]
+</span><span style="color:#abb2bf;">        [</span><span style="color:#cd74e8;">string</span><span style="color:#abb2bf;">] </span><span style="color:#eb6772;">$Name </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&#39;My&#39;</span><span style="color:#adb7c9;">,
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">        [</span><span style="color:#cd74e8;">Security.Cryptography.X509Certificates.OpenFlags</span><span style="color:#abb2bf;">]
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$OpenFlags </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">Security.Cryptography.X509Certificates.OpenFlags</span><span style="color:#abb2bf;">]::MaxAllowed
+</span><span style="color:#abb2bf;">    )
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">begin </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$typeParams </span><span style="color:#adb7c9;">= </span><span style="color:#cd74e8;">@</span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">            </span><span style="color:#eb6772;">TypeDefinition </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">@&#39;
+</span><span style="color:#9acc76;">using Microsoft.Win32.SafeHandles;
+</span><span style="color:#9acc76;">using System;
+</span><span style="color:#9acc76;">using System.Runtime.InteropServices;
+</span><span style="color:#9acc76;">
+</span><span style="color:#9acc76;">namespace X509
+</span><span style="color:#9acc76;">{
+</span><span style="color:#9acc76;">    public class NativeMethods
+</span><span style="color:#9acc76;">    {
+</span><span style="color:#9acc76;">        [DllImport(&quot;Crypt32.dll&quot;)]
+</span><span style="color:#9acc76;">        public static extern bool CertCloseStore(
+</span><span style="color:#9acc76;">            IntPtr hCertStore,
+</span><span style="color:#9acc76;">            uint dwFlags);
+</span><span style="color:#9acc76;">
+</span><span style="color:#9acc76;">        [DllImport(&quot;Crypt32.dll&quot;, CharSet=CharSet.Unicode, SetLastError=true)]
+</span><span style="color:#9acc76;">        public static extern SafeX509Store CertOpenStore(
+</span><span style="color:#9acc76;">            IntPtr lpszStoreProvider,
+</span><span style="color:#9acc76;">            uint dwEncodingType,
+</span><span style="color:#9acc76;">            IntPtr hCryptProv,
+</span><span style="color:#9acc76;">            uint dwFlags,
+</span><span style="color:#9acc76;">            string pvPara);
+</span><span style="color:#9acc76;">    }
+</span><span style="color:#9acc76;">
+</span><span style="color:#9acc76;">    public class SafeX509Store : SafeHandleZeroOrMinusOneIsInvalid
+</span><span style="color:#9acc76;">    {
+</span><span style="color:#9acc76;">        public SafeX509Store() : base(true) { }
+</span><span style="color:#9acc76;">
+</span><span style="color:#9acc76;">        protected override bool ReleaseHandle()
+</span><span style="color:#9acc76;">        {
+</span><span style="color:#9acc76;">            return NativeMethods.CertCloseStore(handle, 0);
+</span><span style="color:#9acc76;">        }
+</span><span style="color:#9acc76;">    }
+</span><span style="color:#9acc76;">}
+</span><span style="color:#9acc76;">&#39;@
+</span><span style="color:#abb2bf;">        }
+</span><span style="color:#abb2bf;">        </span><span style="color:#5ebfcc;">Add-Type </span><span style="color:#eb6772;">@typeParams
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$provider </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">IntPtr</span><span style="color:#abb2bf;">]::new(</span><span style="color:#db9d63;">10</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$flags </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">(</span><span style="color:#db9d63;">0x00050000 </span><span style="color:#adb7c9;">-bor </span><span style="color:#db9d63;">0x00000004</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$flagType </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">Security.Cryptography.X509Certificates.OpenFlags</span><span style="color:#abb2bf;">]
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$openMode </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">int</span><span style="color:#abb2bf;">]</span><span style="color:#eb6772;">$OpenFlags </span><span style="color:#adb7c9;">-band </span><span style="color:#db9d63;">3
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$accessFlags </span><span style="color:#adb7c9;">= </span><span style="color:#cd74e8;">switch </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$openMode</span><span style="color:#abb2bf;">) {
+</span><span style="color:#abb2bf;">            </span><span style="color:#db9d63;">0 </span><span style="color:#abb2bf;">{ </span><span style="color:#db9d63;">0x00008000 </span><span style="color:#abb2bf;">}
+</span><span style="color:#abb2bf;">            </span><span style="color:#db9d63;">2 </span><span style="color:#abb2bf;">{ </span><span style="color:#db9d63;">0x00001000 </span><span style="color:#abb2bf;">}
+</span><span style="color:#abb2bf;">            </span><span style="color:#cd74e8;">default </span><span style="color:#abb2bf;">{ </span><span style="color:#db9d63;">0 </span><span style="color:#abb2bf;">}
+</span><span style="color:#abb2bf;">        }
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$flags </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$flags </span><span style="color:#adb7c9;">-bor </span><span style="color:#eb6772;">$accessFlags
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">        </span><span style="color:#cd74e8;">if </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$OpenFlags.HasFlag</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$flagType</span><span style="color:#abb2bf;">::OpenExistingOnly)) {
+</span><span style="color:#abb2bf;">            </span><span style="color:#eb6772;">$flags </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$flags </span><span style="color:#adb7c9;">-bor </span><span style="color:#db9d63;">0x00004000
+</span><span style="color:#abb2bf;">        }
+</span><span style="color:#abb2bf;">        </span><span style="color:#cd74e8;">if </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$OpenFlags.HasFlag</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$flagType</span><span style="color:#abb2bf;">::IncludeArchived)) {
+</span><span style="color:#abb2bf;">            </span><span style="color:#eb6772;">$flags </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$flags </span><span style="color:#adb7c9;">-bor </span><span style="color:#db9d63;">0x00000200
+</span><span style="color:#abb2bf;">        }
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">process </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$handle </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">X509.NativeMethods</span><span style="color:#abb2bf;">]::CertOpenStore(
+</span><span style="color:#abb2bf;">            </span><span style="color:#eb6772;">$provider</span><span style="color:#adb7c9;">, </span><span style="color:#db9d63;">0</span><span style="color:#adb7c9;">, </span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">IntPtr</span><span style="color:#abb2bf;">]::Zero</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">$flags</span><span style="color:#adb7c9;">, </span><span style="color:#9acc76;">&quot;</span><span style="color:#eb6772;">$ServiceName</span><span style="color:#9acc76;">\</span><span style="color:#eb6772;">$Name</span><span style="color:#9acc76;">&quot;
+</span><span style="color:#abb2bf;">        ); </span><span style="color:#eb6772;">$err </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">Runtime.InteropServices.Marshal</span><span style="color:#abb2bf;">]::GetLastWin32Error()
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">        </span><span style="color:#cd74e8;">if </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$handle.IsInvalid</span><span style="color:#abb2bf;">) {
+</span><span style="color:#abb2bf;">            </span><span style="color:#eb6772;">$exp </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">ComponentModel.Win32Exception</span><span style="color:#abb2bf;">]</span><span style="color:#eb6772;">$err
+</span><span style="color:#abb2bf;">            </span><span style="color:#5ebfcc;">Write-Error </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Message </span><span style="color:#9acc76;">&quot;Failed to open &#39;</span><span style="color:#eb6772;">$ServiceName</span><span style="color:#9acc76;">\</span><span style="color:#eb6772;">$Name</span><span style="color:#9acc76;">&#39;: $(</span><span style="color:#eb6772;">$exp.Message</span><span style="color:#9acc76;">)&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Exception </span><span style="color:#eb6772;">$exp
+</span><span style="color:#abb2bf;">            </span><span style="color:#cd74e8;">return
+</span><span style="color:#abb2bf;">        }
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">        </span><span style="color:#cd74e8;">try </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">            [</span><span style="color:#cd74e8;">Security.Cryptography.X509Certificates.X509Store</span><span style="color:#abb2bf;">]::new(</span><span style="color:#eb6772;">$handle.DangerousGetHandle</span><span style="color:#abb2bf;">())
+</span><span style="color:#abb2bf;">        }
+</span><span style="color:#abb2bf;">        </span><span style="color:#cd74e8;">finally </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">            </span><span style="color:#eb6772;">$handle.Dispose</span><span style="color:#abb2bf;">()
+</span><span style="color:#abb2bf;">        }
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">}
+</span></code></pre>
+<p>From an elevated PowerShell terminal, load <code>Get-ServiceCertStore</code>, then import your LDAP server certificate with the right key storage flags into the "NTDS\MY" certificate store like this:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$CertificateFile </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Resolve-Path </span><span style="color:#9acc76;">&#39;.\ldap-server.pfx&#39;
+</span><span style="color:#eb6772;">$CertificatePassword </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;cert123!&quot;
+</span><span style="color:#eb6772;">$KeyStorageFlags </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">System.Security.Cryptography.X509Certificates.X509KeyStorageFlags</span><span style="color:#abb2bf;">]</span><span style="color:#9acc76;">&#39;MachineKeySet, PersistKeySet&#39;
+</span><span style="color:#eb6772;">$Certificate </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">System.Security.Cryptography.X509Certificates.X509Certificate2</span><span style="color:#abb2bf;">]::new(</span><span style="color:#eb6772;">$CertificateFile</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">$CertificatePassword</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">$KeyStorageFlags</span><span style="color:#abb2bf;">)
+</span><span style="color:#eb6772;">$CertificateThumbprint </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$Certificate.Thumbprint
+</span><span style="color:#abb2bf;">
+</span><span style="color:#eb6772;">$CertificateStore </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-ServiceCertStore </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ServiceName </span><span style="color:#9acc76;">&quot;NTDS&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#9acc76;">&quot;My&quot;
+</span><span style="color:#eb6772;">$CertificateStore.Add</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$Certificate</span><span style="color:#abb2bf;">)
+</span></code></pre>
+<p>Please note that the key storage flags used here are very important: the NTDS service needs to be able to read the private key, or will will skip the corresponding certificate. Importing the private key with MachineKeySet + PersistKeySet ensures it will work.</p>
+<p>You can also list certificates in order of selection preference contained within the store, and testing for validity. If the first entry in the list isn't the one you expect, remove other certificates from the store. If Test-Certificate fails on the certificate you wanted, you can now look into fixing the validation issue.</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$CertificateStore </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-ServiceCertStore </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ServiceName </span><span style="color:#9acc76;">&quot;NTDS&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#9acc76;">&quot;My&quot;
+</span><span style="color:#eb6772;">$LdapServer </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">System.Net.Dns</span><span style="color:#abb2bf;">]::GetHostEntry(</span><span style="color:#9acc76;">&quot;localhost&quot;</span><span style="color:#abb2bf;">).HostName.TrimEnd(</span><span style="color:#9acc76;">&#39;.&#39;</span><span style="color:#abb2bf;">)
+</span><span style="color:#eb6772;">$CertificateStore.Certificates </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Sort-Object</span><span style="color:#abb2bf;"> NotAfter </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Descending </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Where-Object </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    $_</span><span style="color:#eb6772;">.MatchesHostName</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$LdapServer</span><span style="color:#abb2bf;">) </span><span style="color:#adb7c9;">-and
+</span><span style="color:#abb2bf;">    $_</span><span style="color:#eb6772;">.EnhancedKeyUsageList.ObjectId </span><span style="color:#adb7c9;">-contains </span><span style="color:#9acc76;">&quot;1.3.6.1.5.5.7.3.1&quot; </span><span style="color:#abb2bf;">} </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Where-Object </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Test-Certificate </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Cert $_ </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Policy SSL </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">EKU </span><span style="color:#cd74e8;">@</span><span style="color:#abb2bf;">(</span><span style="color:#9acc76;">&quot;1.3.6.1.5.5.7.3.1&quot;</span><span style="color:#abb2bf;">) </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">DNSName </span><span style="color:#eb6772;">$LdapServer </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ErrorAction </span><span style="color:#cd74e8;">Continue
+</span><span style="color:#abb2bf;">}
+</span></code></pre>
+<p>I have simulated a problem by importing a certificate with an incomplete CA chain (I have the root CA, but not the issuer CA), causing the following error:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">WARNING: Chain status:
+</span><span style="color:#abb2bf;">    CERT_TRUST_REVOCATION_STATUS_UNKNOWN
+</span><span style="color:#abb2bf;">    CERT_TRUST_IS_OFFLINE_REVOCATION
+</span><span style="color:#abb2bf;">    CERT_TRUST_IS_PARTIAL_CHAIN
+</span><span style="color:#abb2bf;">Missing issuer: CN</span><span style="color:#adb7c9;">=</span><span style="color:#abb2bf;">IT Help Ninja Issuing CA
+</span></code></pre>
+<p>After installing the issuer CA in the system <strong>Intermediate Certification Authorities</strong> and ensuring my root CA is in the system <strong>Trusted Root Certification Authorities</strong>, I am now down to just one error:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">WARNING: Chain status:
+</span><span style="color:#abb2bf;">    CERT_TRUST_REVOCATION_STATUS_UNKNOWN
+</span></code></pre>
+<p>Here's the thing: I have created a <a rel="noopener nofollow noreferrer" target="_blank" href="https://gist.github.com/awakecoding/5d5589af207f7f2b181aae9ef8681edb">relatively simple CA chain with a script</a>, and it does not contain usable CRL or OCSP URLs for revocation checking, because it takes more work. The certificate <em>will</em> be loaded despite the unknown revocation status, but that's only pushing the problem down to the clients that probably won't be happy about it. In other words: you will have to do the extra work of fixing revocation checking for your clients, or LDAPS will still likely fail.</p>
+<p>Normally, the new certificate should be reloaded automatically, but if you've used an alternate trick involving copying registry keys to <code>'HKLM:/Software/Microsoft/Cryptography/Services/NTDS/SystemCertificates/My/Certificates'</code>, you will need to trigger the hot reload manually through LDAP:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$dse </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">adsi</span><span style="color:#abb2bf;">]</span><span style="color:#9acc76;">&#39;LDAP://localhost/rootDSE&#39;
+</span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">void</span><span style="color:#abb2bf;">]</span><span style="color:#eb6772;">$dse.Properties</span><span style="color:#abb2bf;">[</span><span style="color:#9acc76;">&#39;renewServerCertificate&#39;</span><span style="color:#abb2bf;">].Add(</span><span style="color:#db9d63;">1</span><span style="color:#abb2bf;">)
+</span><span style="color:#eb6772;">$dse.CommitChanges</span><span style="color:#abb2bf;">()
+</span></code></pre>
+<p>Please note that while dealing with the NTDS certificate store through its registry path is not recommended, it can be used as a lazy method to remove certificates: just find the key that corresponds to the certificate thumbprint and delete it.</p>
+<h2 id="closing-thoughts-pkinit">Closing Thoughts: PKINIT</h2>
+<p>I originally meant for this blog to cover <em>both</em> LDAPS and PKINIT certificates, but it turned out to be massive undertaking to document both in depth. I will come back to PKINIT in a separate blog post, but the important thing to remember is that it does <em>not</em> use the NTDS service certificate store, and that yes, it can be configured separately from the LDAPS certificate, despite what people may think.</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;rdp-nla-with-azure-ad-the-pku2u-nightmare&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              RDP NLA with Azure AD: The PKU2U Nightmare
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;active-directory-kerberos-kdc-certificate-selection&#x2F;">
+              Active Directory Kerberos KDC certificate selection<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>

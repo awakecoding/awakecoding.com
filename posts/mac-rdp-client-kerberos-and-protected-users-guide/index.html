@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/mac-rdp-client-kerberos-and-protected-users-guide/">
+  <link rel="alternate" href="https://awakecoding.com/posts/mac-rdp-client-kerberos-and-protected-users-guide/" hreflang="en" />
+  
+  <meta name="description" content="Explore the essential steps to secure Mac RDP connections using Kerberos authentication with a focus on troubleshooting Protected Users and NTLM issues. This guide provides practical solutions for configuring Kerberos in an Active Directory environment, ensuring robust security for remote desktop access." />
+  <meta property="og:title" content="Mac RDP Client: Kerberos and Protected Users Guide" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;mac-rdp-client-kerberos-and-protected-users-guide&#x2F;" />
+  <meta property="og:description" content="Explore the essential steps to secure Mac RDP connections using Kerberos authentication with a focus on troubleshooting Protected Users and NTLM issues. This guide provides practical solutions for configuring Kerberos in an Active Directory environment, ensuring robust security for remote desktop access." />
+  <meta name="twitter:title" content="Mac RDP Client: Kerberos and Protected Users Guide" />
+  <meta name="twitter:description" content="Explore the essential steps to secure Mac RDP connections using Kerberos authentication with a focus on troubleshooting Protected Users and NTLM issues. This guide provides practical solutions for configuring Kerberos in an Active Directory environment, ensuring robust security for remote desktop access." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;mac-rdp-client-kerberos-and-protected-users-guide&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/mac-rdp-client-kerberos-and-protected-users-guide.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/mac-rdp-client-kerberos-and-protected-users-guide.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Mac RDP Client: Kerberos and Protected Users Guide",
+  "description": "Explore the essential steps to secure Mac RDP connections using Kerberos authentication with a focus on troubleshooting Protected Users and NTLM issues. This guide provides practical solutions for configuring Kerberos in an Active Directory environment, ensuring robust security for remote desktop access.",
+  "datePublished": "2024-06-13",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/mac-rdp-client-kerberos-and-protected-users-guide.png",
+  "url": "https://awakecoding.com/posts/mac-rdp-client-kerberos-and-protected-users-guide/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/mac-rdp-client-kerberos-and-protected-users-guide/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | Mac RDP Client: Kerberos and Protected Users Guide
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            Mac RDP Client: Kerberos and Protected Users Guide
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2024-06-13">June 13, 2024</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>8 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>1556 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/rdp/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>RDP</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/kerberos/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Kerberos</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/activedirectory/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>ActiveDirectory</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <h2 id="hardening-that-breaks-rdp">Hardening that breaks RDP</h2>
+<p>Let's say you're in charge of hardening Active Directory security, and you follow advice to disable inbound NTLM or make certain privileged accounts member of the <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group">Protected Users group</a>. You make the changes, feel good about it for a few minutes until you start getting messages from Apple users who can no longer connect to Windows machines using the <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows-server/remote/remote-desktop-services/clients/remote-desktop-mac">Mac RDP client</a>. Oopsie!</p>
+<p>With inbound NTLM disabled, or if you have an invalid password, the error message looks like this:</p>
+<p><img src="/images/posts/mac-rdp-krb-unable-to-connect-ntlm-disabled.png" alt="Mac RDP Unable to Connect - NTLM Disabled" /></p>
+<blockquote>
+<p>We couldn't connect to the remote PC. This might be due to an expired password. If this keeps happening, contact your network administrator for assistance. Error code: 0x207</p>
+</blockquote>
+<p>With using an account member of the Protected Users group, the error message looks like this instead:</p>
+<p><img src="/images/posts/mac-rdp-krb-unable-to-connect-protected-users.png" alt="Mac RDP Unable to Connect - Protected Users" /></p>
+<blockquote>
+<p>We couldn't connect to the remote PC because a user account restriction is preventing you from signing in. Contact your network administrator for assistance. Error code: 0xc07</p>
+</blockquote>
+<h2 id="the-ntlm-fallback-problem">The NTLM fallback problem</h2>
+<p>TL;DR: Kerberos is not working, so the Mac RDP client is falling back to NTLM, which won't work with inbound NTLM disabled, or when the user is a member of the Protected Users group in Active Directory, which also disables NTLM as a side-effect. The only fix is to make Kerberos work from the Mac RDP client, but if you're reading this, chances are your previous attempts at figuring out how to do it have failed. You're in luck: I have the solution!</p>
+<h2 id="kerberos-success-conditions">Kerberos success conditions</h2>
+<p>For Kerberos to work, the Mac doesn't need to be domain-joined, but it needs to find <em>and reach</em> the Kerberos KDC (domain controller) matching the Kerberos realm of the target machine and user. This is commonly described as the KDC line-of-sight, where the Kerberos client can "see" the KDC. If the client cannot see the KDC, then Kerberos just doesn't happen.</p>
+<p><img src="/images/posts/mac-rdp-krb-no-line-of-sight-no-kerberos.png" alt="Mac RDP No KDC line-of-sight, No Kerberos" /></p>
+<p>The Kerberos <em>realm</em> is really a special domain name that is often, but not always, the same as the DNS suffix used for the Active Directory domain. For KDC detection to work, both the machine name and user name need to be mapped to the correct Kerberos realm name. To maximize success, use the Fully-Qualified Domain Name (FQDN) of the target machine, and the User Principal Name (UPN) of the user. Kerberos <em>may</em> work without those in certain conditions, but don't count on it.</p>
+<h2 id="sample-lab-environment">Sample lab environment</h2>
+<p>In my <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/Devolutions/devolutions-labs">lab environment</a>, I have used the following to test:</p>
+<ul>
+<li>IT-HELP-DC.ad.it-help.ninja as my domain controller</li>
+<li>IT-HELP-TEST.ad.it-help.ninja as my destination RDP server</li>
+<li>ad.it-help.ninja as my Active Directory DNS domain name</li>
+<li>IT-HELP as my NetBIOS domain name (try hard not to use it)</li>
+<li>ad.it-help.ninja as my Kerberos realm (same as DNS domain name)</li>
+<li>ProtectedUser@ad.it-help.ninja, a user that is a member of the Protected Users group</li>
+</ul>
+<p>IT-HELP-TEST.ad.it-help.ninja is the FQDN of the destination RDP server. Don't use the IP address (10.10.0.10), or just the machine name (IT-HELP-TEST). Yes, it takes longer to type, but start using the FQDN at all times from now on to avoid issues with Kerberos, you'll thank me later.</p>
+<p>As for the user name format, ProtectedUser@ad.it-help.ninja is the UPN format, and IT-HELP\ProtectedUser is the NetBIOS format. I know it is very tempting to use IT-HELP\ProtectedUser (NetBIOS) instead of ProtectedUser@ad.it-help.ninja (UPN) and chances are it <em>may</em> work, but refrain from using it.</p>
+<h2 id="fixing-dns-resolution">Fixing DNS resolution</h2>
+<p>Windows machines joined to Active Directory have their DNS servers changed to point to the domain controller for internal DNS. Automatic KDC detection uses DNS SRV records which will only work if the Mac client is using the correct DNS servers from Active Directory. If you don't want to change your Mac DNS servers, you can always create a DNS resolver rule to use the domain controllers for DNS for all queries ending in "ad.it-help.ninja":</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">sudo</span><span style="color:#abb2bf;"> mkdir</span><span style="color:#eb6772;"> -p</span><span style="color:#abb2bf;"> /etc/resolver
+</span><span style="color:#eb6772;">sudo</span><span style="color:#abb2bf;"> bash</span><span style="color:#eb6772;"> -c </span><span style="color:#9acc76;">&#39;cat &gt; /etc/resolver/ad.it-help.ninja &lt;&lt;EOF
+</span><span style="color:#9acc76;">domain ad.it-help.ninja
+</span><span style="color:#9acc76;">search ad.it-help.ninja
+</span><span style="color:#9acc76;">nameserver 10.10.0.3
+</span><span style="color:#9acc76;">EOF&#39;
+</span></code></pre>
+<p>In this case, 10.10.0.3 is IT-HELP-DC.ad.it-help.ninja, the domain controller for my "ad.it-help.ninja" Active Directory domain. Another solution is to create new entries manually in the /etc/hosts file of the client:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">10.10.0.3</span><span style="color:#abb2bf;">       IT-HELP-DC.ad.it-help.ninja
+</span><span style="color:#eb6772;">10.10.0.10</span><span style="color:#abb2bf;">      IT-HELP-TEST.ad.it-help.ninja
+</span></code></pre>
+<p>However, the hosts file can only be used to fix name resolution, which is not sufficient to make automatic DNS SRV detection work. Do not worry - KDC detection can work without DNS SRV detection, it just takes more work.</p>
+<h2 id="automatic-dns-srv-kdc-detection">Automatic DNS SRV KDC detection</h2>
+<p>Let's say you are in the ideal scenario: the Mac is configured to use the domain controller for DNS. Use the <code>nslookup</code> command to query DNS SRV records to confirm that it works, replacing "ad.it-help.ninja" with your Kerberos realm name:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">nslookup -type</span><span style="color:#adb7c9;">=</span><span style="color:#abb2bf;">srv _kerberos._tcp.dc._msdcs.ad.it-help.ninja
+</span><span style="color:#eb6772;">Server:</span><span style="color:#abb2bf;">         10.10.0.3
+</span><span style="color:#eb6772;">Address:</span><span style="color:#abb2bf;">        10.10.0.3#53
+</span><span style="color:#abb2bf;">
+</span><span style="color:#eb6772;">_kerberos._tcp.dc._msdcs.ad.it-help.ninja</span><span style="color:#abb2bf;">       service = 0 100 88 it-help-dc.ad.it-help.ninja.
+</span></code></pre>
+<p>The DNS SRV record should point to the domain controller, or Kerberos KDC. If it is not the case, then DNS SRV detection is not working, and you will need manual KDC configuration instead.</p>
+<h2 id="manual-kdc-configuration">Manual KDC configuration</h2>
+<p>Create the /etc/krb5.conf file with the following contents, replacing "IT-HELP-DC.ad.it-help.ninja" with your domain controller, and "ad.it-help.ninja", "AD.IT-HELP.NINJA" with your lowercase and uppercase Kerberos realm names:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">[libdefaults]
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">dns_lookup_kdc</span><span style="color:#abb2bf;"> = false
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">dns_lookup_realm</span><span style="color:#abb2bf;"> = false
+</span><span style="color:#abb2bf;">
+</span><span style="color:#eb6772;">[realms]
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">ad.it-help.ninja</span><span style="color:#abb2bf;"> = {
+</span><span style="color:#abb2bf;">        kdc = tcp/IT-HELP-DC.ad.it-help.ninja
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">AD.IT-HELP.NINJA</span><span style="color:#abb2bf;"> = {
+</span><span style="color:#abb2bf;">        kdc = tcp/IT-HELP-DC.ad.it-help.ninja
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">
+</span><span style="color:#eb6772;">[domain_realm]
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">.ad.it-help.ninja</span><span style="color:#abb2bf;"> = ad.it-help.ninja
+</span></code></pre>
+<p>Let's explain the krb5.conf configuration file, section by section:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">[libdefaults]
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">dns_lookup_kdc</span><span style="color:#abb2bf;"> = false
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">dns_lookup_realm</span><span style="color:#abb2bf;"> = false
+</span></code></pre>
+<p>The dns_lookup_kdc, dns_lookup_realm options are disabled to properly test that the configuration works without accidentally using DNS-based detection. You can leave them enabled if you want DNS SRV detection to be attempted.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">[realms]
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">ad.it-help.ninja</span><span style="color:#abb2bf;"> = {
+</span><span style="color:#abb2bf;">        kdc = tcp/IT-HELP-DC.ad.it-help.ninja
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">AD.IT-HELP.NINJA</span><span style="color:#abb2bf;"> = {
+</span><span style="color:#abb2bf;">        kdc = tcp/IT-HELP-DC.ad.it-help.ninja
+</span><span style="color:#abb2bf;">    }
+</span></code></pre>
+<p>The Kerberos realm name is historically uppercase, but in practice, both lowercase and uppercase variants are mixed, especially with Active Directory. The problem is that GSSAPI implementations on platforms other than Windows tend to be case sensitive, which is why we register the realm <em>twice</em>. This is very important because even if you see successful Kerberos requests to the KDC in Wireshark, the Mac RDP client may still silently downgrade to NTLM because of a failed case sensitive comparison.</p>
+<p>The other important part is the "tcp/" prefix which is used to force TCP instead of UDP as the transport. If you don't force TCP, you are likely to encounter issues where KDC requests sent over UDP are rejected with a maximum response size error, before falling back to TCP.</p>
+<h2 id="confirming-kerberos-works">Confirming Kerberos works</h2>
+<p>Once you have configured KDC detection (either automatic with DNS SRV or manual with krb5.conf), you can now test that Kerberos works using the <code>kinit</code> command to authenticate with your test user:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">kinit</span><span style="color:#abb2bf;"> ProtectedUser@ad.it-help.ninja
+</span><span style="color:#eb6772;">ProtectedUser@ad.it-help.ninja</span><span style="color:#9acc76;">&#39;s password:***
+</span></code></pre>
+<p>If Kerberos authentication worked, you should now have a ticket listed by the <code>klist</code> command:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">klist
+</span><span style="color:#eb6772;">Credentials</span><span style="color:#abb2bf;"> cache: API:CAA29FD0-DE6E-40AF-8BD0-AD68D31522C2
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">Principal:</span><span style="color:#abb2bf;"> ProtectedUser@AD.IT-HELP.NINJA
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">  </span><span style="color:#eb6772;">Issued</span><span style="color:#abb2bf;">                Expires               Principal
+</span><span style="color:#eb6772;">May</span><span style="color:#abb2bf;">  1 17:46:11 2024  May  1 21:46:11 2024  krbtgt/ad.it-help.ninja@AD.IT-HELP.NINJA
+</span></code></pre>
+<p>You are now ready to try authenticating from the Mac RDP client again. Don't forget to use the FQDN format for the host, and the UPN format for the user! If the Mac RDP client still fails but the <code>kinit</code> command works, make sure your krb5.conf file contains both lowercase and uppercase variants of the Kerberos realm, as described earlier.</p>
+<h2 id="what-if-i-don-t-have-a-kdc-line-of-sight">What if I don't have a KDC line-of-sight?</h2>
+<p>Well... you're out of luck for the Mac RDP client. In the Windows world, <a rel="noopener nofollow noreferrer" target="_blank" href="https://syfuhs.net/kdc-proxy-for-remote-access">KDC proxying</a> is an option to provide a KDC line-of-sight for machines that are out of the Active Directory network, but the GSSAPI implementation in macOS doesn't support it properly. Microsoft has a <a rel="noopener nofollow noreferrer" target="_blank" href="https://techcommunity.microsoft.com/t5/windows-it-pro-blog/the-evolution-of-windows-authentication/ba-p/3926848">plan to deprecate NTLM by implementing the IAKerb Kerberos protocol extension</a>, but we have yet to see it comr to fruition, and it's unclear if the Mac RDP client will be improved to support it. Your best solution is likely going to be a VPN, unfortunately.</p>
+<h2 id="devolutions-gateway-is-the-way">Devolutions Gateway is the way</h2>
+<p>Another solution path for simple cross-platform Kerberos support in RDP without a VPN is to use <a rel="noopener nofollow noreferrer" target="_blank" href="https://devolutions.net/gateway/">Devolutions Gateway</a> with <a rel="noopener nofollow noreferrer" target="_blank" href="https://devolutions.net/remote-desktop-manager/">Remote Desktop Manager</a> and <a rel="noopener nofollow noreferrer" target="_blank" href="https://devolutions.net/server/">Devolutions Server</a>. You get the security benefits of just-in-time RDP connections with KDC proxying integrated in our cross-platform RDP clients (<a rel="noopener nofollow noreferrer" target="_blank" href="https://www.freerdp.com/">FreeRDP</a> and <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/Devolutions/IronRDP">IronRDP</a>) combined with our cross-platform Kerberos implementation (<a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/Devolutions/sspi-rs">sspi-rs</a>) that supports KDC proxying, unlike the Mac RDP client. It is indeed a step up from using the Mac RDP client, but if you're serious about RDP security, it's definitely worth looking into.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>If you don't currently have a plan to significantly reduce or eliminate NTLM usage in your Active Directory environment, now is the time. NTLM security can't and won't be improved by Microsoft, so your only choice is to start using Kerberos today. Attackers are getting quite creative at chaining all kinds of NTLM-based attacks, such that when they gain initial access to your network, it's really a matter of time before it's game over. Disabling NTLM is easier said than done, but hopefully this blog post will make the work easier!</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;enable-powershell-winrm-remoting-in-powershell-7&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              Enable PowerShell WinRM Remoting in PowerShell 7
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;powershell-host-ipc-for-any-dotnet-application&#x2F;">
+              PowerShell Host IPC for any .NET application<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>

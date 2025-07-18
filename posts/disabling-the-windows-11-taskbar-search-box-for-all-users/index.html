@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/disabling-the-windows-11-taskbar-search-box-for-all-users/">
+  <link rel="alternate" href="https://awakecoding.com/posts/disabling-the-windows-11-taskbar-search-box-for-all-users/" hreflang="en" />
+  
+  <meta name="description" content="Learn how to disable the Windows 11 taskbar search box for all users by default using PowerShell and registry edits. Includes a deep dive into why the setting gets reset and how to prevent it with a reliable fix." />
+  <meta property="og:title" content="Disabling the Windows 11 Taskbar Search Box for All Users" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;disabling-the-windows-11-taskbar-search-box-for-all-users&#x2F;" />
+  <meta property="og:description" content="Learn how to disable the Windows 11 taskbar search box for all users by default using PowerShell and registry edits. Includes a deep dive into why the setting gets reset and how to prevent it with a reliable fix." />
+  <meta name="twitter:title" content="Disabling the Windows 11 Taskbar Search Box for All Users" />
+  <meta name="twitter:description" content="Learn how to disable the Windows 11 taskbar search box for all users by default using PowerShell and registry edits. Includes a deep dive into why the setting gets reset and how to prevent it with a reliable fix." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;disabling-the-windows-11-taskbar-search-box-for-all-users&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/disabling-the-windows-11-taskbar-search-box-for-all-users.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/disabling-the-windows-11-taskbar-search-box-for-all-users.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Disabling the Windows 11 Taskbar Search Box for All Users",
+  "description": "Learn how to disable the Windows 11 taskbar search box for all users by default using PowerShell and registry edits. Includes a deep dive into why the setting gets reset and how to prevent it with a reliable fix.",
+  "datePublished": "2025-06-06",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/disabling-the-windows-11-taskbar-search-box-for-all-users.png",
+  "url": "https://awakecoding.com/posts/disabling-the-windows-11-taskbar-search-box-for-all-users/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/disabling-the-windows-11-taskbar-search-box-for-all-users/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | Disabling the Windows 11 Taskbar Search Box for All Users
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            Disabling the Windows 11 Taskbar Search Box for All Users
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2025-06-06">June 06, 2025</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>2 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>349 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/windows/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Windows</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/powershell/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>PowerShell</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>Whether you find it useful or not, the Windows 11 taskbar search box is enabled by default and takes up valuable space on your screen.</p>
+<p><img src="/images/posts/taskbar-search-box-taking-space.png" alt="Windows taskbar search box taking space" /></p>
+<p>On special days like <a rel="noopener nofollow noreferrer" target="_blank" href="https://en.wikipedia.org/wiki/National_Donut_Day">National Donut Day</a>, it even adds festive images, like this one:</p>
+<p><img src="/images/posts/taskbar-search-box-national-donut-day.png" alt="Windows taskbar search box national donut day" /></p>
+<p>That's all fun and cute, but if you're like me, you'd rather reclaim that real estate for something else or simply reduce the visual noise.</p>
+<h2 id="disabling-the-search-box-for-the-current-user">Disabling the Search Box for the Current User</h2>
+<p>The easiest way to hide the search box is through the taskbar settings:</p>
+<p><img src="/images/posts/taskbar-search-box-hidden-away.png" alt="Windows taskbar search box hidden away" /></p>
+<p>You can also hide it by using this PowerShell one-liner to set the <strong>SearchboxTaskbarMode</strong> registry key to <strong>0</strong>:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Set-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#9acc76;">&quot;HKCU:\Software\Microsoft\Windows\CurrentVersion\Search&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#9acc76;">&quot;SearchboxTaskbarMode&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#db9d63;">0 </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Type DWORD
+</span></code></pre>
+<p>This change takes effect immediately. No restart or logoff required.</p>
+<h2 id="disabling-the-search-box-for-all-users">Disabling the Search Box for All Users</h2>
+<p>To make this setting apply automatically to all new user accounts, you need to modify the default user registry hive located at <strong>C:\Users\Default\NTUSER.DAT</strong>. The following PowerShell script loads the hive, sets the required registry values, and unloads it cleanly:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$DefaultUserReg </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;HKLM\TempDefault&quot;
+</span><span style="color:#eb6772;">$NtuserDatPath </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;C:\Users\Default\NTUSER.DAT&quot;
+</span><span style="color:#abb2bf;">reg load </span><span style="color:#eb6772;">$DefaultUserReg $NtuserDatPath
+</span><span style="color:#eb6772;">$HKDU </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;Registry::</span><span style="color:#eb6772;">$DefaultUserReg</span><span style="color:#9acc76;">&quot;
+</span><span style="color:#eb6772;">$RegSearchPath </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;</span><span style="color:#eb6772;">$HKDU</span><span style="color:#9acc76;">\Software\Microsoft\Windows\CurrentVersion\Search&quot;
+</span><span style="color:#5ebfcc;">New-Item </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$RegSearchPath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Out-Null
+</span><span style="color:#5ebfcc;">Set-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$RegSearchPath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#9acc76;">&quot;SearchboxTaskbarMode&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#db9d63;">0 </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Type DWORD
+</span><span style="color:#5ebfcc;">Set-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$RegSearchPath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#9acc76;">&quot;SearchboxTaskbarModeCache&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#db9d63;">1 </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Type DWORD
+</span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">GC</span><span style="color:#abb2bf;">]::Collect()
+</span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">GC</span><span style="color:#abb2bf;">]::WaitForPendingFinalizers()
+</span><span style="color:#abb2bf;">reg unload </span><span style="color:#eb6772;">$DefaultUserReg
+</span></code></pre>
+<p>That's it. You can integrate this step into your provisioning scripts or golden images to ensure new users won't see the search box by default.</p>
+<h2 id="the-search-box-that-wouldn-t-go-away">The Search Box That Wouldn't Go Away</h2>
+<p>Initially, I tried setting only <strong>SearchboxTaskbarMode</strong>, but the value kept getting reset when a new user profile was initialized. Using <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/sysinternals/downloads/procmon">Process Monitor</a>, I traced the behavior to a function named <strong>TryMigrateSearchConditionally</strong> inside <strong>C:\Windows\System32\Taskbar.dll</strong>:</p>
+<p><img src="/images/posts/taskbar-search-box-procmon-registry.png" alt="Windows taskbar procmon registry operations" /></p>
+<p>To better understand what was happening, I examined the decompiled function in IDA. It turns out that Windows also checks for <strong>SearchboxTaskbarModeCache</strong>. If this key is missing, the function assumes no user preference exists and "migrates" the setting by assigning a default value of <strong>2</strong> to <strong>SearchboxTaskbarMode</strong>, which re-enables the search box.</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;automating-hyper-v-network-adapter-cleanup-migration&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              Automating Hyper-V Network Adapter Cleanup and IP Migration
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;saving-microsoft-remote-desktop-msrdc-before-its-gone&#x2F;">
+              Saving Microsoft Remote Desktop (MSRDC) before it&#x27;s gone<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>
