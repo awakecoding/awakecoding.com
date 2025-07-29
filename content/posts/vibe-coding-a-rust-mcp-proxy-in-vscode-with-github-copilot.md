@@ -2,7 +2,7 @@
 title = "Vibe coding a Rust MCP proxy in VSCode with GitHub Copilot"
 slug = "vibe-coding-a-rust-mcp-proxy-in-vscode-with-github-copilot"
 date = 2025-07-28
-description = ""
+description = "A hands-off experiment building a Rust-based Model Context Protocol (MCP) proxy tool using only GitHub Copilot agent mode. Covers setup, multi-transport support, and lessons learned from letting Copilot do all the coding."
 
 [taxonomies]
 tags = ["MCP", "Rust", "CTO"]
@@ -11,21 +11,17 @@ tags = ["MCP", "Rust", "CTO"]
 banner = "/images/banners/vibe-coding-a-rust-mcp-proxy-in-vscode-with-github-copilot.png"
 +++
 
-## Introduction
-
-In this post, I'll share my experience "vibe coding" [mcp-proxy-tool](https://github.com/awakecoding/mcp-proxy-tool) - a simple Model Context Protocol (MCP) proxy tool written in Rust. I built this tool as an experiment where I was not allowed to manually edit the files, forcing myself to do everything through GitHub Copilot, just to see how far I could go. My goal was to see how far I could get by letting GitHub Copilot (in agent mode, with Claude Sonnet) do all the heavy lifting, without manually writing a single line of code.
-
-Until recently, my workflow involved a lot of back-and-forth with ChatGPT: copying error messages, requesting modifications, and manually pasting code. I wasn't prepared for how much smoother the process would be with Copilot's agent mode. After this experience, I'm not looking back.
+I set out to build [mcp-proxy-tool](https://github.com/awakecoding/mcp-proxy-tool) - a simple [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) proxy in Rust - without touching the code myself, relying entirely on GitHub Copilot (agent mode, [Claude Sonnet](https://www.anthropic.com/claude/sonnet)) to do the work. This post covers what it was like to let Copilot handle the entire process as a true hands-off coding experiment.
 
 ## Getting Started: Setting Up the Environment
 
 First, install Rust using [rustup](https://rustup.rs/).
 
-You'll also need a GitHub account and to register for [GitHub Copilot](https://github.com/features/copilot). There's a free version, but I recommend the paid tier for access to the premium models.
+You'll also need a GitHub account and to register for [GitHub Copilot](https://github.com/features/copilot). While there’s a free version, I recommend the paid tier for access to premium models.
 
-For this project, I used Ubuntu 22.04 in [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) with [mirrored networking mode](https://learn.microsoft.com/en-us/windows/wsl/networking#mirrored-mode-networking). Why? Just a hunch that it would make some things easier, but you can also just follow the same steps on Windows.
+For this project, I used Ubuntu 22.04 in [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) with [mirrored networking mode](https://learn.microsoft.com/en-us/windows/wsl/networking#mirrored-mode-networking) - mainly because I thought it might simplify things. You can follow the same steps on Windows if you prefer.
 
-Start by creating a new Rust project and launch VSCode inside the new directory:
+Create a new Rust project, then open the directory in VSCode:
 
 ```bash
 cargo new mcp-proxy-tool
@@ -37,11 +33,13 @@ Follow the instructions to set up [GitHub Copilot in VSCode](https://code.visual
 
 ## Why MCP? The Microsoft Learn Docs MCP Server
 
-Remember when Retrieval Augmented Generation (RAG) was all the rage? While LLMs are impressive, they often "hallucinate" unless given access to live, accurate data. Enter the Model Context Protocol (MCP): essentially JSON-RPC for LLMs, allowing agents to call tools from MCP servers as needed.
+Not so long ago, Retrieval Augmented Generation (RAG) was all the rage for making LLMs more useful. Now, MCP (Model Context Protocol) is taking its place with a different, more direct approach: tool calling. Instead of just retrieving documents, MCP lets agents call real tools and services, making LLMs much more capable and interactive.
+
+What makes MCP so interesting is how simple and powerful it is. It's basically JSON-RPC for LLMs, allowing them to discover and use tools on demand. This opens up a whole new world of possibilities for automation and integration.
 
 ![Microsoft Learn Docs MCP Server](/images/posts/vibe-coding-microsoft-learn-docs-mcp-server.png)
 
-The [Microsoft Learn Docs MCP server](https://learn.microsoft.com/en-us/training/support/mcp-get-started) is a great example - it lets you search the docs and returns live results for the LLM to use. Try it out, then let's build a simple MCP proxy tool.
+The [Microsoft Learn Docs MCP server](https://learn.microsoft.com/en-us/training/support/mcp-get-started) is a great example. It lets you search Microsoft Docs and returns live results for the LLM to use - no more hallucinating or relying on stale data. Try it out, then let's build a simple MCP proxy tool.
 
 ## Inspecting MCP Traffic
 
@@ -79,6 +77,7 @@ Use this token to authenticate requests or set DANGEROUSLY_OMIT_AUTH=true to dis
 ![MCP Inspector - Microsoft Learn Docs](/images/posts/vibe-coding-mcp-inspector-learn-docs.png)
 
 ## Model Context Protocol: The Basics
+
 
 [MCP is quite simple at its core](https://modelcontextprotocol.io/specification/2025-06-18): it's just JSON-RPC over stdio or HTTP. You can list tools to discover what the MCP server supports, and let the LLM figure out when to call them.
 
@@ -141,7 +140,7 @@ If you install `mcp-proxy-tool` differently, either ensure it is in the PATH, or
 5. **Choose where to save the MCP server configuration**
    - Select `Workspace` (`.vscode/mcp.json` file)
 
-After registering a new MCP server, you should see the mcp.json file in VSCode. Notice how it has clickable actions inside the JSON to start, stop, restart the MCP server. Click Start, and if everything worked, it should report as least one tool:
+After registering a new MCP server, you should see the mcp.json file in VSCode. Notice how it has clickable actions inside the JSON to start, stop, restart the MCP server. Click Start, and if everything worked, it should report at least one tool:
 
 ![VSCode mcp.json workspace file](/images/posts/vibe-coding-vscode-mcp-json-workspace-file.png)
 
@@ -172,6 +171,10 @@ Options:
 
 In my case, I wanted this tool to connect to an MCP server using a named pipe transport currently being developed in [Remote Desktop Manager](https://devolutions.net/remote-desktop-manager/). While this MCP server is not yet available publicly, it worked on the first try using `mcp-proxy-tool -p RDM.MCP` for me. Hopefully this tool will pave the way to officially supporting named pipes as a transport in MCP!
 
-## Conclusion
+## The Verdict
+
+GitHub Copilot in VSCode with Claude Sonnet 4 is a game changer. I used to rely on ChatGPT, constantly copy-pasting code and context, but Copilot's agent mode eliminates all that manual effort. It automatically accesses your workspace, iterates on its own, and handles the entire developer inner loop - using build and run output as feedback to fix issues. The result is a much smoother, more productive coding experience.
+
+## Closing Thoughts
 
 This experiment was a real eye-opener. With Copilot agent mode, I was able to build a functional, multi-transport MCP proxy tool in Rust with minimal manual intervention. The process was fast, iterative, and surprisingly enjoyable. If you haven't tried "vibe coding" with Copilot agent mode yet, I highly recommend giving it a shot!
