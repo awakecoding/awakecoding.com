@@ -11,15 +11,21 @@ tags = ["MCP", "Rust", "CTO"]
 banner = "/images/banners/vibe-coding-a-rust-mcp-proxy-in-vscode-with-github-copilot.png"
 +++
 
-This blog post relates my experience vibe coding [mcp-proxy-tool](https://github.com/awakecoding/mcp-proxy-tool), a simple MCP proxying tool in Rust.
+## Introduction
 
-Until recently, I was still doing most of my development work in ChatGPT, with a lot of back and forth and copy/pasting of error messages, and requests for modifications. I was not prepared for what I had missed with the GitHub Copilot agent mode with Claude Sonnet, and I will never look back. I wanted to try developing a fully functional tool without touching a single line of code manually, and it did not disappoint.
+In this post, I'll share my experience "vibe coding" [mcp-proxy-tool](https://github.com/awakecoding/mcp-proxy-tool) - a simple Model Context Protocol (MCP) proxy tool written in Rust. I built this tool as an experiment where I was not allowed to manually edit the files, forcing myself to do everything through GitHub Copilot, just to see how far I could go. My goal was to see how far I could get by letting GitHub Copilot (in agent mode, with Claude Sonnet) do all the heavy lifting, without manually writing a single line of code.
 
-Install Rust using [rustup](https://rustup.rs/).
+Until recently, my workflow involved a lot of back-and-forth with ChatGPT: copying error messages, requesting modifications, and manually pasting code. I wasn't prepared for how much smoother the process would be with Copilot's agent mode. After this experience, I'm not looking back.
 
-You will need a GitHub account, and to register for [GitHub Copilot](https://github.com/features/copilot). Don't worry, there's a free version, but I recommend looking into the paid tier for access to the premium models.
+## Getting Started: Setting Up the Environment
 
-I'll be using Ubuntu 22.04 in WSL with the [mirrored networking mode](https://learn.microsoft.com/en-us/windows/wsl/networking#mirrored-mode-networking). Why? Just a hunch that it'll make some things easier.
+First, install Rust using [rustup](https://rustup.rs/).
+
+You'll also need a GitHub account and to register for [GitHub Copilot](https://github.com/features/copilot). There's a free version, but I recommend the paid tier for access to the premium models.
+
+For this project, I used Ubuntu 22.04 in [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) with [mirrored networking mode](https://learn.microsoft.com/en-us/windows/wsl/networking#mirrored-mode-networking). Why? Just a hunch that it would make some things easier, but you can also just follow the same steps on Windows.
+
+Start by creating a new Rust project and launch VSCode inside the new directory:
 
 ```bash
 cargo new mcp-proxy-tool
@@ -27,25 +33,23 @@ cd mcp-proxy-tool
 code .
 ```
 
-Follow the instructions to set up [GitHub Copilot in VSCode](https://code.visualstudio.com/docs/copilot/setup).
+Follow the instructions to set up [GitHub Copilot in VSCode](https://code.visualstudio.com/docs/copilot/setup). In the Copilot chat, select [agent mode](https://code.visualstudio.com/docs/copilot/chat/chat-agent-mode) and switch to the latest [Claude Sonnet](https://www.anthropic.com/claude/sonnet) model.
 
-In the Copilot chat, select the [agent mode](https://code.visualstudio.com/docs/copilot/chat/chat-agent-mode) and [change the model](https://code.visualstudio.com/docs/copilot/language-models) to the latest version of [Claude Sonnet](https://www.anthropic.com/claude/sonnet) available.
+## Why MCP? The Microsoft Learn Docs MCP Server
 
-## Microsoft Learn Docs MCP Server
+Remember when Retrieval Augmented Generation (RAG) was all the rage? While LLMs are impressive, they often "hallucinate" unless given access to live, accurate data. Enter the Model Context Protocol (MCP): essentially JSON-RPC for LLMs, allowing agents to call tools from MCP servers as needed.
 
-Do you remember when RAG (Retrieval Augmented Generation) was all the rage? Models are trained on large data sets. While they can provide impressive results with training data alone, they usually fall short or "hallucinate" unless augmented by live, known-to-be-accurate data. Here comes the Model Context Protocol (MCP), which is pretty much JSON-RPC for LLMs. Now your agent can just... call tools from MCP servers as needed instead of relying on solely on trained data. The Microsoft Learn Docs MCP server is just that: a single tool to search the docs and return live search results that the LLM will use. Simple, but effective.
+![Microsoft Learn Docs MCP Server](/images/posts/vibe-coding-microsoft-learn-docs-mcp-server.png)
 
-[Get started with the Microsoft Learn Docs MCP server](https://learn.microsoft.com/en-us/training/support/mcp-get-started)
-
-Try it out! Then we'll work on building a simple MCP proxy tool.
+The [Microsoft Learn Docs MCP server](https://learn.microsoft.com/en-us/training/support/mcp-get-started) is a great example - it lets you search the docs and returns live results for the LLM to use. Try it out, then let's build a simple MCP proxy tool.
 
 ## Inspecting MCP Traffic
 
-Now that you can *use* an MCP server, let's move to inspecting it more closely using the [MCP Inspector](https://github.com/modelcontextprotocol/inspector). Now if there's one thing I loathe more than installing Python tools, it's installing a tool that uses [Node.js](https://nodejs.org/). To be fair, it probably isn't that bad, but I'm just not familiar with the tooling and I usually run into errors I don't feel like researching. Thankfully, I could leave that boring work to the GitHub Copilot agent to figure out for me:
+Once you can use an MCP server, it's helpful to inspect the traffic. The [MCP Inspector](https://github.com/modelcontextprotocol/inspector) is perfect for this. I'm not a fan of installing Python or Node.js tools, but Copilot handled the setup for me:
 
 ![Installing MCP inspector](/images/posts/vibe-coding-installing-mcp-inspector.png)
 
-From the [Microsoft Learn Docs MCP Server developer reference](https://learn.microsoft.com/en-us/training/support/mcp-developer-reference), we know that the [mcp.json file used by VSCode](https://code.visualstudio.com/docs/copilot/chat/mcp-servers) should look like this:
+From the [Microsoft Learn Docs MCP Server developer reference](https://learn.microsoft.com/en-us/training/support/mcp-developer-reference), here's what the [mcp.json file used by VSCode](https://code.visualstudio.com/docs/copilot/chat/mcp-servers) should look like:
 
 ```json
 {
@@ -58,7 +62,7 @@ From the [Microsoft Learn Docs MCP Server developer reference](https://learn.mic
 }
 ```
 
-Launch the MCP inspector from the command-line, then open the link in your browser:
+Launch the MCP inspector from the command line, then open the link in your browser:
 
 ```bash
 mamoreau@DEVOLUTIONS495:~/git/mcp-proxy-tool$ mcp-inspector
@@ -74,44 +78,100 @@ Use this token to authenticate requests or set DANGEROUSLY_OMIT_AUTH=true to dis
 
 ![MCP Inspector - Microsoft Learn Docs](/images/posts/vibe-coding-mcp-inspector-learn-docs.png)
 
-## Model Context Protocol
+## Model Context Protocol: The Basics
 
-At its core, [MCP is quite simple](https://modelcontextprotocol.io/specification/2025-06-18): JSON-RPC over [stdio or HTTP](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports). You list tools to discover what the MCP server supports, and then you let the LLM figure out when to call them.
+[MCP is quite simple at its core](https://modelcontextprotocol.io/specification/2025-06-18): it's just JSON-RPC over stdio or HTTP. You can list tools to discover what the MCP server supports, and let the LLM figure out when to call them.
 
-One thing MCP doesn't (yet) support is a named pipe transport, which would be very useful as an alternative to the standard input/output transport. For local IPC, named pipes have the advantage of supporting operating system access permissions in the same way filesystem access does. TCP sockets don't support this, and also have the issue of running too easily into port conflicts. Launching a new process to communicate with it over standard input/output is not practical when you want it to talk to an *existing* process, especially for a GUI application. However, nothing prevents us from building a simple tool to proxy between stdio and a named pipe to bridge this gap, and start building MCP servers over named pipes.
+One thing MCP doesn't (yet) support is named pipe transport, which would be useful as an alternative to stdio. Named pipes allow for OS-level access permissions, unlike TCP sockets, and avoid port conflicts. While launching a new process to communicate over stdio isn't practical for existing processes (like GUIs), nothing stops us from building a tool to proxy between stdio and a named pipe - bridging the gap and enabling MCP servers over named pipes.
 
-## Building the MVP
+## Copilot's Inner Loop: Building the MVP
 
-GitHub Copilot in Agent mode works best when it can iterate with a full feedback cycle it can control: make changes, build project, run it, check output, repeat. The first goal will be to build a simple command-line tool that acts as an MCP server over stdio that proxies the requests to the Microsoft Learn Docs MCP server. Once this is functional, we should be able to register our tool in VSCode instead of the original MCP server. Here is what the first steps looked like:
+GitHub Copilot in agent mode shines when it can iterate through the full feedback cycle: make changes, build, run, check output, repeat. My first goal was to build a simple command-line tool that acts as an MCP server over stdio, proxying requests to the Microsoft Learn Docs MCP server. Once functional, I could register my tool in VSCode instead of the original MCP server.
+
+Here's how I approached it:
 
 1. Make sample MCP calls to an HTTP MCP server
 2. Proxy MCP calls from stdio to an HTTP MCP server
-3. Build command-line interface, remove hardcoded values
+3. Build a command-line interface and remove hardcoded values
 
-To get boostrapped, what really helped was starting with an *existing* MCP server, because GitHub Copilot could build and test against it, checking for server responses. It had to iterate a few times to get it right, and I provided it with sample requests and responses obtained from the MCP inspector tool. I then used MCP inspector to connect to my executable, and pasted the errors back into the chat until it finally started proxying MCP successfully.
+Starting with an existing MCP server helped a lot - Copilot could build and test against it, checking for server responses. I provided sample requests and responses from the MCP inspector, and pasted errors back into the chat until it started proxying successfully.
 
-Adding a command-line interface was as simple as asking for it. By default, it used [clap](https://docs.rs/clap/latest/clap/) which is a very popular Rust crate for CLI parsing, with the downside of increasing executable size. I asked for a lightweight alternative, and it found [argh](https://crates.io/crates/argh) which is optimized for code size. All I had to do what look at the code, see what I'd like changed, and ask for it. That's it, I still haven't touched a single line of code manually.
+Adding a CLI was as simple as asking for it. Copilot defaulted to [clap](https://docs.rs/clap/latest/clap/) (popular, but increases binary size), so I asked for a lightweight alternative and it found [argh](https://crates.io/crates/argh). I just reviewed the code, requested tweaks, and let Copilot handle the rest. Still no manual code edits!
 
-## Adding support for more transports
+## Adding Support for More Transports
 
-Now that I've got an executable that can act as an MCP server that proxies requests to an outgoing HTTP server, I want to expand the supported transport types. Here are the steps I took, in order:
+With a working executable proxying HTTP, I wanted to support more transport types:
 
 1. Add outgoing stdio proxying support (in addition to HTTP)
-2. Add outgoing named pipe proxying support (for Linux)
-3. Add outgoing named pipe proxying support (for Windows)
+2. Add outgoing named pipe proxying support (Linux)
+3. Add outgoing named pipe proxying support (Windows)
 
-Proxying MCP requests to another MCP server executable over stdio was relatively easy. What surprised me is that GitHub Copilot used the output from the HTTP-based MCP server and generated a mock MCP server from it to test against, iterating until everything was working as expected. For the named pipe transport, it used the same strategy with a sample Python named pipe server. Where it started falling short is with the Windows named pipe support: I'm in WSL, so it could not easy test it. It generated code which didn't build, so I had to commit the code, switch to Windows, then let it iterate until it worked.
-
-This being said, this is very impressive: with a few hours I already had a functional multi-transport MCP proxying tool.
+Proxying to another MCP server over stdio was straightforward. Copilot even generated a mock MCP server for testing. For named pipes, it used a sample Python server. Windows named pipe support was trickier (since I was in WSL), so I had to commit, switch to Windows, and let Copilot iterate until it worked. Still, within a few hours, I had a functional multi-transport MCP proxy tool.
 
 ## GitHub Actions Workflows
 
-Because my goal was to see how far I could "vibe code" a simple tool, I had to resist the urge of copying and adapting one of my existing GitHub Actions workflows. The workflow it generated wasn't to my liking: too much platform-specific scripts instead of cross-platform PowerShell, and too much reliance on third-party GitHub Actions for things that can be done with a few lines of PowerShell. Granted, this is not what most developers do, so I had to tell it my personal preferences.
+Since my goal was to "vibe code" as much as possible, I resisted the urge to copy one of my existing GitHub Actions workflows. The workflow Copilot generated wasn't ideal: too many platform-specific scripts, not enough cross-platform PowerShell, and too much reliance on third-party actions for things that could be done in a few lines of PowerShell. I had to clarify my preferences.
 
 ![Github CLI for GitHub Actions](/images/posts/vibe-coding-github-cli-github-actions.png)
 
-The second problem is obvious in hindsight: GitHub Copilot is *really* good at iterating by itself if it can do the full "developer inner loop" by itself. With a GitHub Actions workflow, you have to push to a branch, launch the workflow, wait for it to finish, check the logs, etc. As far as I know there's no MCP server for this yet, so I used the [GitHub CLI](https://cli.github.com/) and manually instructed GitHub Copilot to use it. I made sure to use a test branch first so it could make a lot of intermediate commits that I could squash later. At first, it would test after every change, so I had to tell it to wait until I was ready to do test workflow run in the CI.
+Another challenge: Copilot is great at iterating when it controls the full developer inner loop. With GitHub Actions, you have to push to a branch, launch the workflow, wait for it to finish, and check the logs. There's no MCP server for this (yet), so I used the [GitHub CLI](https://cli.github.com/) and manually instructed Copilot to use it. I worked on a test branch so Copilot could make lots of intermediate commits to squash later. At first, it wanted to test after every change, so I told it to wait until I was ready to run the workflow in CI.
 
 ![GitHub Actions workflow success](/images/posts/vibe-coding-github-actions-workflow-success.png)
 
-I'll admit it took a bit of effort to get the workflow working properly, especially since it's much slower to test when you can't just build and run locally for all platforms in the same way the CI environment does, but I managed to get it done nonetheless.
+It took some effort to get the workflow working properly, especially since testing in CI is much slower than building and running locally for all platforms, but I got it done.
+
+## Using mcp-proxy-tool
+
+Let's register and use `mcp-proxy-tool` to see it in action. Build [mcp-proxy-tool](https://github.com:/awakecoding/mcp-proxy-tool) from source, and install it locally:
+
+```bash
+git clone https://github.com:/awakecoding/mcp-proxy-tool
+cd mcp-proxy-tool
+cargo install --path .
+```
+
+If you install `mcp-proxy-tool` differently, either ensure it is in the PATH, or use the absolute path to the executable when following these instructions to add a new MCP server:
+
+1. **Open the Command Palette**
+   - Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac).
+2. **Search for and select** `MCP: Add Server...`.
+3. **Choose the 'Command (stdio)' transport**
+4. **Enter the command to run:**
+   - `mcp-proxy-tool --url https://learn.microsoft.com/api/mcp`
+5. **Choose where to save the MCP server configuration**
+   - Select `Workspace` (`.vscode/mcp.json` file)
+
+After registering a new MCP server, you should see the mcp.json file in VSCode. Notice how it has clickable actions inside the JSON to start, stop, restart the MCP server. Click Start, and if everything worked, it should report as least one tool:
+
+![VSCode mcp.json workspace file](/images/posts/vibe-coding-vscode-mcp-json-workspace-file.png)
+
+You can see the list of MCP tools by clicking the "tool" icon from the GitHub Copilot chat window:
+
+![VSCode MCP server list with tools](/images/posts/vibe-coding-mcp-server-list-with-tools.png)
+
+Our "microsoft-learn-proxy" MCP server now lists the "microsoft_docs_search" tool, confirming that `mcp-proxy-tool` successfully forwards MCP requests to `https://learn.microsoft.com/api/mcp`!
+
+For the full list of command-line arguments, use `mcp-proxy-tool --help`:
+
+```bash
+Usage: mcp-proxy-tool [-u <url>] [-c <command>] [-a <args>] [-p <pipe>] [-t <timeout>] [-v]
+
+MCP Proxy Tool - Proxies MCP requests to remote HTTP-based or STDIO-based MCP servers
+
+Options:
+  -u, --url         URL of the remote HTTP-based MCP server to proxy requests to
+  -c, --command     command to execute for STDIO-based MCP server
+  -a, --args        arguments for the STDIO-based MCP server command
+  -p, --pipe        path to named pipe for named pipe-based MCP server (Unix:
+                    /path/to/pipe, Windows: pipename or \.\pipe\pipename)
+  -t, --timeout     timeout in seconds for HTTP requests (ignored for STDIO and
+                    named pipe)
+  -v, --verbose     enable verbose logging
+  --help, help      display usage information
+```
+
+In my case, I wanted this tool to connect to an MCP server using a named pipe transport currently being developed in [Remote Desktop Manager](https://devolutions.net/remote-desktop-manager/). While this MCP server is not yet available publicly, it worked on the first try using `mcp-proxy-tool -p RDM.MCP` for me. Hopefully this tool will pave the way to officially supporting named pipes as a transport in MCP!
+
+## Conclusion
+
+This experiment was a real eye-opener. With Copilot agent mode, I was able to build a functional, multi-transport MCP proxy tool in Rust with minimal manual intervention. The process was fast, iterative, and surprisingly enjoyable. If you haven't tried "vibe coding" with Copilot agent mode yet, I highly recommend giving it a shot!
