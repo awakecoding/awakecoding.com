@@ -19,7 +19,7 @@ First, install Rust using [rustup](https://rustup.rs/).
 
 You'll also need a GitHub account and to register for [GitHub Copilot](https://github.com/features/copilot). While there’s a free version, I recommend the paid tier for access to premium models.
 
-For this project, I used Ubuntu 22.04 in [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) with [mirrored networking mode](https://learn.microsoft.com/en-us/windows/wsl/networking#mirrored-mode-networking) - mainly because I thought it might simplify things. You can follow the same steps on Windows if you prefer.
+For this project, I used Ubuntu 22.04 in [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) - mainly because I thought it might simplify things. You can follow the same steps on Windows if you prefer.
 
 Create a new Rust project, then open the directory in VSCode:
 
@@ -31,15 +31,15 @@ code .
 
 Follow the instructions to set up [GitHub Copilot in VSCode](https://code.visualstudio.com/docs/copilot/setup). In the Copilot chat, select [agent mode](https://code.visualstudio.com/docs/copilot/chat/chat-agent-mode) and switch to the latest [Claude Sonnet](https://www.anthropic.com/claude/sonnet) model.
 
-## Why MCP? The Microsoft Learn Docs MCP Server
+## Microsoft Learn Docs MCP Server
 
 Not so long ago, Retrieval Augmented Generation (RAG) was all the rage for making LLMs more useful. Now, MCP (Model Context Protocol) is taking its place with a different, more direct approach: tool calling. Instead of just retrieving documents, MCP lets agents call real tools and services, making LLMs much more capable and interactive.
 
 What makes MCP so interesting is how simple and powerful it is. It's basically JSON-RPC for LLMs, allowing them to discover and use tools on demand. This opens up a whole new world of possibilities for automation and integration.
 
-![Microsoft Learn Docs MCP Server](/images/posts/vibe-coding-microsoft-learn-docs-mcp-server.png)
-
 The [Microsoft Learn Docs MCP server](https://learn.microsoft.com/en-us/training/support/mcp-get-started) is a great example. It lets you search Microsoft Docs and returns live results for the LLM to use - no more hallucinating or relying on stale data. Try it out, then let's build a simple MCP proxy tool.
+
+![Microsoft Learn Docs MCP Server](/images/posts/vibe-coding-microsoft-learn-docs-mcp-server.png)
 
 ## Inspecting MCP Traffic
 
@@ -74,10 +74,11 @@ Use this token to authenticate requests or set DANGEROUSLY_OMIT_AUTH=true to dis
    http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=da40cba93f37728bdd42788abd6c74185eeb280b0bbee9d2de23095376286a4f
 ```
 
+If you are using WSL without the [mirrored networking mode](https://learn.microsoft.com/en-us/windows/wsl/networking#mirrored-mode-networking), you may run into issues accessing the localhost URL from the Windows host.
+
 ![MCP Inspector - Microsoft Learn Docs](/images/posts/vibe-coding-mcp-inspector-learn-docs.png)
 
 ## Model Context Protocol: The Basics
-
 
 [MCP is quite simple at its core](https://modelcontextprotocol.io/specification/2025-06-18): it's just JSON-RPC over stdio or HTTP. You can list tools to discover what the MCP server supports, and let the LLM figure out when to call them.
 
@@ -171,10 +172,6 @@ Options:
 
 In my case, I wanted this tool to connect to an MCP server using a named pipe transport currently being developed in [Remote Desktop Manager](https://devolutions.net/remote-desktop-manager/). While this MCP server is not yet available publicly, it worked on the first try using `mcp-proxy-tool -p RDM.MCP` for me. Hopefully this tool will pave the way to officially supporting named pipes as a transport in MCP!
 
-## The Verdict
+## Conclusion
 
-GitHub Copilot in VSCode with Claude Sonnet 4 is a game changer. I used to rely on ChatGPT, constantly copy-pasting code and context, but Copilot's agent mode eliminates all that manual effort. It automatically accesses your workspace, iterates on its own, and handles the entire developer inner loop - using build and run output as feedback to fix issues. The result is a much smoother, more productive coding experience.
-
-## Closing Thoughts
-
-This experiment was a real eye-opener. With Copilot agent mode, I was able to build a functional, multi-transport MCP proxy tool in Rust with minimal manual intervention. The process was fast, iterative, and surprisingly enjoyable. If you haven't tried "vibe coding" with Copilot agent mode yet, I highly recommend giving it a shot!
+GitHub Copilot in VSCode with Claude Sonnet 4 is a game changer. I used to rely on ChatGPT, constantly copy-pasting code and context, but Copilot's agent mode eliminates all that manual effort. It automatically accesses your workspace, iterates on its own, and handles the entire developer inner loop - using build and run output as feedback to fix issues. This experiment was a real eye-opener: I was able to build a functional, multi-transport MCP proxy tool in Rust with minimal manual intervention. The process was fast, iterative, and surprisingly enjoyable. If you haven't tried "vibe coding" with Copilot agent mode yet, I highly recommend giving it a shot!
