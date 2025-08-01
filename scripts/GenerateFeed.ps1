@@ -21,7 +21,7 @@ $Items = @()
 foreach ($item in $rss.rss.channel.item) {
     $slug = $item.link.Trim('/').Split('/')[-1]
     $banner_image = $item.bannerImage
-    $image = $banner_image -Replace "(.*)(\.\w+)$", '$1-image$2'
+    $image = $banner_image -Replace "(.*)\.png$", '$1-image.jpg'
     $DatePublished = [DateTime]::Parse($item.pubDate).ToString("yyyy-MM-dd'T'HH:mm:ssK")
     $Summary = $item.description
     $Post = [ordered]@{
