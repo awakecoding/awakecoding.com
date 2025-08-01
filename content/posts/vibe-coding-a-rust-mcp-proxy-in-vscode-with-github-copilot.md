@@ -1,5 +1,5 @@
 +++
-title = "Vibe coding a Rust MCP proxy in VSCode with GitHub Copilot"
+title = "Vibe Coding a Rust MCP proxy in VSCode with GitHub Copilot"
 slug = "vibe-coding-a-rust-mcp-proxy-in-vscode-with-github-copilot"
 date = 2025-07-28
 description = "A hands-off experiment building a Rust-based Model Context Protocol (MCP) proxy tool using only GitHub Copilot agent mode. Covers setup, multi-transport support, and lessons learned from letting Copilot do all the coding."
