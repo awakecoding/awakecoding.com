@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+      <title>AwakeCoding ☀️💻 - RDP</title>
+      <link>https://awakecoding.com</link>
+      <description>awakecoding - Adventures of a CTO</description>
+      <generator>Zola</generator>
+      <language>en</language>
+      <atom:link href="https://awakecoding.com/tags/rdp/rss.xml" rel="self" type="application/rss+xml"/>
+      <lastBuildDate>Fri, 18 Jul 2025 00:00:00 +0000</lastBuildDate>
+      <item>
+          <title>Saving Microsoft Remote Desktop (MSRDC) before it&#x27;s gone</title>
+          <pubDate>Fri, 18 Jul 2025 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/saving-microsoft-remote-desktop-msrdc-before-its-gone/</link>
+          <guid>https://awakecoding.com/posts/saving-microsoft-remote-desktop-msrdc-before-its-gone/</guid>
+          <description>Microsoft’s Remote Desktop client (MSRDC) is being deprecated, and recent updates have broken MsRdpEx support. Learn how to download and pin a stable version, disable auto-updates, and preserve access before MSRDC goes away for good.</description>
+          <bannerImage>https://awakecoding.com/images/banners/saving-microsoft-remote-desktop-msrdc-before-its-gone.png</bannerImage><tags>
+              <tag>RDP</tag>
+              <tag>Windows</tag>
+              <tag>PowerShell</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>RD Gateway Without KDC Proxy Causes NTLM Downgrade</title>
+          <pubDate>Sat, 26 Apr 2025 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/rd-gateway-without-kdc-proxy-causes-ntlm-downgrade/</link>
+          <guid>https://awakecoding.com/posts/rd-gateway-without-kdc-proxy-causes-ntlm-downgrade/</guid>
+          <description>Learn why mstsc requires the RD Gateway to act as a KDC proxy for Kerberos authentication, how this undocumented behavior causes silent NTLM downgrades, and how to fix it by enabling the KDC proxy service.</description>
+          <bannerImage>https://awakecoding.com/images/banners/rd-gateway-without-kdc-proxy-causes-ntlm-downgrade.png</bannerImage><tags>
+              <tag>Windows</tag>
+              <tag>Kerberos</tag>
+              <tag>RDP</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>Mac RDP Client: Kerberos and Protected Users Guide</title>
+          <pubDate>Thu, 13 Jun 2024 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/mac-rdp-client-kerberos-and-protected-users-guide/</link>
+          <guid>https://awakecoding.com/posts/mac-rdp-client-kerberos-and-protected-users-guide/</guid>
+          <description>Explore the essential steps to secure Mac RDP connections using Kerberos authentication with a focus on troubleshooting Protected Users and NTLM issues. This guide provides practical solutions for configuring Kerberos in an Active Directory environment, ensuring robust security for remote desktop access.</description>
+          <bannerImage>https://awakecoding.com/images/banners/mac-rdp-client-kerberos-and-protected-users-guide.png</bannerImage><tags>
+              <tag>RDP</tag>
+              <tag>Kerberos</tag>
+              <tag>ActiveDirectory</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>RDP NLA with Azure AD: The PKU2U Nightmare</title>
+          <pubDate>Thu, 10 Aug 2023 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/rdp-nla-with-azure-ad-the-pku2u-nightmare/</link>
+          <guid>https://awakecoding.com/posts/rdp-nla-with-azure-ad-the-pku2u-nightmare/</guid>
+          <description>This post tackles the challenges of RDP Network Level Authentication (NLA) with Azure AD, labeled as the PKU2U nightmare, offering detailed solutions for common problems. It addresses enabling PKU2U authentication, Azure AD workplace joining, the correct Azure AD username format, and third-party application support, providing both technical insights and practical steps to mitigate these issues in Azure AD environments.</description>
+          <bannerImage>https://awakecoding.com/images/banners/rdp-nla-with-azure-ad-the-pku2u-nightmare.png</bannerImage><tags>
+              <tag>RDP</tag>
+              <tag>Windows</tag>
+              <tag>Azure</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>RDP Smartcard Logon: User Name Does Not Exist</title>
+          <pubDate>Fri, 04 Aug 2023 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/rdp-smartcard-logon-user-name-does-not-exist/</link>
+          <guid>https://awakecoding.com/posts/rdp-smartcard-logon-user-name-does-not-exist/</guid>
+          <description>Navigate through the confusion of &quot;the specified user name does not exist&quot; error during RDP smartcard logon, offering insights into common misinterpretations and actionable solutions. This post breaks down error messages, suggests disabling strict KDC validation, and guides on certificate trust validation, ensuring successful authentication with practical steps and PowerShell commands.</description>
+          <bannerImage>https://awakecoding.com/images/banners/rdp-smartcard-logon-user-name-does-not-exist.png</bannerImage><tags>
+              <tag>RDP</tag>
+              <tag>Kerberos</tag>
+              <tag>Windows</tag>
+              <tag>CTO</tag>
+            </tags></item>
+    </channel>
+</rss>

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+      <title>AwakeCoding ☀️💻 - PowerShell</title>
+      <link>https://awakecoding.com</link>
+      <description>awakecoding - Adventures of a CTO</description>
+      <generator>Zola</generator>
+      <language>en</language>
+      <atom:link href="https://awakecoding.com/tags/powershell/rss.xml" rel="self" type="application/rss+xml"/>
+      <lastBuildDate>Fri, 01 Aug 2025 00:00:00 +0000</lastBuildDate>
+      <item>
+          <title>Deleting Hidden Proxy Settings that Break Windows Apps</title>
+          <pubDate>Fri, 01 Aug 2025 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/deleting-hidden-proxy-settings-that-break-windows-apps/</link>
+          <guid>https://awakecoding.com/posts/deleting-hidden-proxy-settings-that-break-windows-apps/</guid>
+          <description>Windows leaves behind hidden proxy configurations in the ProxyMgr registry that break apps even after disabling proxy settings. Learn how to identify and completely eliminate these phantom settings that affect system services like Kerberos authentication.</description>
+          <bannerImage>https://awakecoding.com/images/banners/deleting-hidden-proxy-settings-that-break-windows-apps.png</bannerImage><tags>
+              <tag>Windows</tag>
+              <tag>PowerShell</tag>
+              <tag>Networking</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>Saving Microsoft Remote Desktop (MSRDC) before it&#x27;s gone</title>
+          <pubDate>Fri, 18 Jul 2025 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/saving-microsoft-remote-desktop-msrdc-before-its-gone/</link>
+          <guid>https://awakecoding.com/posts/saving-microsoft-remote-desktop-msrdc-before-its-gone/</guid>
+          <description>Microsoft’s Remote Desktop client (MSRDC) is being deprecated, and recent updates have broken MsRdpEx support. Learn how to download and pin a stable version, disable auto-updates, and preserve access before MSRDC goes away for good.</description>
+          <bannerImage>https://awakecoding.com/images/banners/saving-microsoft-remote-desktop-msrdc-before-its-gone.png</bannerImage><tags>
+              <tag>RDP</tag>
+              <tag>Windows</tag>
+              <tag>PowerShell</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>Disabling the Windows 11 Taskbar Search Box for All Users</title>
+          <pubDate>Fri, 06 Jun 2025 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/disabling-the-windows-11-taskbar-search-box-for-all-users/</link>
+          <guid>https://awakecoding.com/posts/disabling-the-windows-11-taskbar-search-box-for-all-users/</guid>
+          <description>Learn how to disable the Windows 11 taskbar search box for all users by default using PowerShell and registry edits. Includes a deep dive into why the setting gets reset and how to prevent it with a reliable fix.</description>
+          <bannerImage>https://awakecoding.com/images/banners/disabling-the-windows-11-taskbar-search-box-for-all-users.png</bannerImage><lastUpdated>Fri, 06 Jun 2025 00:00:00 +0000</lastUpdated><tags>
+              <tag>Windows</tag>
+              <tag>PowerShell</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>Automating Hyper-V Network Adapter Cleanup and IP Migration</title>
+          <pubDate>Sat, 17 May 2025 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/automating-hyper-v-network-adapter-cleanup-migration/</link>
+          <guid>https://awakecoding.com/posts/automating-hyper-v-network-adapter-cleanup-migration/</guid>
+          <description>Learn how to automate the cleanup of ghost Hyper-V network adapters and migrate static IP configurations using PowerShell. This post walks through detecting stale adapters, reassigning IP settings, and setting up a scheduled task to keep your lab environments self-healing on boot.</description>
+          <bannerImage>https://awakecoding.com/images/banners/automating-hyper-v-network-adapter-cleanup-migration.png</bannerImage><lastUpdated>Sun, 18 May 2025 00:00:00 +0000</lastUpdated><tags>
+              <tag>Windows</tag>
+              <tag>Networking</tag>
+              <tag>PowerShell</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>Pinning Apps to the Windows 11 Taskbar with PowerShell</title>
+          <pubDate>Wed, 14 May 2025 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/pinning-apps-to-the-windows-11-taskbar-with-powershell/</link>
+          <guid>https://awakecoding.com/posts/pinning-apps-to-the-windows-11-taskbar-with-powershell/</guid>
+          <description>Learn how to automate taskbar app pinning in Windows 11 using PowerShell by generating a LayoutModification.xml file and forcing the shell to reinitialize the layout without creating new user profiles.</description>
+          <bannerImage>https://awakecoding.com/images/banners/pinning-apps-to-the-windows-11-taskbar-with-powershell.png</bannerImage><lastUpdated>Thu, 15 May 2025 00:00:00 +0000</lastUpdated><tags>
+              <tag>Windows</tag>
+              <tag>PowerShell</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>Fix CRL Not Published When Revocation Server Is Offline</title>
+          <pubDate>Sat, 19 Apr 2025 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/fix-crl-not-published-when-revocation-server-is-offline/</link>
+          <guid>https://awakecoding.com/posts/fix-crl-not-published-when-revocation-server-is-offline/</guid>
+          <description>Learn why AD CS may silently skip CRL publishing when the server is turned off or running with constrained resources, leading to revocation errors like CRYPT_E_REVOCATION_OFFLINE. This post breaks down the root cause, highlights overlooked pitfalls in default AD CS configurations, and provides practical fixes using PowerShell, HTTP CRL distribution, and scheduled tasks.</description>
+          <bannerImage>https://awakecoding.com/images/banners/fix-crl-not-published-when-revocation-server-is-offline.png</bannerImage><lastUpdated>Sun, 20 Apr 2025 00:00:00 +0000</lastUpdated><tags>
+              <tag>ActiveDirectory</tag>
+              <tag>Windows</tag>
+              <tag>PowerShell</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>Disable Bing Search in Start Menu for Faster Results</title>
+          <pubDate>Sun, 13 Apr 2025 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/disable-bing-search-in-start-menu-for-faster-results/</link>
+          <guid>https://awakecoding.com/posts/disable-bing-search-in-start-menu-for-faster-results/</guid>
+          <description>Discover how to disable Bing search in the Windows Start Menu for faster, more responsive local search results. This step-by-step guide shows how to modify the registry with PowerShell or a .reg file, apply the setting for all users, and optionally use Group Policy or Intune to deploy the change across an organization. Improve Start Menu performance and streamline your Windows experience.</description>
+          <bannerImage>https://awakecoding.com/images/banners/disable-bing-search-in-start-menu-for-faster-results.png</bannerImage><tags>
+              <tag>Windows</tag>
+              <tag>PowerShell</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>Isolating a Windows Service Process for Easier Debugging</title>
+          <pubDate>Sun, 06 Apr 2025 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/isolating-a-windows-service-process-for-easier-debugging/</link>
+          <guid>https://awakecoding.com/posts/isolating-a-windows-service-process-for-easier-debugging/</guid>
+          <description>Learn how to isolate a Windows system service into its own process for easier debugging. This guide walks you through identifying service process IDs, listing service group members, and using PowerShell to move a service into a new, dedicated service group.</description>
+          <bannerImage>https://awakecoding.com/images/banners/isolating-a-windows-service-process-for-easier-debugging.png</bannerImage><tags>
+              <tag>Windows</tag>
+              <tag>PowerShell</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>PowerShell Host IPC for any .NET application</title>
+          <pubDate>Wed, 25 Sep 2024 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/powershell-host-ipc-for-any-dotnet-application/</link>
+          <guid>https://awakecoding.com/posts/powershell-host-ipc-for-any-dotnet-application/</guid>
+          <description>Explore how PowerShell enables interprocess communication (IPC) using named pipes in .NET applications, allowing seamless remote control and API access. This hands-on guide walks through creating custom named pipes, using Enter-PSHostProcess for connection, and integrating PowerShell with your .NET projects to enhance flexibility and streamline automation workflows with real-world examples.</description>
+          <bannerImage>https://awakecoding.com/images/banners/powershell-host-ipc-for-any-dotnet-application.png</bannerImage><tags>
+              <tag>PowerShell</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>Enable PowerShell WinRM Remoting in PowerShell 7</title>
+          <pubDate>Wed, 07 Feb 2024 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/enable-powershell-winrm-remoting-in-powershell-7/</link>
+          <guid>https://awakecoding.com/posts/enable-powershell-winrm-remoting-in-powershell-7/</guid>
+          <description>Enable PowerShell 7 WinRM remoting for efficient server management without relying on SSH. This post provides a straightforward method to incorporate PowerShell 7 into Windows environments, ensuring compatibility and simplifying remoting tasks with practical code snippets and configuration advice.</description>
+          <bannerImage>https://awakecoding.com/images/banners/enable-powershell-winrm-remoting-in-powershell-7.png</bannerImage><tags>
+              <tag>PowerShell</tag>
+              <tag>Hyper-V</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>Debugging PowerShell Binary Modules in Visual Studio</title>
+          <pubDate>Sat, 21 Oct 2023 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/debugging-powershell-binary-modules-in-visual-studio/</link>
+          <guid>https://awakecoding.com/posts/debugging-powershell-binary-modules-in-visual-studio/</guid>
+          <description>Learn to create and debug PowerShell binary modules in Visual Studio, covering both local and remote debugging. This guide simplifies the development process for PowerShell modules, enhancing productivity with practical examples and troubleshooting tips for common issues.</description>
+          <bannerImage>https://awakecoding.com/images/banners/debugging-powershell-binary-modules-in-visual-studio.png</bannerImage><tags>
+              <tag>PowerShell</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>PowerShell Remoting Trusted Hosts: What does it mean?</title>
+          <pubDate>Sat, 17 Jun 2023 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/powershell-remoting-trusted-hosts-what-does-it-mean/</link>
+          <guid>https://awakecoding.com/posts/powershell-remoting-trusted-hosts-what-does-it-mean/</guid>
+          <description>This guide demystifies the &quot;TrustedHosts&quot; setting in PowerShell remoting, explaining its significance and how to configure it to avoid common errors. It offers solutions for enabling remote connections, particularly when Kerberos or HTTPS isn&#x27;t used, ensuring security and connectivity for non-domain-joined machines or across different domains.</description>
+          <bannerImage>https://awakecoding.com/images/banners/powershell-remoting-trusted-hosts-what-does-it-mean.png</bannerImage><tags>
+              <tag>PowerShell</tag>
+              <tag>Kerberos</tag>
+              <tag>CTO</tag>
+            </tags></item>
+    </channel>
+</rss>

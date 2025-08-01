@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/enable-powershell-winrm-remoting-in-powershell-7/">
+  <link rel="alternate" href="https://awakecoding.com/posts/enable-powershell-winrm-remoting-in-powershell-7/" hreflang="en" />
+  
+  <meta name="description" content="Enable PowerShell 7 WinRM remoting for efficient server management without relying on SSH. This post provides a straightforward method to incorporate PowerShell 7 into Windows environments, ensuring compatibility and simplifying remoting tasks with practical code snippets and configuration advice." />
+  <meta property="og:title" content="Enable PowerShell WinRM Remoting in PowerShell 7" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;enable-powershell-winrm-remoting-in-powershell-7&#x2F;" />
+  <meta property="og:description" content="Enable PowerShell 7 WinRM remoting for efficient server management without relying on SSH. This post provides a straightforward method to incorporate PowerShell 7 into Windows environments, ensuring compatibility and simplifying remoting tasks with practical code snippets and configuration advice." />
+  <meta name="twitter:title" content="Enable PowerShell WinRM Remoting in PowerShell 7" />
+  <meta name="twitter:description" content="Enable PowerShell 7 WinRM remoting for efficient server management without relying on SSH. This post provides a straightforward method to incorporate PowerShell 7 into Windows environments, ensuring compatibility and simplifying remoting tasks with practical code snippets and configuration advice." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;enable-powershell-winrm-remoting-in-powershell-7&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/enable-powershell-winrm-remoting-in-powershell-7.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/enable-powershell-winrm-remoting-in-powershell-7.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Enable PowerShell WinRM Remoting in PowerShell 7",
+  "description": "Enable PowerShell 7 WinRM remoting for efficient server management without relying on SSH. This post provides a straightforward method to incorporate PowerShell 7 into Windows environments, ensuring compatibility and simplifying remoting tasks with practical code snippets and configuration advice.",
+  "datePublished": "2024-02-07",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/enable-powershell-winrm-remoting-in-powershell-7.png",
+  "url": "https://awakecoding.com/posts/enable-powershell-winrm-remoting-in-powershell-7/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/enable-powershell-winrm-remoting-in-powershell-7/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | Enable PowerShell WinRM Remoting in PowerShell 7
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            Enable PowerShell WinRM Remoting in PowerShell 7
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2024-02-07">February 07, 2024</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>7 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>1224 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/powershell/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>PowerShell</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/hyper-v/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Hyper-V</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>Do you often wonder how to use PowerShell 7 in the <em>server</em> without switching to <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/powershell/scripting/learn/remoting/ssh-remoting-in-powershell">SSH-based remoting</a>? If <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows/win32/winrm/installation-and-configuration-for-windows-remote-management">WinRM</a> already works well, why would you want to deal with SSH keys when all you want is PowerShell 7? While WinRM-based remoting is not officially supported on non-Windows, it remains a decent choice for PowerShell remoting in Windows environments. If you want a code snippet you can just copy/paste to enable PowerShell 7 in WinRM without the whole explanation, just skip to the summary section at the end of this blog. Otherwise, read on!</p>
+<h2 id="installing-powershell">Installing PowerShell</h2>
+<p>There are several ways to install <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows">PowerShell 7 on Windows</a>, but my favorite method is this PowerShell code snippet which I run from an elevated shell:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">Environment</span><span style="color:#abb2bf;">]::SetEnvironmentVariable(</span><span style="color:#9acc76;">&quot;POWERSHELL_TELEMETRY_OPTOUT&quot;</span><span style="color:#adb7c9;">, </span><span style="color:#9acc76;">&quot;1&quot;</span><span style="color:#adb7c9;">, </span><span style="color:#9acc76;">&quot;Machine&quot;</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">iex </span><span style="color:#9acc76;">&quot;&amp; { $(irm https:</span><span style="color:#adb7c9;">//</span><span style="color:#9acc76;">aka.ms</span><span style="color:#adb7c9;">/</span><span style="color:#5ebfcc;">install-powershell.ps1</span><span style="color:#9acc76;">) } -UseMSI -Quiet -EnablePSRemoting&quot;
+</span></code></pre>
+<p>Otherwise, just download the latest MSI installer from the <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/PowerShell/PowerShell/releases">PowerShell GitHub releases</a>. From the <strong>Optional Actions</strong> dialog, make sure to enable PowerShell remoting. Feel free to disable telemetry if that's not your thing:</p>
+<p><img src="/images/posts/psremoting7-pwsh-msi-options-enable-psremoting.png" alt="PowerShell MSI installer Options Enable PSRemoting" /></p>
+<p>The "Enable PowerShell Remoting" option of the MSI installer just runs the <code>Enable-PSRemoting</code> command in pwsh.exe automatically.</p>
+<h2 id="enabling-powershell-remoting">Enabling PowerShell Remoting</h2>
+<p>On the server machine, launch PowerShell 7 (pwsh.exe) as administrator, then run <code>Enable-PSRemoting</code>:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS </span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Enable-PSRemoting
+</span><span style="color:#abb2bf;">WARNING: PowerShell remoting has been enabled only </span><span style="color:#cd74e8;">for</span><span style="color:#abb2bf;"> PowerShell </span><span style="color:#db9d63;">6</span><span style="color:#adb7c9;">+</span><span style="color:#abb2bf;"> configurations and does not affect Windows PowerShell remoting configurations. Run this cmdlet </span><span style="color:#cd74e8;">in</span><span style="color:#abb2bf;"> Windows PowerShell to affect all PowerShell remoting configurations.
+</span><span style="color:#abb2bf;">WinRM is already set up to receive requests on this computer.
+</span><span style="color:#abb2bf;">WinRM is already set up </span><span style="color:#cd74e8;">for</span><span style="color:#abb2bf;"> remote management on this computer.
+</span></code></pre>
+<p>Verify that <code>Get-PSSessionConfiguration</code> now lists a configuration named <strong>PowerShell.7</strong>:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS </span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-PSSessionConfiguration</span><span style="color:#abb2bf;"> PowerShell.</span><span style="color:#db9d63;">7</span><span style="color:#adb7c9;">* | </span><span style="color:#5ebfcc;">Select-Object</span><span style="color:#abb2bf;"> Name</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;">PSVersion</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;">Filename
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">Name              PSVersion Filename
+</span><span style="color:#adb7c9;">----              --------- --------
+</span><span style="color:#abb2bf;">PowerShell.</span><span style="color:#db9d63;">7      7.2       </span><span style="color:#adb7c9;">%</span><span style="color:#abb2bf;">windir</span><span style="color:#adb7c9;">%</span><span style="color:#abb2bf;">\system32\PowerShell\</span><span style="color:#db9d63;">7.2</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">17</span><span style="color:#abb2bf;">\pwrshplugin.dll
+</span><span style="color:#abb2bf;">PowerShell.</span><span style="color:#db9d63;">7.2</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">17 7.2       </span><span style="color:#adb7c9;">%</span><span style="color:#abb2bf;">windir</span><span style="color:#adb7c9;">%</span><span style="color:#abb2bf;">\system32\PowerShell\</span><span style="color:#db9d63;">7.2</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">17</span><span style="color:#abb2bf;">\pwrshplugin.dll
+</span></code></pre>
+<p>It is very important to note that Enable-PSRemoting and Get-PSSessionConfiguration work differently in powershell.exe and pwsh.exe: the listing is different, and registration needs to be done separately for Windows PowerShell (powershell.exe) and PowerShell 7 (pwsh.exe). The default Windows PowerShell configuration names also begin with "microsoft." instead of "PowerShell.":</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Get-PSSessionConfiguration</span><span style="color:#abb2bf;"> microsoft.</span><span style="color:#adb7c9;">* | </span><span style="color:#5ebfcc;">Select-Object</span><span style="color:#abb2bf;"> Name</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;">PSVersion</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;">Filename
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">Name                                     PSVersion Filename
+</span><span style="color:#adb7c9;">----                                     --------- --------
+</span><span style="color:#abb2bf;">microsoft.powershell                     </span><span style="color:#db9d63;">5.1       </span><span style="color:#adb7c9;">%</span><span style="color:#abb2bf;">windir</span><span style="color:#adb7c9;">%</span><span style="color:#abb2bf;">\system32\pwrshplugin.dll
+</span><span style="color:#abb2bf;">microsoft.powershell.workflow            </span><span style="color:#db9d63;">5.1       </span><span style="color:#adb7c9;">%</span><span style="color:#abb2bf;">windir</span><span style="color:#adb7c9;">%</span><span style="color:#abb2bf;">\system32\pwrshplugin.dll
+</span><span style="color:#abb2bf;">microsoft.powershell32                   </span><span style="color:#db9d63;">5.1       </span><span style="color:#adb7c9;">%</span><span style="color:#abb2bf;">windir</span><span style="color:#adb7c9;">%</span><span style="color:#abb2bf;">\system32\pwrshplugin.dll
+</span><span style="color:#abb2bf;">microsoft.windows.servermanagerworkflows </span><span style="color:#db9d63;">3.0</span><span style="color:#abb2bf;">       C:\Windows\system32\pwrshplugin.dll
+</span></code></pre>
+<p>Do not make the mistake of using powershell.exe: use pwsh.exe at all times for PowerShell 7 remoting configuration management, even if PowerShell 7 configuration names somehow end up listed in powershell.exe. It's a trap, don't fall into it like I did.</p>
+<h2 id="connecting-with-powershell-remoting">Connecting with PowerShell Remoting</h2>
+<p>On the client machine, launch PowerShell, and define a few variables we're going to reuse for <code>Enter-PSSession</code> commands. The client machine can be the same as the server machine for local testing, but for real-world usage this is not normally the case:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$UserName </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;Administrator@ad.it-help.ninja&quot;
+</span><span style="color:#eb6772;">$ComputerName </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;IT-HELP-TEST.ad.it-help.ninja&quot;
+</span><span style="color:#eb6772;">$Credential </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-Credential </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">UserName </span><span style="color:#eb6772;">$UserName
+</span></code></pre>
+<p>Open a new PowerShell remoting session using the <strong>PowerShell.7</strong> configuration name, then print $PSVersionTable from the PowerShell server to confirm what version it is using:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Enter-PSSession </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ComputerName </span><span style="color:#eb6772;">$ComputerName </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Credential </span><span style="color:#eb6772;">$Credential </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ConfigurationName </span><span style="color:#9acc76;">&quot;PowerShell.7&quot;
+</span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">IT</span><span style="color:#adb7c9;">-</span><span style="color:#cd74e8;">HELP</span><span style="color:#adb7c9;">-</span><span style="color:#cd74e8;">TEST.ad.it</span><span style="color:#adb7c9;">-</span><span style="color:#cd74e8;">help.ninja</span><span style="color:#abb2bf;">]: </span><span style="color:#adb7c9;">&gt; </span><span style="color:#abb2bf;">$PSVersionTable
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">Name                           Value
+</span><span style="color:#adb7c9;">----                           -----
+</span><span style="color:#abb2bf;">PSVersion                      </span><span style="color:#db9d63;">7.2</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">17
+</span><span style="color:#abb2bf;">PSEdition                      Core
+</span><span style="color:#abb2bf;">GitCommitId                    </span><span style="color:#db9d63;">7.2</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">17
+</span><span style="color:#abb2bf;">OS                             Microsoft Windows </span><span style="color:#db9d63;">10.0</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">20348
+</span><span style="color:#abb2bf;">Platform                       Win32NT
+</span><span style="color:#abb2bf;">PSCompatibleVersions           {</span><span style="color:#db9d63;">1.0</span><span style="color:#adb7c9;">, </span><span style="color:#db9d63;">2.0</span><span style="color:#adb7c9;">, </span><span style="color:#db9d63;">3.0</span><span style="color:#adb7c9;">, </span><span style="color:#db9d63;">4.0</span><span style="color:#abb2bf;">…}
+</span><span style="color:#abb2bf;">PSRemotingProtocolVersion
+</span><span style="color:#abb2bf;">SerializationVersion           </span><span style="color:#db9d63;">1.1</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">0.1
+</span><span style="color:#abb2bf;">WSManStackVersion              </span><span style="color:#db9d63;">3.0
+</span></code></pre>
+<p>If it didn't work, here are the most common errors and their meaning:</p>
+<blockquote>
+<p>The WinRM client cannot process the request because the server name cannot be resolved.</p>
+</blockquote>
+<p>Check the computer name and your DNS configuration, as the target computer name cannot be resolved. You can also try connecting by IP address instead.</p>
+<blockquote>
+<p>The WS-Management service cannot process the request. Cannot find the PowerShell.7 session configuration in the WSMan: drive on the remote computer.</p>
+</blockquote>
+<p>The WinRM service on the target computer could be reached, but it doesn't know about the "PowerShell.7" session configuration. Check that you have run the <code>Enable-PSRemoting</code> command from pwsh.exe (PowerShell 7) and not powershell.exe (Windows PowerShell 5.1), and then try connecting again.</p>
+<blockquote>
+<p>WinRM cannot complete the operation. Verify that the specified computer name is valid, that the computer is accessible over the network, and that a firewall exception for the WinRM service is enabled and allows access from this computer. By default, the WinRM firewall exception for public profiles limits access to remote computers within the same local subnet</p>
+</blockquote>
+<p>The target computer name could be resolved, but the WinRM service either isn't listening on TCP/5985 or a firewall is blocking the connection.</p>
+<blockquote>
+<p>The WinRM client cannot process the request. If the authentication scheme is different from Kerberos, or if the client computer is not joined to a domain, then HTTPS transport must be used or the destination machine must be added to the TrustedHosts configuration setting. Use winrm.cmd to configure TrustedHosts. Note that computers in the TrustedHosts list might not be authenticated.</p>
+</blockquote>
+<p>See my blog <a rel="noopener nofollow noreferrer" target="_blank" href="https://awakecoding.com/posts/powershell-remoting-trusted-hosts-what-does-it-mean/">"PowerShell Remoting Trusted Hosts: What does it mean?"</a> which is dedicated just to that one cryptic error.</p>
+<h2 id="hyper-v-powershell-7-direct">Hyper-V PowerShell 7 Direct</h2>
+<p>If you manage virtual machines in Hyper-V, did you know it was possible to use PowerShell remoting over the VMBus? <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/user-guide/powershell-direct">PowerShell Direct</a> is extremely useful to configure Windows virtual machines guests from the host <em>without networking</em> (!). I use this feature extensively to configure guest VM networking, but also to <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/Devolutions/devolutions-labs">automate entire Hyper-V labs with scripts driven from the host</a>. Either launch an elevated PowerShell terminal, or ensure you are a member of the local Hyper-V Administrators group, then use the <code>-VMName</code> parameter instead of <code>-ComputerName</code> with the <code>Enter-PSSession</code> cmdlet:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$VMName </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;IT-HELP-TEST&quot;
+</span><span style="color:#eb6772;">$UserName </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;Administrator@ad.it-help.ninja&quot;
+</span><span style="color:#eb6772;">$Credential </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-Credential </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">UserName </span><span style="color:#eb6772;">$UserName
+</span><span style="color:#5ebfcc;">Enter-PSSession </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">VMName </span><span style="color:#eb6772;">$VMName </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Credential </span><span style="color:#eb6772;">$Credential </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ConfigurationName </span><span style="color:#9acc76;">&quot;PowerShell.7&quot;
+</span></code></pre>
+<p>It is not properly documented anywhere, but the same PSSessionConfiguration used for WinRM is also used by the Hyper-V PSDirect service. Another "trick" is to delete <code>powershell.exe</code> from the Windows guest which will force <code>pwsh.exe</code> to be used instead:</p>
+<p><img src="/images/posts/psremoting7-hyper-v-psdirect-pwsh-fallback.png" alt="PowerShell MSI installer Options Enable PSRemoting" /></p>
+<p>However, this "solution" is not recommended for obvious reasons.</p>
+<h2 id="updating-powershell-7">Updating PowerShell 7</h2>
+<p>Enabling PowerShell remoting is great, but what happens when you update PowerShell? Most of the time it <em>should</em> work, but problems often arise with outdated and broken session configuration data. On the client, this often manifests itself as a weird assembly loading error:</p>
+<blockquote>
+<p>New-PSSession:  failed with the following error message : Could not load file or assembly 'System.Security.Cryptography, Version=7.0.0.0, Culture=neutral, . The system cannot find the file specified. For more information, see the about_Remote_Troubleshooting Help topic.</p>
+</blockquote>
+<p>To fix this, on the server, unregister the previous PowerShell 7 session configurations, then run <code>Enable-PSRemoting</code> again:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Get-PSSessionConfiguration</span><span style="color:#abb2bf;"> PowerShell.</span><span style="color:#db9d63;">7</span><span style="color:#adb7c9;">* | </span><span style="color:#5ebfcc;">Unregister-PSSessionConfiguration</span><span style="color:#abb2bf;">; </span><span style="color:#5ebfcc;">Enable-PSRemoting
+</span></code></pre>
+<p>You should now have proper PowerShell session configurations pointing to the currently installed version:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Get-PSSessionConfiguration</span><span style="color:#abb2bf;"> PowerShell.</span><span style="color:#db9d63;">7</span><span style="color:#adb7c9;">* | </span><span style="color:#5ebfcc;">Select-Object</span><span style="color:#abb2bf;"> Name</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;">PSVersion</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;">Filename
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">Name             PSVersion Filename
+</span><span style="color:#adb7c9;">----             --------- --------
+</span><span style="color:#abb2bf;">PowerShell.</span><span style="color:#db9d63;">7     7.4       </span><span style="color:#adb7c9;">%</span><span style="color:#abb2bf;">windir</span><span style="color:#adb7c9;">%</span><span style="color:#abb2bf;">\system32\PowerShell\</span><span style="color:#db9d63;">7.4</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">1</span><span style="color:#abb2bf;">\pwrshplugin.dll
+</span><span style="color:#abb2bf;">PowerShell.</span><span style="color:#db9d63;">7.4</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">1 7.4       </span><span style="color:#adb7c9;">%</span><span style="color:#abb2bf;">windir</span><span style="color:#adb7c9;">%</span><span style="color:#abb2bf;">\system32\PowerShell\</span><span style="color:#db9d63;">7.4</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">1</span><span style="color:#abb2bf;">\pwrshplugin.dll
+</span></code></pre>
+<p>From the client, you can try connecting again:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Enter-PSSession </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ComputerName </span><span style="color:#eb6772;">$ComputerName </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Credential </span><span style="color:#eb6772;">$Credential </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ConfigurationName </span><span style="color:#9acc76;">&quot;PowerShell.7&quot;
+</span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">IT</span><span style="color:#adb7c9;">-</span><span style="color:#cd74e8;">HELP</span><span style="color:#adb7c9;">-</span><span style="color:#cd74e8;">TEST.ad.it</span><span style="color:#adb7c9;">-</span><span style="color:#cd74e8;">help.ninja</span><span style="color:#abb2bf;">]: PS </span><span style="color:#adb7c9;">&gt; </span><span style="color:#abb2bf;">$PSVersionTable
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">Name                           Value
+</span><span style="color:#adb7c9;">----                           -----
+</span><span style="color:#abb2bf;">PSVersion                      </span><span style="color:#db9d63;">7.4</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">1
+</span><span style="color:#abb2bf;">PSEdition                      Core
+</span><span style="color:#abb2bf;">GitCommitId                    </span><span style="color:#db9d63;">7.4</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">1
+</span><span style="color:#abb2bf;">OS                             Microsoft Windows </span><span style="color:#db9d63;">10.0</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">20348
+</span><span style="color:#abb2bf;">Platform                       Win32NT
+</span><span style="color:#abb2bf;">PSCompatibleVersions           {</span><span style="color:#db9d63;">1.0</span><span style="color:#adb7c9;">, </span><span style="color:#db9d63;">2.0</span><span style="color:#adb7c9;">, </span><span style="color:#db9d63;">3.0</span><span style="color:#adb7c9;">, </span><span style="color:#db9d63;">4.0</span><span style="color:#abb2bf;">…}
+</span><span style="color:#abb2bf;">PSRemotingProtocolVersion
+</span><span style="color:#abb2bf;">SerializationVersion           </span><span style="color:#db9d63;">1.1</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">0.1
+</span><span style="color:#abb2bf;">WSManStackVersion              </span><span style="color:#db9d63;">3.0
+</span></code></pre>
+<p>To prevent future PSSessionConfiguration breakage, a quick and dirty solution is to create a scheduled task:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$TaskCommand </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;</span><span style="color:#5ebfcc;">`$</span><span style="color:#9acc76;">PSVersion = </span><span style="color:#5ebfcc;">`$</span><span style="color:#9acc76;">PSVersionTable.PSVersion.ToString(); &quot; </span><span style="color:#adb7c9;">+
+</span><span style="color:#abb2bf;">    </span><span style="color:#9acc76;">&quot;if (-Not (Get-PSSessionConfiguration PowerShell.</span><span style="color:#5ebfcc;">`$</span><span style="color:#9acc76;">PSVersion)) { &quot; </span><span style="color:#adb7c9;">+
+</span><span style="color:#abb2bf;">    </span><span style="color:#9acc76;">&quot;Get-PSSessionConfiguration PowerShell.7* | Unregister-PSSessionConfiguration; &quot; </span><span style="color:#adb7c9;">+
+</span><span style="color:#abb2bf;">    </span><span style="color:#9acc76;">&quot;Enable-PSRemoting }&quot;
+</span><span style="color:#eb6772;">$TaskAction </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">New-ScheduledTaskAction </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Execute </span><span style="color:#9acc76;">&#39;pwsh.exe&#39; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Argument </span><span style="color:#9acc76;">&quot;-Command </span><span style="color:#eb6772;">$TaskCommand</span><span style="color:#9acc76;">&quot;
+</span><span style="color:#eb6772;">$TaskTrigger </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">New-ScheduledTaskTrigger </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">AtStartup
+</span><span style="color:#eb6772;">$Params </span><span style="color:#adb7c9;">= </span><span style="color:#cd74e8;">@</span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">Action </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$TaskAction</span><span style="color:#abb2bf;">;
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">Trigger </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$TaskTrigger</span><span style="color:#abb2bf;">;
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">User </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;NT AUTHORITY\SYSTEM&quot;</span><span style="color:#abb2bf;">;
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">TaskName </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;Update PowerShell 7 remoting configuration&quot;</span><span style="color:#abb2bf;">;
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">Description </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;Update PowerShell 7 remoting configuration&quot;</span><span style="color:#abb2bf;">;
+</span><span style="color:#abb2bf;">}
+</span><span style="color:#5ebfcc;">Register-ScheduledTask </span><span style="color:#eb6772;">@Params
+</span></code></pre>
+<p>However, the scheduled task is not guaranteed to run right after PowerShell 7 is updated, so it may still break. What if we simply didn't need to update the registration information, such that it remained valid after a PowerShell upgrade? Let's remove the version-specific PSSessionConfiguration, then edit the PowerShell.7 configuration to point to the pwrshplugin.dll plugin DLL in its installation path. Since the <code>Enable-PSRemoting</code> cmdlet doesn't overwrite existing configurations, it won't be overwritten if you select "Enable PowerShell Remoting" in the MSI installer:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Get-PSSessionConfiguration</span><span style="color:#abb2bf;"> PowerShell.</span><span style="color:#db9d63;">7</span><span style="color:#abb2bf;">.</span><span style="color:#adb7c9;">* | </span><span style="color:#5ebfcc;">Unregister-PSSessionConfiguration
+</span><span style="color:#eb6772;">$WSManPluginPath </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Join-Path </span><span style="color:#abb2bf;">$PSHOME</span><span style="color:#eb6772;">.Replace</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$Env:ProgramFiles</span><span style="color:#adb7c9;">, </span><span style="color:#9acc76;">&#39;%ProgramFiles%&#39;</span><span style="color:#abb2bf;">) </span><span style="color:#9acc76;">&quot;pwrshplugin.dll&quot;
+</span><span style="color:#5ebfcc;">Set-Item </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#9acc76;">&quot;WSMan:\localhost\Plugin\PowerShell.7\Filename&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#eb6772;">$WSManPluginPath
+</span><span style="color:#5ebfcc;">Set-Item </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#9acc76;">&quot;WSMan:\localhost\Plugin\PowerShell.7\InitializationParameters\PSVersion&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#9acc76;">&quot;7&quot;
+</span><span style="color:#5ebfcc;">Get-Item </span><span style="color:#9acc76;">&quot;</span><span style="color:#eb6772;">$Env:WinDir</span><span style="color:#9acc76;">\system32\PowerShell\7.*&quot; </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Remove-Item </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Recurse </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force
+</span><span style="color:#5ebfcc;">Get-Item </span><span style="color:#9acc76;">&quot;</span><span style="color:#eb6772;">$Env:WinDir</span><span style="color:#9acc76;">\system32\PowerShell\7\*.dll&quot; </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Remove-Item </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force
+</span><span style="color:#5ebfcc;">Restart-Service</span><span style="color:#abb2bf;"> WinRM
+</span></code></pre>
+<p>From PowerShell 7, you should now have a single PSSessionConfiguration named "PowerShell 7":</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Get-PSSessionConfiguration </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Select-Object </span><span style="color:#adb7c9;">*
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">MaxMemoryPerShellMB           : </span><span style="color:#db9d63;">2147483647
+</span><span style="color:#abb2bf;">PSVersion                     : </span><span style="color:#db9d63;">7
+</span><span style="color:#abb2bf;">ResourceUri                   : http:</span><span style="color:#adb7c9;">//</span><span style="color:#5ebfcc;">schemas.microsoft.com</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">powershell</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">PowerShell.</span><span style="color:#db9d63;">7
+</span><span style="color:#abb2bf;">MaxIdleTimeoutms              : </span><span style="color:#db9d63;">2147483647
+</span><span style="color:#abb2bf;">XmlRenderingType              : text
+</span><span style="color:#abb2bf;">MaxShells                     : </span><span style="color:#db9d63;">2147483647
+</span><span style="color:#abb2bf;">MaxProcessesPerShell          : </span><span style="color:#db9d63;">2147483647
+</span><span style="color:#abb2bf;">RunAsPassword                 :
+</span><span style="color:#abb2bf;">RunAsUser                     :
+</span><span style="color:#abb2bf;">MaxShellsPerUser              : </span><span style="color:#db9d63;">25
+</span><span style="color:#abb2bf;">SecurityDescriptorSddl        : O:NSG:BAD:P(A;;GA;;;BA)(A;;GA;;;RM)(A;;GA;;;IU)S:P(AU;FA;GA;;;WD)(AU;SA;GXGW;;;WD)
+</span><span style="color:#abb2bf;">MaxConcurrentUsers            : </span><span style="color:#db9d63;">2147483647
+</span><span style="color:#abb2bf;">ExactMatch                    : False
+</span><span style="color:#abb2bf;">IdleTimeoutms                 : </span><span style="color:#db9d63;">7200000
+</span><span style="color:#abb2bf;">OutputBufferingMode           : Block
+</span><span style="color:#abb2bf;">RunAsVirtualAccount           : false
+</span><span style="color:#abb2bf;">AutoRestart                   : false
+</span><span style="color:#abb2bf;">Capability                    : {Shell}
+</span><span style="color:#abb2bf;">Filename                      : </span><span style="color:#adb7c9;">%</span><span style="color:#abb2bf;">ProgramFiles</span><span style="color:#adb7c9;">%</span><span style="color:#abb2bf;">\PowerShell\</span><span style="color:#db9d63;">7</span><span style="color:#abb2bf;">\pwrshplugin.dll
+</span><span style="color:#abb2bf;">UseSharedProcess              : false
+</span><span style="color:#abb2bf;">Enabled                       : True
+</span><span style="color:#abb2bf;">SDKVersion                    : </span><span style="color:#db9d63;">2
+</span><span style="color:#abb2bf;">RunAsVirtualAccountGroups     :
+</span><span style="color:#abb2bf;">ParentResourceUri             : http:</span><span style="color:#adb7c9;">//</span><span style="color:#5ebfcc;">schemas.microsoft.com</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">powershell</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">PowerShell.</span><span style="color:#db9d63;">7
+</span><span style="color:#abb2bf;">Architecture                  : </span><span style="color:#db9d63;">64
+</span><span style="color:#abb2bf;">Name                          : PowerShell.</span><span style="color:#db9d63;">7
+</span><span style="color:#abb2bf;">lang                          : en</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">US
+</span><span style="color:#abb2bf;">MaxConcurrentCommandsPerShell : </span><span style="color:#db9d63;">2147483647
+</span><span style="color:#abb2bf;">ProcessIdleTimeoutSec         : </span><span style="color:#db9d63;">0
+</span><span style="color:#abb2bf;">SupportsOptions               : true
+</span><span style="color:#abb2bf;">xmlns                         : http:</span><span style="color:#adb7c9;">//</span><span style="color:#5ebfcc;">schemas.microsoft.com</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">wbem</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">wsman</span><span style="color:#adb7c9;">/</span><span style="color:#db9d63;">1</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">config</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">PluginConfiguration
+</span><span style="color:#abb2bf;">Uri                           : http:</span><span style="color:#adb7c9;">//</span><span style="color:#5ebfcc;">schemas.microsoft.com</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">powershell</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">PowerShell.</span><span style="color:#db9d63;">7
+</span><span style="color:#abb2bf;">Permission                    : NT AUTHORITY\INTERACTIVE AccessAllowed</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;"> BUILTIN\Administrators AccessAllowed</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;"> BUILTIN\Remote Management Users AccessAllowed
+</span></code></pre>
+<p>That's it! You can now upgrade or downgrade PowerShell 7, the "PowerShell.7" PSSessionConfiguration won't need manual updating to keep working.</p>
+<h2 id="summary">Summary</h2>
+<p>If you just want to enable PowerShell WinRM remoting in PowerShell 7 with just one code snippet, here it is. Don't forget to run it from pwsh.exe (PowerShell 7) and not Windows PowerShell (powershell.exe):</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Get-PSSessionConfiguration</span><span style="color:#abb2bf;"> PowerShell.</span><span style="color:#db9d63;">7</span><span style="color:#adb7c9;">* | </span><span style="color:#5ebfcc;">Unregister-PSSessionConfiguration</span><span style="color:#abb2bf;">; </span><span style="color:#5ebfcc;">Enable-PSRemoting
+</span><span style="color:#eb6772;">$WSManPluginPath </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Join-Path </span><span style="color:#abb2bf;">$PSHOME</span><span style="color:#eb6772;">.Replace</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$Env:ProgramFiles</span><span style="color:#adb7c9;">, </span><span style="color:#9acc76;">&#39;%ProgramFiles%&#39;</span><span style="color:#abb2bf;">) </span><span style="color:#9acc76;">&quot;pwrshplugin.dll&quot;
+</span><span style="color:#5ebfcc;">Set-Item </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#9acc76;">&quot;WSMan:\localhost\Plugin\PowerShell.7\Filename&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#eb6772;">$WSManPluginPath
+</span><span style="color:#5ebfcc;">Set-Item </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#9acc76;">&quot;WSMan:\localhost\Plugin\PowerShell.7\InitializationParameters\PSVersion&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#9acc76;">&quot;7&quot;
+</span><span style="color:#5ebfcc;">Get-Item </span><span style="color:#9acc76;">&quot;</span><span style="color:#eb6772;">$Env:WinDir</span><span style="color:#9acc76;">\system32\PowerShell\7.*&quot; </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Remove-Item </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Recurse </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force
+</span><span style="color:#5ebfcc;">Get-Item </span><span style="color:#9acc76;">&quot;</span><span style="color:#eb6772;">$Env:WinDir</span><span style="color:#9acc76;">\system32\PowerShell\7\*.dll&quot; </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Remove-Item </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force
+</span><span style="color:#5ebfcc;">Restart-Service</span><span style="color:#abb2bf;"> WinRM
+</span></code></pre>
+<p>You can then connect using the "PowerShell.7" configuration name with the <code>Enter-PSSession</code> cmdlet:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$UserName </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;Administrator@ad.it-help.ninja&quot;
+</span><span style="color:#eb6772;">$ComputerName </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;IT-HELP-TEST.ad.it-help.ninja&quot;
+</span><span style="color:#eb6772;">$Credential </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-Credential </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">UserName </span><span style="color:#eb6772;">$UserName
+</span><span style="color:#5ebfcc;">Enter-PSSession </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ComputerName </span><span style="color:#eb6772;">$ComputerName </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Credential </span><span style="color:#eb6772;">$Credential </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ConfigurationName </span><span style="color:#9acc76;">&quot;PowerShell.7&quot;
+</span></code></pre>
+<p>You can now start migrating to PowerShell 7 for all your PSRemoting needs, instead of using PowerShell 7 to connect to Windows PowerShell!</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;decompiling-hyper-v-manager-to-rebuild-it-from-source&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              Decompiling Hyper-V Manager to rebuild it from source
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;mac-rdp-client-kerberos-and-protected-users-guide&#x2F;">
+              Mac RDP Client: Kerberos and Protected Users Guide<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>

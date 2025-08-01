@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/windows-hello-cloud-kerberos-trust-or-key-trust/">
+  <link rel="alternate" href="https://awakecoding.com/posts/windows-hello-cloud-kerberos-trust-or-key-trust/" hreflang="en" />
+  
+  <meta name="description" content="Unpack the dilemma between Cloud Kerberos Trust and Key Trust in Windows Hello for Business deployments. This post navigates through troubleshooting login issues, clarifying deployment types, and offering solutions for transitioning between deployment models with Group Policy and PowerShell, ensuring a smoother Windows Hello setup and operational reliability." />
+  <meta property="og:title" content="Windows Hello: Cloud Kerberos Trust, or Key Trust?" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;windows-hello-cloud-kerberos-trust-or-key-trust&#x2F;" />
+  <meta property="og:description" content="Unpack the dilemma between Cloud Kerberos Trust and Key Trust in Windows Hello for Business deployments. This post navigates through troubleshooting login issues, clarifying deployment types, and offering solutions for transitioning between deployment models with Group Policy and PowerShell, ensuring a smoother Windows Hello setup and operational reliability." />
+  <meta name="twitter:title" content="Windows Hello: Cloud Kerberos Trust, or Key Trust?" />
+  <meta name="twitter:description" content="Unpack the dilemma between Cloud Kerberos Trust and Key Trust in Windows Hello for Business deployments. This post navigates through troubleshooting login issues, clarifying deployment types, and offering solutions for transitioning between deployment models with Group Policy and PowerShell, ensuring a smoother Windows Hello setup and operational reliability." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;windows-hello-cloud-kerberos-trust-or-key-trust&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/windows-hello-cloud-kerberos-trust-or-key-trust.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/windows-hello-cloud-kerberos-trust-or-key-trust.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Windows Hello: Cloud Kerberos Trust, or Key Trust?",
+  "description": "Unpack the dilemma between Cloud Kerberos Trust and Key Trust in Windows Hello for Business deployments. This post navigates through troubleshooting login issues, clarifying deployment types, and offering solutions for transitioning between deployment models with Group Policy and PowerShell, ensuring a smoother Windows Hello setup and operational reliability.",
+  "datePublished": "2023-05-15",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/windows-hello-cloud-kerberos-trust-or-key-trust.png",
+  "url": "https://awakecoding.com/posts/windows-hello-cloud-kerberos-trust-or-key-trust/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/windows-hello-cloud-kerberos-trust-or-key-trust/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | Windows Hello: Cloud Kerberos Trust, or Key Trust?
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            Windows Hello: Cloud Kerberos Trust, or Key Trust?
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2023-05-15">May 15, 2023</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>4 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>679 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/windows/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Windows</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/azure/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Azure</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>So you've just enabled <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows/security/identity-protection/hello-for-business/hello-overview">Windows Hello for Business</a> through Intune using a <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows/security/identity-protection/hello-for-business/hello-hybrid-cloud-kerberos-trust">Cloud Kerberos trust deployment</a> which should work from anywhere once the initial setup is done. You test it with a few users and it works well, so you decide to enable it company-wide, only to be flooded with issues the next day when people try logging in from home:</p>
+<ul>
+<li>Something went wrong and your PIN isn't available (status: 0xC000005E, substatus: 0x0).</li>
+<li>We can't sign you in with this credential because your domain isn't available.</li>
+<li>That option is temporarily unavailable. For now, please use a different method to sign in.</li>
+</ul>
+<p>Does that sound familiar? To make it even more confusing, connecting with a VPN helps, but it makes no sense because a domain controller line-of-sight should not be required for the Cloud Kerberos trust deployment type. In our case, we had multiple other issues with the camera, fingerprint and even the PIN authentication factors, even when trying to log in at work. Finding the root cause of the problem was hard because symptoms would vary a lot.</p>
+<p>The first thing you want to double-check is the Windows Hello for Business deployment type on the affected system. Open the Windows Event Viewer, and navigate to <strong>Application and Services Logs / Microsoft / Windows / HelloForBusiness / Operational</strong>:</p>
+<p><img src="/images/posts/whfb-account-has-cloud-tgt-true.png" alt="WHfB Account Has Cloud TGT True" /></p>
+<p>If you don't see <strong>Account has Cloud TGT: True</strong> then you don't have a cloud Kerberos trust deployment, and most likely ended up with a key trust deployment instead. For some reason, the Intune configuration didn't apply properly, and the quickest solution is to set a local group policy manually before re-doing the Windows Hello for Business setup from scratch. Open the Group Policy Editor (gpedit.msc) and navigate to <strong>Administrative Templates / Windows Components / Windows Hello for Business</strong>:</p>
+<p><img src="/images/posts/whfb-use-cloud-trust-on-premises.png" alt="WHfB Use Cloud Trust On-Premises" /></p>
+<p>Set "Use cloud trust for on-premises authentication" to "enabled". You can leave "Use certificate for on-premises authentication" untouched, but what matters is that <a rel="noopener nofollow noreferrer" target="_blank" href="https://msendpointmgr.com/2023/03/04/cloud-kerberos-trust-part-3/">when both of these group policies are not configured, Windows Hello for Business will default to a key trust deployment</a>. This means that if the Intune configuration didn't get applied correctly, all of your users setting up Windows Hello will... end up with the wrong deployment type, and hit many issues that shouldn't happen normally.</p>
+<p>Alternatively, you can achieve the same in PowerShell by setting the <strong>UseCloudTrustForOnPremAuth</strong> registry key directly:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">New-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#9acc76;">&#39;HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork&#39; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name UseCloudTrustForOnPremAuth </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#db9d63;">1 </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force
+</span></code></pre>
+<p>Instead of using PowerShell, you can also download and import <a href="/files/UseCloudTrustForOnPremAuth.reg">UseCloudTrustForOnPremAuth.reg</a> to set the registry key.</p>
+<p>In order to switch from a <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows/security/identity-protection/hello-for-business/hello-hybrid-key-trust">key trust deployment</a> to a <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows/security/identity-protection/hello-for-business/hello-hybrid-cloud-kerberos-trust">cloud Kerberos trust deployment</a>, you must first delete the Windows Hello container using the <code>certutil.exe -DeleteHelloContainer</code> command:</p>
+<p><img src="/images/posts/whfb-certutil-delete-hello-container.png" alt="WHfB certutil Delete Hello Container" /></p>
+<p>Once the Windows Hello container is deleted, you can log out or reboot, and then login again. The Windows Hello for Business setup should normally appear - just follow the steps normally. If you encountered issues with the camera before, maybe only bother setting up the fingerprint (if available) and the PIN for now. You can then confirm that your account has a cloud TGT using the previous method show, or by navigating to <strong>Application and Services Logs / Microsoft / Windows / User Device Registration / Admin</strong> in the Windows Event Viewer:</p>
+<p><img src="/images/posts/whfb-user-device-registration-cloud-tgt.png" alt="WHfB User Device Registration Cloud TGT" /></p>
+<p>If you see <strong>User account had Cloud TGT: Yes</strong>, then congratulations, you now have Windows Hello for Business configured with the right deployment type, which should normally resolve the unexpected issues!</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;fix-kerberos-machine-tgt-fetching-on-startup&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              Fix Kerberos Machine TGT Fetching on Startup
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;powershell-remoting-trusted-hosts-what-does-it-mean&#x2F;">
+              PowerShell Remoting Trusted Hosts: What does it mean?<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>

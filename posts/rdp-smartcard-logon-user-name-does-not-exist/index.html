@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/rdp-smartcard-logon-user-name-does-not-exist/">
+  <link rel="alternate" href="https://awakecoding.com/posts/rdp-smartcard-logon-user-name-does-not-exist/" hreflang="en" />
+  
+  <meta name="description" content="Navigate through the confusion of &quot;the specified user name does not exist&quot; error during RDP smartcard logon, offering insights into common misinterpretations and actionable solutions. This post breaks down error messages, suggests disabling strict KDC validation, and guides on certificate trust validation, ensuring successful authentication with practical steps and PowerShell commands." />
+  <meta property="og:title" content="RDP Smartcard Logon: User Name Does Not Exist" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;rdp-smartcard-logon-user-name-does-not-exist&#x2F;" />
+  <meta property="og:description" content="Navigate through the confusion of &quot;the specified user name does not exist&quot; error during RDP smartcard logon, offering insights into common misinterpretations and actionable solutions. This post breaks down error messages, suggests disabling strict KDC validation, and guides on certificate trust validation, ensuring successful authentication with practical steps and PowerShell commands." />
+  <meta name="twitter:title" content="RDP Smartcard Logon: User Name Does Not Exist" />
+  <meta name="twitter:description" content="Navigate through the confusion of &quot;the specified user name does not exist&quot; error during RDP smartcard logon, offering insights into common misinterpretations and actionable solutions. This post breaks down error messages, suggests disabling strict KDC validation, and guides on certificate trust validation, ensuring successful authentication with practical steps and PowerShell commands." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;rdp-smartcard-logon-user-name-does-not-exist&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/rdp-smartcard-logon-user-name-does-not-exist.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/rdp-smartcard-logon-user-name-does-not-exist.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "RDP Smartcard Logon: User Name Does Not Exist",
+  "description": "Navigate through the confusion of \"the specified user name does not exist\" error during RDP smartcard logon, offering insights into common misinterpretations and actionable solutions. This post breaks down error messages, suggests disabling strict KDC validation, and guides on certificate trust validation, ensuring successful authentication with practical steps and PowerShell commands.",
+  "datePublished": "2023-08-04",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/rdp-smartcard-logon-user-name-does-not-exist.png",
+  "url": "https://awakecoding.com/posts/rdp-smartcard-logon-user-name-does-not-exist/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/rdp-smartcard-logon-user-name-does-not-exist/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | RDP Smartcard Logon: User Name Does Not Exist
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            RDP Smartcard Logon: User Name Does Not Exist
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2023-08-04">August 04, 2023</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>7 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>1332 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/rdp/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>RDP</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/kerberos/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Kerberos</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/windows/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Windows</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <h2 id="misleading-error-messages-analyzed">Misleading Error Messages, Analyzed</h2>
+<p>So, you've hit the dreaded "the specified user name does not exist" error with RDP smartcard authentication:</p>
+<p><img src="/images/posts/rdp-sc-the-specified-user-name-does-not-exist-error.png" alt="RDP Logon Error: The specified user name does not exist" /></p>
+<p>You then likely went through the same thought process I did:</p>
+<blockquote>
+<p>The specified user name does not exist.</p>
+</blockquote>
+<p>Yes it does, here's my client certificate that proves it?</p>
+<blockquote>
+<p>Verify the user name and try logging in again.</p>
+</blockquote>
+<p>What do you want me to do, select the same certificate again?</p>
+<blockquote>
+<p>If the problem continues, contact your system administrator or technical support.</p>
+</blockquote>
+<p>Guess who's reading this blog post now? I'm the "system administrator or technical support"!</p>
+<p>Alternatively, you may have hit the "NLA required, DC cannot be contacted" error instead:</p>
+<p><img src="/images/posts/rdp-sc-nla-required-dc-cannot-be-contacted-error.png" alt="RDP Logon Error: NLA required, DC cannot be contacted" /></p>
+<blockquote>
+<p>The remote computer that you are trying to connect to requires Network Level Authentication (NLA),</p>
+</blockquote>
+<p>I sure hope it requires NLA, you're not supposed to disable it! What did you expect?</p>
+<blockquote>
+<p>but your Windows domain controller cannot be contacted to perform NLA.</p>
+</blockquote>
+<p>Hum... don't you mean NLA + <strong>Kerberos</strong>? NLA + NTLM works without a DC line-of-sight last time I checked?</p>
+<blockquote>
+<p>You can try connecting to the remote computer using your username and password instead.</p>
+</blockquote>
+<p>Ah! You really mean to make me try NTLM with password-based authentication instead because Kerberos doesn't work!</p>
+<p>Jokes aside, what do these error messages mean? Is it true that the specified user name does not exist, or that the domain controller cannot be contacted? Maybe, but the exact same errors are thrown for a wide variety of unrelated reasons, misleading users into fixing imaginary problems.</p>
+<h2 id="please-just-make-it-work">Please, Just Make It Work!</h2>
+<p>Do the following conditions apply to your environment?</p>
+<ol>
+<li>Is your client system joined to the <em>same</em> domain as the target computer? (No)</li>
+<li>Does your client system have a line-of-sight with the target domain controller? (Yes)</li>
+</ol>
+<p>If you do not have a line-of-sight with the target domain controller, then work on fixing that first and then come back here (out-of-scope for this blog).</p>
+<p>If your machine is joined to the same domain as the target computer, then it's possible that the issue truly is with <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows/security/identity-protection/smart-cards/smart-card-certificate-requirements-and-enumeration#client-certificate-mappings">X.509 client certificate name mapping</a> (also out-of-scope for this blog).</p>
+<p>Otherwise, the most likely cause of the problem is with <strong>trust validation of the certificate used by the KDC server for PKINIT</strong>, so let's <strong>disable strict KDC validation</strong> on the client:</p>
+<p>Open the Group Policy Editor (gpedit.msc) and navigate to <strong>Administrative Templates / System / Kerberos</strong>:</p>
+<p><img src="/images/posts/rdp-sc-kerberos-require-strict-kdc-validation-gpo.png" alt="Kerberos require strict KDC validation GPO" /></p>
+<p>Set the <strong>Require strict KDC validation</strong> policy to <strong>Disabled</strong>, then reboot. Try connecting again, and see if the error is gone. If it worked, congratulations, we have a winner!</p>
+<p>If it doesn't work instantly, don't give up, sometimes the issue is mixed with unreliable domain controller detection. To check if this is the case, open the Event Viewer (eventvwr.msc) and navigate to <strong>Application and Services Logs / Microsoft / Windows / Security-Kerberos / Operational</strong>. If the log is empty, right-click <strong>Operational</strong> and then select <strong>Enable Log</strong>, after which you can trigger the problem again.</p>
+<p><img src="/images/posts/rdp-sc-kerberos-client-could-not-locate-dc-warning.png" alt="Kerberos client could not locate DC warning" /></p>
+<p>If you see "The Kerberos client could not locate a domain controller for domain XYZ: 0xC000005E. Kerberos authentication requires communicating with a domain controller." then there's an issue with the domain controller line-of-sight, or with the detection of the domain controller when it's reachable. Make sure that those warnings are gone before continuing, as they will trigger the error condition.</p>
+<h2 id="fixing-strict-kdc-validation">Fixing Strict KDC Validation</h2>
+<p>With strict KDC validation enabled, you should be able to see errors like this in the Windows event viewer, under <strong>Application and Services Logs / Microsoft / Windows / Security-Kerberos / Operational</strong>:</p>
+<p><img src="/images/posts/rdp-sc-kerberos-kdc-cert-trust-validation-error.png" alt="Kerberos KDC cert trust validation error" /></p>
+<p>"Trust validation of the certificate for the Kerberos Key Distribution Center (KDC) XYZ failed: 0x800B0112. Use the CAPI2 diagnostic traces to identify the reason for the validation failure."</p>
+<p>As suggested, let's enable CAPI2 event logging under <strong>Application and Services Logs / Microsoft / Windows / CAPI2 / Operational</strong>. right-click <strong>Operational</strong> and then select <strong>Enable Log</strong>, and watch a flood of new events coming in when you refresh. This is a chatty event log which you'll want to disable once you're done. Reproduce the issue, refresh the CAPI2 logs, and then look for errors similar to this:</p>
+<p><img src="/images/posts/rdp-sc-capi2-cert-chain-policy-nt-auth-error.png" alt="RDP CAPI2 cert chain policy NT Auth error" /></p>
+<p>According to the <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-certverifycertificatechainpolicy">CertVerifyCertificateChainPolicy function</a>, the <strong>CERT_CHAIN_POLICY_NT_AUTH</strong> cert chain policy</p>
+<blockquote>
+<p>checks if the second element in the chain, the CA that issued the end certificate, is a trusted CA for Windows NT Authentication. A CA is considered to be trusted if it exists in the "NTAuth" system registry store found in the CERT_SYSTEM_STORE_LOCAL_MACHINE_ENTERPRISE store location.</p>
+</blockquote>
+<p>In plain English? You need to install the issuer CA certificate into the NTAuth store of your client. No, it is <em>not</em> enough to installed the root CA certificate into the machine trusted root CAs, you need to do both or validation will fail. Richard Hicks has a nice blog post on the <a rel="noopener nofollow noreferrer" target="_blank" href="https://directaccess.richardhicks.com/tag/ntauth-store/">NTAuth store</a>.</p>
+<h3 id="importing-issuer-ca-in-ntauth-store">Importing Issuer CA in NTAuth Store</h3>
+<p>Here's how you can import the issuer CA certificate into the NTAuth store of your client, from an elevated shell:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">certutil.exe </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">enterprise </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">addstore NTAuth .\ISSUER</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">CA.cer
+</span></code></pre>
+<p>You can also view the list of certificates in the NTAuth store:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">certutil.exe </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">viewstore </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">enterprise ntauth
+</span></code></pre>
+<p>Last but not least, you can select a certificate to be removed from the NTAuth store:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">certutil.exe </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">viewdelstore </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">enterprise ntauth
+</span></code></pre>
+<p>The NTAuth certificate store is not visible in the regular Windows certificate store view, and it cannot be interacted with directly in PowerShell like other certificate stores. The easiest way to deal with it is the certutil.exe command, unfortunately. If you're curious, the NTAuth store is located under HKLM:\SOFTWARE\Microsoft\SystemCertificates\ROOT\Certificates in the registry. For domain-joined machines, the contents of the local NTAuth store automatically include the NTAuth certificates published in Active Directory.</p>
+<h3 id="importing-root-ca-in-machine-trusted-root-cas">Importing Root CA in Machine Trusted Root CAs</h3>
+<p>We haven't mentioned it previously, but the certificates used for smartcard authentication need to be trusted on the client, so the root CA certificate needs to imported into the machine trusted root CAs. Open the local machine certificates (certlm.msc), then navigate to <strong>Trusted Root Certification Authorities / Certificates</strong>. Right-click <strong>Certificates</strong>, select <strong>All Tasks / Import...</strong>, and then import your root CA certificate.</p>
+<p><img src="/images/posts/rdp-sc-machine-trusted-root-cas-import.png" alt="Machine Trusted Root CAs" /></p>
+<p>You can also do the same using an elevated PowerShell terminal:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Import-Certificate </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">FilePath .\ROOT</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">CA.cer </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">CertStoreLocation </span><span style="color:#9acc76;">&quot;cert:\LocalMachine\Root&quot;
+</span></code></pre>
+<p>If you sign leaf certificates directly from the root CA, then your issuer CA is the same as the root CA, but oftentimes PKI deployments will use an issuer CA to sign leaf certificates, where the issuer CA is signed by the root CA. Don't confuse the two, and make sure to put the issuer CA certificate into the NTAuth store, not the root CA, if they're not the same.</p>
+<h2 id="investigating-further-if-necessary">Investigating Further, if Necessary</h2>
+<p>If you are unlucky enough to have a problem that wasn't related to strict KDC validation, you will need to keep investigating further. There are many related problems, especially the issue of providing a domain controller line-of-sight, that require their own blog posts. My recommendation would be to make use of the same logs shown in the event viewer to diagnose the issues, and ignore the misleading error messages. Don't go down the same rabbit hole I did, trying to find issues with X.509 certificate name mapping when there was none.</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;powershell-remoting-trusted-hosts-what-does-it-mean&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              PowerShell Remoting Trusted Hosts: What does it mean?
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;rdp-nla-with-azure-ad-the-pku2u-nightmare&#x2F;">
+              RDP NLA with Azure AD: The PKU2U Nightmare<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>

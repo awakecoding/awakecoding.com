@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/decompiling-hyper-v-manager-to-rebuild-it-from-source/">
+  <link rel="alternate" href="https://awakecoding.com/posts/decompiling-hyper-v-manager-to-rebuild-it-from-source/" hreflang="en" />
+  
+  <meta name="description" content="This post guides through decompiling Hyper-V Manager to rebuild it from source, aiming to assess its value for potential open-sourcing. It explores manual and automated decompilation processes, including troubleshooting and enhancing the tool, advocating for community-led improvements to this widely-used but neglected software." />
+  <meta property="og:title" content="Decompiling Hyper-V Manager to rebuild it from source" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;decompiling-hyper-v-manager-to-rebuild-it-from-source&#x2F;" />
+  <meta property="og:description" content="This post guides through decompiling Hyper-V Manager to rebuild it from source, aiming to assess its value for potential open-sourcing. It explores manual and automated decompilation processes, including troubleshooting and enhancing the tool, advocating for community-led improvements to this widely-used but neglected software." />
+  <meta name="twitter:title" content="Decompiling Hyper-V Manager to rebuild it from source" />
+  <meta name="twitter:description" content="This post guides through decompiling Hyper-V Manager to rebuild it from source, aiming to assess its value for potential open-sourcing. It explores manual and automated decompilation processes, including troubleshooting and enhancing the tool, advocating for community-led improvements to this widely-used but neglected software." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;decompiling-hyper-v-manager-to-rebuild-it-from-source&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/decompiling-hyper-v-manager-to-rebuild-it-from-source.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/decompiling-hyper-v-manager-to-rebuild-it-from-source.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Decompiling Hyper-V Manager to rebuild it from source",
+  "description": "This post guides through decompiling Hyper-V Manager to rebuild it from source, aiming to assess its value for potential open-sourcing. It explores manual and automated decompilation processes, including troubleshooting and enhancing the tool, advocating for community-led improvements to this widely-used but neglected software.",
+  "datePublished": "2024-01-02",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/decompiling-hyper-v-manager-to-rebuild-it-from-source.png",
+  "url": "https://awakecoding.com/posts/decompiling-hyper-v-manager-to-rebuild-it-from-source/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/decompiling-hyper-v-manager-to-rebuild-it-from-source/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | Decompiling Hyper-V Manager to rebuild it from source
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            Decompiling Hyper-V Manager to rebuild it from source
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2024-01-02">January 02, 2024</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>21 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>4116 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/hyper-v/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Hyper-V</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/reversing/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Reversing</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <h2 id="why-hyper-v-manager">Why Hyper-V Manager?</h2>
+<p>Hyper-V is undeniably <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/reference/hyper-v-architecture">a critical component</a> of the <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/virtualization/">Microsoft virtualization stack</a> as Azure runs on it, but it's also used in <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/oem-vbs">Virtualization-Based Security</a>, <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/hyperv-container">Windows Containers</a>, <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows/wsl/">Windows Subsystem for Linux</a>, <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows/android/wsa/">Windows Subsystem for Android</a>, and even <a rel="noopener nofollow noreferrer" target="_blank" href="https://www.youtube.com/watch?v=quLa6kzzra0">the Xbox</a>.</p>
+<p>Then comes the <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/hyper-v-on-windows-server">"regular" Hyper-V virtual machines</a>, for which Hyper-V Manager is <a rel="noopener nofollow noreferrer" target="_blank" href="https://twitter.com/awakecoding/status/1740019131976683805">the most popular management user interface today</a>, far ahead of <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows-server/manage/windows-admin-center/use/get-started">Windows Admin Center</a>:</p>
+<p><img src="/images/posts/hvmanager-interactive-management-usage-poll.png" alt="Hyper-V Manager Interactive Usage Poll" /></p>
+<p>In theory, Hyper-V Manager has been replaced by <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows-server/manage/windows-admin-center/use/manage-virtual-machines">Windows Admin Center</a>, but for most users out there, switching to a localhost web application with self-signed certificates feels like a major downgrade. At a bare minimum, wrapping Windows Admin Center in a WebView2 "desktop" application could help alleviate some of the adoption problems.</p>
+<p>The <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/powershell/module/hyper-v">Hyper-V PowerShell cmdlets</a> that wrap the underlying <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows/win32/hyperv_v2/windows-virtualization-portal">Hyper-V WMI provider</a> are well maintained and provide complete access to many settings not properly exposed in Hyper-V Manager. However, while PowerShell is great for automation, nobody really wants to manually type in <code>Set-VMProcessor -VMName &lt;VMName&gt; -ExposeVirtualizationExtensions $true</code> <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/user-guide/enable-nested-virtualization">to enable nested virtualization in a virtual machine</a>: a simple check box in the user interface would be much faster for the same operation.</p>
+<p>Here's the problem: while Microsoft <em>thinks</em> Windows Admin Center replaced Hyper-V Manager, the reality is that it hasn't. Hyper-V Manager, despite being used by 80%, is considered "legacy" on life support. It receives no improvements, despite its pain points being very well known by the community of IT professionals using it. Improvements in Windows Admin Center have limited effect due to its relatively low adoption.</p>
+<p>I have one wish for 2024: <strong>that Microsoft open sources Hyper-V Manager such that the community can freely improve it</strong>.</p>
+<p>I, for one, would like to champion such an effort. Hyper-V Manager is a mature product with a large number of users with a long list of relative minor improvements or fixes that would make a huge difference. Rewriting Hyper-V Manager is hard, as Hyper-V has a <em>lot</em> of advanced features which most users don't touch unless they're running a production Hyper-V environment. This being said, the most promising open-source Hyper-V Manager alternative right now is <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/0xf005ba11/vmplex-ws">VMPlex Workstation</a>. It is written in WPF and uses a clever trick to load the same configuration dialogs and wizards as the original Hyper-V Manager. Ideally, they would all have to be rewritten, but this makes it functional from day one.</p>
+<h2 id="why-bother-decompiling">Why Bother Decompiling?</h2>
+<p>Hyper-V Manager is written in C# using WinForms, and while it still targets .NET Framework and is designed to be hosted in mmc.exe, it is exactly the type of application that can decompile well enough to be built from source again. Automatic .NET decompilation of external code is so common that even the <a rel="noopener nofollow noreferrer" target="_blank" href="https://devblogs.microsoft.com/visualstudio/visual-studio-2022-17-7-now-available/#auto-decompilation-for-external-net-code">latest version of Visual Studio does it by default</a>. However, one should understand that decompiled code is not open source code: it doesn't have the proper legal status granted by an open source license and is therefore not suitable for an open source project.</p>
+<p>The primary goal of decompiling Hyper-V Manager is really to assess its value as a <em>potential open source project</em>, which is what I'm hoping Microsoft can be convinced to do. Microsoft has its eyes on Windows Admin Center and has been leaving Hyper-V Manager to die a slow death. I think Hyper-V Manager deserves a better ending with a community-lead project.</p>
+<p>The secondary goal of decompiling a complete .NET application like Hyper-V Manager to rebuild it from source is really the educational value of the exercise. We've all experimented with .NET decompilation in the past one way or another, but very few have tried really going all the way to reconstruct a complete solution with individual projects that can be built from source again in Visual Studio. Yes, it is possible to patch .NET assemblies, but building the entire program from decompiled source code makes certain kind of changes possible.</p>
+<h2 id="installing-required-tooling">Installing Required Tooling</h2>
+<p>Install the <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/dotnet/core/sdk">.NET SDK</a> and make sure the <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/dotnet/core/tools/">dotnet CLI</a> works, as we'll use it to create and edit solution files. I will be using <a rel="noopener nofollow noreferrer" target="_blank" href="https://visualstudio.microsoft.com/downloads/">Visual Studio</a> to build the project, but feel free to use any suitable alternative.</p>
+<p>For scripting, we'll be using <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows">PowerShell 7</a>. I recommend using <a rel="noopener nofollow noreferrer" target="_blank" href="https://code.visualstudio.com/Download">VSCode</a> for editing and <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows/terminal/install">Windows Terminal</a> to run the scripts.</p>
+<p>For .NET decompilation, open an elevated shell and install <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/icsharpcode/ILSpy">ILSpy GUI and command-line tool</a>:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">dotnet tool install ilspycmd </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">g
+</span><span style="color:#abb2bf;">winget install icsharpcode.ILSpy
+</span></code></pre>
+<p>For blazing fast textual search and replace from the command-line, install <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/BurntSushi/ripgrep">RipGrep</a>:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">winget install BurntSushi.ripgrep.MSVC
+</span></code></pre>
+<p>You will also want a good text editor that can do fast <em>textual</em> (no IntelliSense please!) search in a directory. <a rel="noopener nofollow noreferrer" target="_blank" href="https://www.sublimetext.com/">Sublime Text</a> is a good choice if VScode is not your thing.</p>
+<p>During our analysis, tools like <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/sysinternals/downloads/procmon">Process Monitor</a> and <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/sysinternals/downloads/process-explorer">Process Explorer</a> will come in handy:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">winget install Microsoft.Sysinternals.ProcessMonitor
+</span><span style="color:#abb2bf;">winget install Microsoft.Sysinternals.ProcessExplorer
+</span></code></pre>
+<p>You will also need the <a rel="noopener nofollow noreferrer" target="_blank" href="https://git-scm.com/download/win">git command-line tools</a>, and a simple git GUI to view the history of commits like <a rel="noopener nofollow noreferrer" target="_blank" href="https://git-scm.com/docs/gitk">gitk</a> that usually comes built-in:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">winget install Git.Git
+</span></code></pre>
+<p>Last but not least, <a rel="noopener nofollow noreferrer" target="_blank" href="https://openai.com/chatgpt">ChatGPT</a> as your assistant - it's really good at generating PowerShell code snippets and even regular expressions. I also recommend <a rel="noopener nofollow noreferrer" target="_blank" href="https://regex101.com/">regex101</a> to help visualize regex to get it right instead of just guessing it.</p>
+<h2 id="finding-assemblies-of-interest">Finding Assemblies of Interest</h2>
+<p>Our target is Hyper-V Manager, which can be installed by enabling the Hyper-V Management Tools in Windows. Note that you can use a VM without nested virtualization for this part, since the management tools can be installed without the virtualization host features:</p>
+<p><img src="/images/posts/hvmanager-management-tools-enable-feature.png" alt="Enable Hyper-V Management Tools" /></p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Enable-WindowsOptionalFeature </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Online </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">FeatureName Microsoft</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Hyper</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">V</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Tools</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">All
+</span></code></pre>
+<p>Launch Process Monitor (<code>procexp</code>) with the following filters:</p>
+<table><thead><tr><th>Column</th><th>Relation</th><th>Value</th><th>Action</th></tr></thead><tbody>
+<tr><td>Process Name</td><td>is</td><td>mmc.exe</td><td>Include</td></tr>
+<tr><td>Operation</td><td>excludes</td><td>Reg</td><td>Include</td></tr>
+</tbody></table>
+<p><img src="/images/posts/hvmanager-process-monitor-mmc-virtmgmt-filter.png" alt="Process Monitor - mmc.exe virtmgmt filter" /></p>
+<p>From the Windows start menu, search and launch "Hyper-V Manager". In Process Monitor, scroll down until you find some file operation that looks like something interesting. Unfortunately, we seem to be hitting cached assembly files, and we have no idea where the original ones are.</p>
+<p>Launch Process Explorer (<code>procexp</code>) <strong>as an administrator</strong>. Right-click on one of the columns in Process Explorer, then click <strong>Select Columns</strong>, then select <strong>Window Title</strong> and <strong>Command Line</strong>:</p>
+<p><img src="/images/posts/hvmanager-process-explorer-select-columns.png" alt="Process Manager - Select Columns" /></p>
+<p>Find the process that has the "Hyper-V Manager" window title. If you can't find it, then Process Explorer was most likely launched without elevation.</p>
+<p><img src="/images/posts/hvmanager-process-explorer-command-line-mmc.png" alt="Process Manager - Hyper-V Manager" /></p>
+<p>Let's now look at the command line behind Hyper-V Manager:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#9acc76;">&quot;C:\Windows\System32\mmc.exe&quot; &quot;C:\Windows\System32\virtmgmt.msc&quot;
+</span></code></pre>
+<p>What does it mean? With a bit of research, we can figure out that Hyper-V Manager is a <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/previous-versions/windows/desktop/mmc/microsoft-management-console-start-page">Microsoft Management Console (MMC) snap-in</a>, and the <code>virtmgmt.msc</code> file is the specific management console to load. If we launch mmc.exe directly, we can manually add Hyper-V Manager to a generic management console instead:</p>
+<p><img src="/images/posts/hvmanager-mmc-add-remove-snapin.png" alt="MMC - Add/Remove Snapin Hyper-V Manager" /></p>
+<p>This complicates our search a little bit, since mmc.exe is a generic executable that loads specialized management consoles like Hyper-V Manager. We still don't know where the assemblies or interest are located. Let's open virtmgmt.msc in notepad to see if we can find out more:</p>
+<p><img src="/images/posts/hvmanager-virtmgmt-notepad-regedit.png" alt="virtmgmt.msc notepad and regedit" /></p>
+<p>Thankfully, virtmgmt.msc is an XML definition file, and it contains what looks like a <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows/win32/com/com-class-objects-and-clsids">COM class id</a>. By searching in the registry for the same id, we have a hit under <code>[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\MMC\SnapIns\FX:{922180d7-b74e-45f6-8c74-4b560cc100a5}]</code>. By looking at the registry keys, we find that "C:\Program Files\Hyper-V" is the application base path:</p>
+<p><img src="/images/posts/hvmanager-virtmgmt-program-files-hyper-v.png" alt="virtmgmt.msc program files Hyper-V" /></p>
+<p>Bingo, we finally have our files! Create a zip file of the entire Hyper-V directory as a backup for now. Using regedit, export the registry keys we've found to virtmgmt.reg, as they could be useful later.</p>
+<p>A word of caution on trying to patch the <em>original</em> Hyper-V Manager located in <code>%ProgramFiles%\Hyper-V</code>: don't do it. This is what I originally tried, and thought I was successful until I realized using Process Explorer that the DLLs from the <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/dotnet/framework/app-domains/gac">global assembly cache</a> were loaded instead, and they can't be removed without uninstalling Hyper-V Manager. Even if you do this, you will need to purge the <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/dotnet/framework/tools/ngen-exe-native-image-generator">native image cache</a> as well. For this reason, it is much simpler to use a different COM class ID and register our custom Hyper-V Manager in a different location.</p>
+<h2 id="initial-analysis-of-decompilation-target">Initial Analysis of Decompilation Target</h2>
+<p>Create a workspace for the reversing project. In my case, I copied the contents of "C:\Program Files\Hyper-V" to "~\Documents\Reversing\Hyper-V". Let's start with the easy stuff: mmc.exe loads snap-ins, which are library components, not executables, yet we see executables:</p>
+<ul>
+<li>InspectVhdDialog.exe</li>
+<li>VMCreate.exe</li>
+<li>VMImport.exe</li>
+</ul>
+<p>By launching them directly, we realize that VMCreate.exe is just a helper executable launched from Hyper-V Manager for the <strong>Quick Create</strong> feature:</p>
+<p><img src="/images/posts/hvmanager-quick-create-vmcreate-executable.png" alt="Quick Create VMCreate.exe" /></p>
+<p>We can guess that VMImport.exe and InspectVhdDialog.exe serve similar purposes. Since they are external executables, they can be built separately from the core assemblies of interest, so they can be safely scoped out at this point.</p>
+<p>Now for the fun part you've been waiting for: launch ILSpy, then drag all the DLLs that begin with Microsoft.Virtualization.Client into it:</p>
+<p><img src="/images/posts/hvmanager-ilspy-microsoft-virtualization-client.png" alt="ILSpy Microsoft.Virtualization.Client DLLs" /></p>
+<p>Why Microsoft.Virtualization.Client? Because it looks like the assembly namespace used for Hyper-V Manager internally. Newtonsoft.Json.dll is <a rel="noopener nofollow noreferrer" target="_blank" href="https://www.nuget.org/packages/Newtonsoft.Json">a common dependency</a> of low interest. As for SnapInAbout.dll, it is not even .NET - it's a native library that appears used only for the MMC snap-in registration, so let's put it aside.</p>
+<p>From a quick look at the information provided by ILSpy, most assemblies target .NET Framework 4.6 (!) but two assemblies (Microsoft.Virtualization.Client.RdpClientAxHost.dll, Microsoft.Virtualization.Client.RdpClientInterop.dll) target .NET Framework 4.0 instead, which is so both old and odd:</p>
+<p><img src="/images/posts/hvmanager-ilspy-virtualization-rdp-client-interop.png" alt="ILSpy Virtualization RDP Client Interop" /></p>
+<p>It takes a bit more work to figure this one out, but those two assemblies are in fact <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/Devolutions/MsRdpEx/tree/master/com">generated .NET Interop DLLs</a> for the <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows/win32/termserv/using-remote-desktop-web-connection">RDP ActiveX control interface</a>. Those are probably needed for the Hyper-V Manager special RDP client, <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/learn-more/hyper-v-virtual-machine-connect">vmconnect.exe</a>, which is currently missing from our decompilation project. Let's unload the RDP ActiveX Interop DLLs for now, we'll come back to them later.</p>
+<p>We are now down to 7 .NET assemblies in the Microsoft.Virtualization.Client namespace which we believe is what makes Hyper-V Manager tick. Inspect the assembly references to find out the interdependencies, looking for assembly that should be the easiest to rebuild from source:</p>
+<p><img src="/images/posts/hvmanager-ilspy-virtualization-client-common-types.png" alt="ILSpy Microsoft.Virtualization.Client.Common.Types.dll" /></p>
+<p>Let's build a list of dependencies for each of the assemblies, considering only the Microsoft.Virtualization.Client namespace for now:</p>
+<p>Microsoft.Virtualization.Client.Management.dll depends on:</p>
+<ul>
+<li>Microsoft.Virtualization.Client.Common.Types.dll</li>
+</ul>
+<p>Microsoft.Virtualization.Client.Settings.dll depends on:</p>
+<ul>
+<li>Microsoft.Virtualization.Client.dll</li>
+<li>Microsoft.Virtualization.Client.Common.dll</li>
+<li>Microsoft.Virtualization.Client.Common.Types.dll</li>
+<li>Microsoft.Virtualization.Client.Management.dll</li>
+<li>Microsoft.Virtualization.Client.Wizards.dll</li>
+</ul>
+<p>Microsoft.Virtualization.Client.VMBrowser.dll depends on:</p>
+<ul>
+<li>Microsoft.Virtualization.Client.dll</li>
+<li>Microsoft.Virtualization.Client.Common.dll</li>
+<li>Microsoft.Virtualization.Client.Common.Types.dll</li>
+<li>Microsoft.Virtualization.Client.Management.dll</li>
+<li>Microsoft.Virtualization.Client.Settings.dll</li>
+<li>Microsoft.Virtualization.Client.Wizards.dll</li>
+</ul>
+<p>Microsoft.Virtualization.Client.Wizards.dll depends on:</p>
+<ul>
+<li>Microsoft.Virtualization.Client.dll</li>
+<li>Microsoft.Virtualization.Client.Common.dll</li>
+<li>Microsoft.Virtualization.Client.Common.Types.dll</li>
+<li>Microsoft.Virtualization.Client.Management.dll</li>
+</ul>
+<p>Microsoft.Virtualization.Client.dll depends on:</p>
+<ul>
+<li>Microsoft.Virtualization.Client.Common.dll</li>
+<li>Microsoft.Virtualization.Client.Common.Types.dll</li>
+<li>Microsoft.Virtualization.Client.Common.Management.dll</li>
+</ul>
+<p>Microsoft.Virtualization.Client.Common.dll depends on:</p>
+<ul>
+<li>Microsoft.Virtualization.Client.Common.Types.dll</li>
+</ul>
+<p>And finally, Microsoft.Virtualization.Client.Common.Types.dll depends on nothing except core .NET runtime assemblies, and vmstaging.dll, a native DLL found C:\Windows\System32, so the reference probably comes from pinvoke calls. This looks like our best choice to begin decompilation!</p>
+<h2 id="manual-decompilation-process">Manual Decompilation Process</h2>
+<p>One should always <em>try</em> manual decompilation first, just to get a feel of how far it is possible to go. However, unless the project is relatively simple, you will reach a point where you start to forget some of the steps and need to start over because you've done a risky change that needs to be reverted. Your goal with manual decompilation should be to document steps which you want to automate later. This section is only provided as a partial guide to show what it looks like, since we're going to do the full decompilation process with a script right after.</p>
+<p>Start by creating a "Decompiled" directory, with one directory for each assembly ("Microsoft.Virtualization.Client.Common.Types" for Microsoft.Virtualization.Client.Common.Types.dll, etc):</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#cd74e8;">@</span><span style="color:#abb2bf;">(</span><span style="color:#9acc76;">&#39;Microsoft.Virtualization.Client.Common.Types&#39;</span><span style="color:#adb7c9;">,
+</span><span style="color:#abb2bf;">  </span><span style="color:#9acc76;">&#39;Microsoft.Virtualization.Client.Common&#39;</span><span style="color:#adb7c9;">,
+</span><span style="color:#abb2bf;">  </span><span style="color:#9acc76;">&#39;Microsoft.Virtualization.Client&#39;</span><span style="color:#adb7c9;">,
+</span><span style="color:#abb2bf;">  </span><span style="color:#9acc76;">&#39;Microsoft.Virtualization.Client.Management&#39;</span><span style="color:#adb7c9;">,
+</span><span style="color:#abb2bf;">  </span><span style="color:#9acc76;">&#39;Microsoft.Virtualization.Client.Settings&#39;</span><span style="color:#adb7c9;">,
+</span><span style="color:#abb2bf;">  </span><span style="color:#9acc76;">&#39;Microsoft.Virtualization.Client.VMBrowser&#39;</span><span style="color:#adb7c9;">,
+</span><span style="color:#abb2bf;">  </span><span style="color:#9acc76;">&#39;Microsoft.Virtualization.Client.Wizards&#39;</span><span style="color:#abb2bf;">) </span><span style="color:#adb7c9;">| </span><span style="color:#cd74e8;">% </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">New-Item </span><span style="color:#abb2bf;">$_ </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ItemType Directory
+</span><span style="color:#abb2bf;">  }
+</span></code></pre>
+<p>We will now go over each assembly, getting them to compile one by one according to order of dependencies, using the following steps:</p>
+<ul>
+<li>Fix internal references (project references within current solution)</li>
+<li>Fix external references (package references or assembly references)</li>
+<li>Fix AssemblyInfo.cs and broken project file (.csproj) properties</li>
+<li>Fix compilation issues resulting from broken or changed references</li>
+<li>Fix remaining issues resulting from improper decompilation output</li>
+</ul>
+<p>This process is fairly repetitive, manual and error-prone. Some external assembly references may have nuget packages, some may not - you can only figure out the proper package replacement through trial and error. In the case of Hyper-V Manager, we have a few remaining assembly references directly in the <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/dotnet/framework/app-domains/gac">Windows global assembly cache</a> we could not get rid of in favor of a <a rel="noopener nofollow noreferrer" target="_blank" href="https://www.nuget.org/">published nuget package</a>.</p>
+<p>In ILSpy, right-click on the assembly, select "Save Code" then select the corresponding output directory. Repeat the process for all of the 7 Microsoft.Virtualization.Client assemblies we've identified previously:</p>
+<p><img src="/images/posts/hvmanager-ilspy-virtualization-common-types-save-code.png" alt="ILSpy Virtualization Common Types Save Code" /></p>
+<p>Create a new solution file in the "Decompiled" directory, then add references to the individual project files:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">dotnet new sln </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">n Microsoft.Virtualization.Client
+</span><span style="color:#5ebfcc;">Get-Item </span><span style="color:#adb7c9;">*</span><span style="color:#abb2bf;">\</span><span style="color:#adb7c9;">*</span><span style="color:#abb2bf;">.csproj </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">ForEach-Object </span><span style="color:#abb2bf;">{ dotnet sln add (</span><span style="color:#5ebfcc;">Resolve-Path </span><span style="color:#abb2bf;">$_ </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Relative) }
+</span></code></pre>
+<p>Open Microsoft.Virtualization.Client.sln in Visual Studio, then try building the solution a first time:</p>
+<p><img src="/images/posts/hvmanager-ilspy-manual-decompilation-initial-errors.png" alt="ILSpy Manual Decompilation Initial Errors" /></p>
+<p>Did you <em>really</em> think it would be that easy? Of course not! Let's start by fixing the simplest one: assembly signing. We're not Microsoft, but ILSpy decompiled an AssemblyInfo.cs file matching the original assembly signed by Microsoft. Remove the AssemblyKeyFile and AssemblyDelaySign properties from AssemblyInfo.cs:</p>
+<p><img src="/images/posts/hvmanager-ilspy-fix-assembly-signing.png" alt="ILSpy fixing assembly signing" /></p>
+<p>Microsoft.Virtualization.Client.Common.Types should now build (yipee!) but all the other projects have the same issue. This is where using VSCode textual search can be much easier and faster than Visual Studio:</p>
+<p><img src="/images/posts/hvmanager-vscode-assembly-delay-sign-search.png" alt="VSCode assembly delay sign search" /></p>
+<p>But even after fixing the assembly signing, we can't build Microsoft.Virtualization.Client.Common which depends on Microsoft.Virtualization.Client.Common.Types. This is becauses none of the assembly and project references have been manually fixed. Add a <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/visualstudio/msbuild/common-msbuild-project-items?view=vs-2022#projectreference">project reference</a> to Microsoft.Virtualization.Client.Common.Types, then add an <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/visualstudio/msbuild/common-msbuild-project-items?view=vs-2022#reference">assembly reference</a> to Microsoft.ManagementConsole.dll using the full path as shown in ILSpy:</p>
+<p><img src="/images/posts/hvmanager-ilspy-fix-assembly-references-common.png" alt="ILSpy fix assembly references common" /></p>
+<p>Microsoft.ManagementConsole.dll is part of the .NET <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/dotnet/framework/app-domains/gac">Global Assembly Cache</a> and unfortunately, the modern .csproj format doesn't have a clean way to reference those. The most foolproof approach is to use HintPath with the full path to the assembly.</p>
+<p>When you try building again, you'll hit errors caused by incorrect <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.internalsvisibletoattribute?view=net-8.0">InternalsVisibleTo</a> assembly properties in AssemblyInfo.cs. Remove the explicit PublicKey from all AssemblyInfo.cs files in the solution to fix those:</p>
+<p><img src="/images/posts/hvmanager-ilspy-fix-internals-visible-to-errors.png" alt="ILSpy internals visible to errors" /></p>
+<p>Move on to fixing Microsoft.Virtualization.Client.Management. Add a project reference to Microsoft.Virtualization.Client.Common.Types, then add a package reference to PowerShellStandard.Library version 5.1.1 and Microsoft.Management.Infrastructure version 3.0.0:</p>
+<p><img src="/images/posts/hvmanager-ilspy-fix-virtualization-client-management.png" alt="ILSpy fix virtualization client management" /></p>
+<p>Next, fix Microsoft.Virtualization.Client. Add a project reference to Microsoft.Virtualization.Client.Common.Types, Microsoft.Virtualization.Client.Common and Microsoft.Virtualization.Client.Management, then add a package reference to PowerShellStandard.Library version 5.1.1. Try building again, but this time we are not so lucky:</p>
+<p><img src="/images/posts/hvmanager-ilspy-fix-assembly-references-client.png" alt="ILSpy fix assembly references client" /></p>
+<p>What is this "The type or namespace name 'Pipeline' could not be found" error in Microsoft.Virtualization.Client\CommonUtilities.cs? The offending code looks simple enough:</p>
+<pre data-lang="cs" style="background-color:#2b303b;color:#6c7079;" class="language-cs "><code class="language-cs" data-lang="cs"><span style="color:#cd74e8;">public static </span><span style="color:#abb2bf;">ICollection&lt;PSObject&gt; </span><span style="color:#5cb3fa;">RunPowershellScript</span><span style="color:#abb2bf;">(</span><span style="color:#cd74e8;">string </span><span style="color:#eb6772;">script</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    Runspace </span><span style="color:#eb6772;">runspace </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">RunspaceFactory</span><span style="color:#abb2bf;">.</span><span style="color:#eb6772;">CreateRunspace</span><span style="color:#abb2bf;">();
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">runspace</span><span style="color:#abb2bf;">.</span><span style="color:#eb6772;">Open</span><span style="color:#abb2bf;">();
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">try
+</span><span style="color:#abb2bf;">    {
+</span><span style="color:#abb2bf;">        Pipeline </span><span style="color:#eb6772;">pipeline </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">runspace</span><span style="color:#abb2bf;">.</span><span style="color:#eb6772;">CreatePipeline</span><span style="color:#abb2bf;">(); </span><span style="font-style:italic;color:#5f697a;">// this is what breaks the build
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">pipeline</span><span style="color:#abb2bf;">.</span><span style="color:#eb6772;">Commands</span><span style="color:#abb2bf;">.</span><span style="color:#eb6772;">AddScript</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">script</span><span style="color:#abb2bf;">);
+</span><span style="color:#abb2bf;">        </span><span style="color:#cd74e8;">return </span><span style="color:#eb6772;">pipeline</span><span style="color:#abb2bf;">.</span><span style="color:#eb6772;">Invoke</span><span style="color:#abb2bf;">();
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">finally
+</span><span style="color:#abb2bf;">    {
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">runspace</span><span style="color:#abb2bf;">.</span><span style="color:#eb6772;">Close</span><span style="color:#abb2bf;">();
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">}
+</span></code></pre>
+<p>We take a look at the original function in ILSpy to figure out where the Pipeline type is coming from:</p>
+<p><img src="/images/posts/hvmanager-ilspy-run-powershell-script-function.png" alt="ILSpy run PowerShell script function" /></p>
+<p>Weird, is it coming from System.Management.Automation, the <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/dotnet/api/system.management.automation.powershell?view=powershellsdk-7.4.0">PowerShell SDK</a>. We've replaced the previous assembly reference with a package reference to <a rel="noopener nofollow noreferrer" target="_blank" href="https://www.nuget.org/packages/PowerShellStandard.Library">PowerShellStandard.Library</a> and somehow the original code was so old it used a type that's been moved elsewhere. Let's patch this function such that it can build again:</p>
+<pre data-lang="cs" style="background-color:#2b303b;color:#6c7079;" class="language-cs "><code class="language-cs" data-lang="cs"><span style="color:#cd74e8;">public static </span><span style="color:#abb2bf;">ICollection&lt;PSObject&gt; </span><span style="color:#5cb3fa;">RunPowershellScript</span><span style="color:#abb2bf;">(</span><span style="color:#cd74e8;">string </span><span style="color:#eb6772;">script</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    Runspace </span><span style="color:#eb6772;">runspace </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">RunspaceFactory</span><span style="color:#abb2bf;">.</span><span style="color:#eb6772;">CreateRunspace</span><span style="color:#abb2bf;">();
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">runspace</span><span style="color:#abb2bf;">.</span><span style="color:#eb6772;">Open</span><span style="color:#abb2bf;">();
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">try
+</span><span style="color:#abb2bf;">    {
+</span><span style="color:#abb2bf;">        System.Management.Automation.PowerShell </span><span style="color:#eb6772;">powerShell </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">System</span><span style="color:#abb2bf;">.</span><span style="color:#eb6772;">Management</span><span style="color:#abb2bf;">.</span><span style="color:#eb6772;">Automation</span><span style="color:#abb2bf;">.</span><span style="color:#eb6772;">PowerShell</span><span style="color:#abb2bf;">.</span><span style="color:#eb6772;">Create</span><span style="color:#abb2bf;">();
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">powerShell</span><span style="color:#abb2bf;">.</span><span style="color:#eb6772;">Runspace </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">runspace</span><span style="color:#abb2bf;">;
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">powerShell</span><span style="color:#abb2bf;">.</span><span style="color:#eb6772;">AddScript</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">script</span><span style="color:#abb2bf;">);
+</span><span style="color:#abb2bf;">        </span><span style="color:#cd74e8;">return </span><span style="color:#eb6772;">powerShell</span><span style="color:#abb2bf;">.</span><span style="color:#eb6772;">Invoke</span><span style="color:#abb2bf;">();
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">finally
+</span><span style="color:#abb2bf;">    {
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">runspace</span><span style="color:#abb2bf;">.</span><span style="color:#eb6772;">Close</span><span style="color:#abb2bf;">();
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">}
+</span></code></pre>
+<p>And it builds! Next is Microsoft.Virtualization.Client.Wizards. As usual, let's start by fixing the assembly references to then try building:</p>
+<p><img src="/images/posts/hvmanager-ilspy-fix-assembly-references-wizards.png" alt="ILSpy fix virtualization client wizards" /></p>
+<p>No luck this time! We seem to be hitting problems due to automatic decompilations of accessor functions that look like default implementations. Maybe those shouldn't even be decompiled, so let's comment them out:</p>
+<p><img src="/images/posts/hvmanager-ilspy-fix-default-accessor-functions.png" alt="ILSpy fix default accessor functions" /></p>
+<p>And success, it builds! Now fix Microsoft.Virtualization.Client.Settings assembly references, and comment out similar accessor functions that break the build:</p>
+<p><img src="/images/posts/hvmanager-ilspy-fix-assembly-references-settings.png" alt="ILSpy fix virtualization client settings" /></p>
+<p>We're down to the last one: Microsoft.Virtualization.Client.VMBrowser. Fix the assembly references:</p>
+<pre data-lang="xml" style="background-color:#2b303b;color:#6c7079;" class="language-xml "><code class="language-xml" data-lang="xml"><span style="color:#abb2bf;">  &lt;</span><span style="color:#eb6772;">ItemGroup</span><span style="color:#abb2bf;">&gt;
+</span><span style="color:#abb2bf;">    &lt;</span><span style="color:#eb6772;">ProjectReference </span><span style="color:#db9d63;">Include</span><span style="color:#abb2bf;">=</span><span style="color:#9acc76;">&quot;..\Microsoft.Virtualization.Client.Common.Types\Microsoft.Virtualization.Client.Common.Types.csproj&quot; </span><span style="color:#abb2bf;">/&gt;
+</span><span style="color:#abb2bf;">    &lt;</span><span style="color:#eb6772;">ProjectReference </span><span style="color:#db9d63;">Include</span><span style="color:#abb2bf;">=</span><span style="color:#9acc76;">&quot;..\Microsoft.Virtualization.Client.Common\Microsoft.Virtualization.Client.Common.csproj&quot; </span><span style="color:#abb2bf;">/&gt;
+</span><span style="color:#abb2bf;">    &lt;</span><span style="color:#eb6772;">ProjectReference </span><span style="color:#db9d63;">Include</span><span style="color:#abb2bf;">=</span><span style="color:#9acc76;">&quot;..\Microsoft.Virtualization.Client.Management\Microsoft.Virtualization.Client.Management.csproj&quot; </span><span style="color:#abb2bf;">/&gt;
+</span><span style="color:#abb2bf;">    &lt;</span><span style="color:#eb6772;">ProjectReference </span><span style="color:#db9d63;">Include</span><span style="color:#abb2bf;">=</span><span style="color:#9acc76;">&quot;..\Microsoft.Virtualization.Client.Settings\Microsoft.Virtualization.Client.Settings.csproj&quot; </span><span style="color:#abb2bf;">/&gt;
+</span><span style="color:#abb2bf;">    &lt;</span><span style="color:#eb6772;">ProjectReference </span><span style="color:#db9d63;">Include</span><span style="color:#abb2bf;">=</span><span style="color:#9acc76;">&quot;..\Microsoft.Virtualization.Client.Wizards\Microsoft.Virtualization.Client.Wizards.csproj&quot; </span><span style="color:#abb2bf;">/&gt;
+</span><span style="color:#abb2bf;">    &lt;</span><span style="color:#eb6772;">ProjectReference </span><span style="color:#db9d63;">Include</span><span style="color:#abb2bf;">=</span><span style="color:#9acc76;">&quot;..\Microsoft.Virtualization.Client\Microsoft.Virtualization.Client.csproj&quot; </span><span style="color:#abb2bf;">/&gt;
+</span><span style="color:#abb2bf;">  &lt;/</span><span style="color:#eb6772;">ItemGroup</span><span style="color:#abb2bf;">&gt;
+</span><span style="color:#abb2bf;">  &lt;</span><span style="color:#eb6772;">ItemGroup</span><span style="color:#abb2bf;">&gt;
+</span><span style="color:#abb2bf;">    &lt;</span><span style="color:#eb6772;">Reference </span><span style="color:#db9d63;">Include</span><span style="color:#abb2bf;">=</span><span style="color:#9acc76;">&quot;Microsoft.ManagementConsole&quot; </span><span style="color:#db9d63;">HintPath</span><span style="color:#abb2bf;">=</span><span style="color:#9acc76;">&quot;C:\WINDOWS\assembly\GAC_MSIL\Microsoft.ManagementConsole\3.0.0.0__31bf3856ad364e35\Microsoft.ManagementConsole.dll&quot; </span><span style="color:#abb2bf;">/&gt;
+</span><span style="color:#abb2bf;">    &lt;</span><span style="color:#eb6772;">Reference </span><span style="color:#db9d63;">Include</span><span style="color:#abb2bf;">=</span><span style="color:#9acc76;">&quot;PresentationFramework&quot; </span><span style="color:#db9d63;">HintPath</span><span style="color:#abb2bf;">=</span><span style="color:#9acc76;">&quot;C:\WINDOWS\assembly\GAC_MSIL\PresentationFramework\v4.0_4.0.0.0__31bf3856ad364e35\PresentationFramework.dll&quot; </span><span style="color:#abb2bf;">/&gt;
+</span><span style="color:#abb2bf;">	&lt;</span><span style="color:#eb6772;">Reference </span><span style="color:#db9d63;">Include</span><span style="color:#abb2bf;">=</span><span style="color:#9acc76;">&quot;WindowBase&quot; </span><span style="color:#db9d63;">HintPath</span><span style="color:#abb2bf;">=</span><span style="color:#9acc76;">&quot;C:\WINDOWS\Microsoft.NET\assembly\GAC_MSIL\WindowsBase\v4.0_4.0.0.0__31bf3856ad364e35\WindowsBase.dll&quot; </span><span style="color:#abb2bf;">/&gt;
+</span><span style="color:#abb2bf;">    &lt;</span><span style="color:#eb6772;">Reference </span><span style="color:#db9d63;">Include</span><span style="color:#abb2bf;">=</span><span style="color:#9acc76;">&quot;WindowsFormsIntegration&quot; </span><span style="color:#db9d63;">HintPath</span><span style="color:#abb2bf;">=</span><span style="color:#9acc76;">&quot;C:\WINDOWS\Microsoft.NET\assembly\GAC_MSIL\WindowsFormsIntegration\v4.0_4.0.0.0__31bf3856ad364e35\WindowsFormsIntegration.dll&quot; </span><span style="color:#abb2bf;">/&gt;
+</span><span style="color:#abb2bf;">  &lt;/</span><span style="color:#eb6772;">ItemGroup</span><span style="color:#abb2bf;">&gt;
+</span><span style="color:#abb2bf;">  &lt;</span><span style="color:#eb6772;">ItemGroup</span><span style="color:#abb2bf;">&gt;
+</span><span style="color:#abb2bf;">    &lt;</span><span style="color:#eb6772;">Reference </span><span style="color:#db9d63;">Include</span><span style="color:#abb2bf;">=</span><span style="color:#9acc76;">&quot;System.Core&quot; </span><span style="color:#abb2bf;">/&gt;
+</span><span style="color:#abb2bf;">    &lt;</span><span style="color:#eb6772;">Reference </span><span style="color:#db9d63;">Include</span><span style="color:#abb2bf;">=</span><span style="color:#9acc76;">&quot;PresentationCore&quot; </span><span style="color:#abb2bf;">/&gt;
+</span><span style="color:#abb2bf;">    &lt;</span><span style="color:#eb6772;">Reference </span><span style="color:#db9d63;">Include</span><span style="color:#abb2bf;">=</span><span style="color:#9acc76;">&quot;System.Configuration.Install&quot; </span><span style="color:#abb2bf;">/&gt;
+</span><span style="color:#abb2bf;">  &lt;/</span><span style="color:#eb6772;">ItemGroup</span><span style="color:#abb2bf;">&gt;
+</span></code></pre>
+<p>Then comment out the accessor functions that cause problems (there are a lot more of them, unfortunately). Try building the entire solution this time:</p>
+<p><img src="/images/posts/hvmanager-ilspy-fix-assembly-references-vmbrowser.png" alt="ILSpy fix virtualization client vmbrowser" /></p>
+<p>Success! Finally, all 7 assemblies of interest can now be built from source. Are we done yet? Well... we still have to find a way to run our modified Hyper-V Manager, and once we do, we'll run into a lot of issues with satellite resource assemblies. You know, the assemblies in that 'en-US' directory that we've conveniently ignored at the beginning.</p>
+<h2 id="automated-decompilation-process">Automated Decompilation Process</h2>
+<p>Leave the manually-compiled project aside, and clone my <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/awakecoding/hyper-v-manager">Hyper-V Manager automated decompilation project</a> git repository:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">git clone git</span><span style="color:#eb6772;">@github.com</span><span style="color:#abb2bf;">:awakecoding</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">hyper</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">v</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">manager.git
+</span></code></pre>
+<p>Open a PowerShell 7 terminal, then run the <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/awakecoding/Hyper-V-Manager/blob/master/bootstrap.ps1">bootstrap.ps1</a> script:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">.\bootstrap.ps1
+</span></code></pre>
+<p>If everything went well, you should now have a "Decompiled" directory with a "Microsoft.Virtualization.Client.sln" solution file you can now open and build in Visual Studio:</p>
+<p><img src="/images/posts/hvmanager-automated-decompiled-visual-studio-project.png" alt="Automated Decompiled Visual Studio Project" /></p>
+<p>Well, that was too almost easy, wasn't it? Keep in mind that some additional post-compilation fixes may be required due to changes in either the original assemblies or the way ILSpy decompiles them in the future. However, at the time of writing this blog post, everything builds properly.</p>
+<p>That's why automation works better in the end: too many times I have failed to achieve success because I could only get halfway, and then forgot most of the steps by the time I could give it another go. If you structure your decompilation project with a script that deletes the "Decompiled" directory to start over from scratch, automating the steps you've discovered work through manual decompilation, it becomes much easier to make incremental progress.</p>
+<p>Let's go over the major differences of what the <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/awakecoding/Hyper-V-Manager/blob/master/bootstrap.ps1">bootstrap.ps1</a> script does differently:</p>
+<ul>
+<li>Copy assemblies of interest in local "Assemblies" directory</li>
+<li>Use AssemblyInfo.cs files generated from .csproj properties</li>
+<li>All .csproj files now include a common build property file</li>
+<li>Use "overlay" project files that overwrite the decompiled ones</li>
+<li>Call <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/icsharpcode/ILSpy/tree/master/ICSharpCode.ILSpyCmd">ilspycmd</a> from PowerShell to decompile assemblies automatically</li>
+<li>Decompile <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/dotnet/core/extensions/create-satellite-assemblies">satellite resource assemblies</a> located in 'en-US' directory</li>
+<li>Rename decompiled .resx files to remove assembly prefix from file names</li>
+<li>Decompile vmconnect.exe and fix it, something we've skipped earlier</li>
+<li>Patch executable path detection to use the same directory as the assemblies</li>
+<li>Apply many more post-decompilation fixups for all kinds of additional issues</li>
+</ul>
+<p>Take the time to look at the script for yourself to study what it does. One important thing you'll notice is that it creates a local git repository from the "Decompiled" directory, and individual commits for all the automated changes done to the code after initial decompilation. You may wonder why bother creating a git repository for something that isn't going to be published: git commits make it very easy to track changes at every step of the way, and revert them if needed:</p>
+<p><img src="/images/posts/hvmanager-automated-decompiled-project-git-history.png" alt="Automated Decompiled Project Git History" /></p>
+<h2 id="running-recompiled-hyper-v-manager">Running recompiled Hyper-V Manager</h2>
+<p>Create the "C:\Hyper-V\Manager" directory, copy the build output there, then copy hvmanager.msc to the same directory. Import hvmanager.reg to register the MMC component with a different GUID than the original Hyper-V Manager, and point it to "C:\Hyper-V\Manager" as the install path.</p>
+<p>You can now try launch mmc.exe with hvmanager.msc:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">mmc.exe </span><span style="color:#9acc76;">&quot;C:\Hyper-V\Manager\hvmanager.msc&quot;
+</span></code></pre>
+<p>Alternatively, you can launch mmc.exe as the current user and avoid the UAC prompt, which can come in handy if you want to debug your recompiled project in Visual Studio without launching it as an administrator:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$Env:__COMPAT_LAYER</span><span style="color:#adb7c9;">=</span><span style="color:#9acc76;">&#39;RunAsInvoker&#39;
+</span><span style="color:#5ebfcc;">mmc.exe </span><span style="color:#9acc76;">&quot;C:\Hyper-V\Manager\hvmanager.msc&quot;
+</span></code></pre>
+<p>However, this trick requires you to become part of the local Hyper-V Administrators, otherwise you won't be able to manage VMs:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$CurrentUser </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">System.Security.Principal.WindowsIdentity</span><span style="color:#abb2bf;">]::GetCurrent().Name
+</span><span style="color:#cd74e8;">if </span><span style="color:#abb2bf;">(</span><span style="color:#adb7c9;">-Not </span><span style="color:#abb2bf;">(</span><span style="color:#5ebfcc;">Get-LocalGroupMember </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Group </span><span style="color:#9acc76;">&quot;Hyper-V Administrators&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Member </span><span style="color:#eb6772;">$CurrentUser </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ErrorAction SilentlyContinue)) {
+</span><span style="color:#abb2bf;">	</span><span style="color:#5ebfcc;">Add-LocalGroupMember </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Group </span><span style="color:#9acc76;">&quot;Hyper-V Administrators&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Member </span><span style="color:#cd74e8;">@</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$CurrentUser</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">}
+</span></code></pre>
+<p>You can now create a shortcut on the desktop with <code>C:\Windows\System32\cmd.exe /c "SET __COMPAT_LAYER=RunAsInvoker &amp; START mmc.exe "C:\Hyper-V\Manager\hvmanager.msc""</code> as the target, and <code>%ProgramFiles%\Hyper-V\SnapInAbout.dll</code> for the Hyper-V Manager icon. Once the shortcut is created, you can drag it onto the taskbar, and delete the original shortcut if you don't want it on the desktop:</p>
+<p><img src="/images/posts/hvmanager-desktop-shortcut-with-proper-icon.png" alt="Hyper-V Manager Desktop Shortcut" /></p>
+<p>Last but not least, use the new shortcut to launch your custom Hyper-V Manager build, then use Process Explorer (<code>procexp</code>) to confirm that the .NET assemblies loaded are the ones we expect in <code>C:\Hyper-V\Manager</code>:</p>
+<p><img src="/images/posts/hvmanager-process-explorer-mmc-custom-file-paths.png" alt="Hyper-V Manager custom file paths" /></p>
+<p>If it's not using cached assemblies, but really loading the assemblies we've just build from source, then congratulations! It works! You can now start patching Hyper-V Manager to fix some of the things that annoy you the most.</p>
+<h2 id="closing-thoughts">Closing Thoughts</h2>
+<p>Even if we've managed to rebuild and patch Hyper-V Manager from source, this is not enough for a real community project to take place. As much as I would like to just upload the decompiled source code to GitHub to start making significant changes to it, there's no legal standing for this project. I can only go as far as streamlining the process of decompilation such that others can experiment making changes locally.</p>
+<p>Are you a Hyper-V Manager user? Do you wish it could be improved? Make yourself heard, and help save Hyper-V Manager by convincing Microsoft to open source it!</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;debugging-powershell-binary-modules-in-visual-studio&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              Debugging PowerShell Binary Modules in Visual Studio
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;enable-powershell-winrm-remoting-in-powershell-7&#x2F;">
+              Enable PowerShell WinRM Remoting in PowerShell 7<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>

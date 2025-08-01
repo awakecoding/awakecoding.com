@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/pinning-apps-to-the-windows-11-taskbar-with-powershell/">
+  <link rel="alternate" href="https://awakecoding.com/posts/pinning-apps-to-the-windows-11-taskbar-with-powershell/" hreflang="en" />
+  
+  <meta name="description" content="Learn how to automate taskbar app pinning in Windows 11 using PowerShell by generating a LayoutModification.xml file and forcing the shell to reinitialize the layout without creating new user profiles." />
+  <meta property="og:title" content="Pinning Apps to the Windows 11 Taskbar with PowerShell" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;pinning-apps-to-the-windows-11-taskbar-with-powershell&#x2F;" />
+  <meta property="og:description" content="Learn how to automate taskbar app pinning in Windows 11 using PowerShell by generating a LayoutModification.xml file and forcing the shell to reinitialize the layout without creating new user profiles." />
+  <meta name="twitter:title" content="Pinning Apps to the Windows 11 Taskbar with PowerShell" />
+  <meta name="twitter:description" content="Learn how to automate taskbar app pinning in Windows 11 using PowerShell by generating a LayoutModification.xml file and forcing the shell to reinitialize the layout without creating new user profiles." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;pinning-apps-to-the-windows-11-taskbar-with-powershell&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/pinning-apps-to-the-windows-11-taskbar-with-powershell.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/pinning-apps-to-the-windows-11-taskbar-with-powershell.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Pinning Apps to the Windows 11 Taskbar with PowerShell",
+  "description": "Learn how to automate taskbar app pinning in Windows 11 using PowerShell by generating a LayoutModification.xml file and forcing the shell to reinitialize the layout without creating new user profiles.",
+  "datePublished": "2025-05-14",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/pinning-apps-to-the-windows-11-taskbar-with-powershell.png",
+  "url": "https://awakecoding.com/posts/pinning-apps-to-the-windows-11-taskbar-with-powershell/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/pinning-apps-to-the-windows-11-taskbar-with-powershell/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | Pinning Apps to the Windows 11 Taskbar with PowerShell
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            Pinning Apps to the Windows 11 Taskbar with PowerShell
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2025-05-14">May 14, 2025</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>3 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>503 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/windows/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Windows</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/powershell/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>PowerShell</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>Pinning apps to the taskbar in Windows 11 is surprisingly tricky to automate. Microsoft's <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows/configuration/taskbar/pinned-apps">official solution</a> is to provision a LayoutModification.xml file, which is only applied during user profile initialization. If your user profile is already initialized, or if you just want to test layout modifications for your current user: well, tough luck.</p>
+<p>In a first step, we'll generate a working <code>LayoutModification.xml</code> file using PowerShell and a list of application shortcuts. In a second step, we'll see how to force Windows to re-initialize the layout modifications for an existing user. It's not elegant, but it makes repeated testing much easier, and it's good enough for automation.</p>
+<h2 id="generating-layoutmodification-xml-with-powershell">Generating LayoutModification.xml with PowerShell</h2>
+<p>The default layout modification file is located in <code>C:\Users\Default\AppData\Local\Microsoft\Windows\Shell\LayoutModification.xml</code> and automatically copied to <code>%AppData%\Microsoft\Windows\Shell\LayoutModification.xml</code> upon user profile initialization.</p>
+<p>Here's a sample layout modification file using only a list of shortcuts to existing applications:</p>
+<pre data-lang="xml" style="background-color:#2b303b;color:#6c7079;" class="language-xml "><code class="language-xml" data-lang="xml"><span style="color:#abb2bf;">&lt;</span><span style="color:#eb6772;">LayoutModificationTemplate
+</span><span style="color:#abb2bf;">    </span><span style="color:#db9d63;">xmlns:defaultlayout</span><span style="color:#abb2bf;">=</span><span style="color:#9acc76;">&quot;http://schemas.microsoft.com/Start/2014/FullDefaultLayout&quot;
+</span><span style="color:#abb2bf;">    </span><span style="color:#db9d63;">xmlns:taskbar</span><span style="color:#abb2bf;">=</span><span style="color:#9acc76;">&quot;http://schemas.microsoft.com/Start/2014/TaskbarLayout&quot;
+</span><span style="color:#abb2bf;">    </span><span style="color:#db9d63;">xmlns</span><span style="color:#abb2bf;">=</span><span style="color:#9acc76;">&quot;http://schemas.microsoft.com/Start/2014/LayoutModification&quot;
+</span><span style="color:#abb2bf;">    </span><span style="color:#db9d63;">Version</span><span style="color:#abb2bf;">=</span><span style="color:#9acc76;">&quot;1&quot;</span><span style="color:#abb2bf;">&gt;
+</span><span style="color:#abb2bf;">  &lt;</span><span style="color:#eb6772;">CustomTaskbarLayoutCollection </span><span style="color:#db9d63;">PinListPlacement</span><span style="color:#abb2bf;">=</span><span style="color:#9acc76;">&quot;Replace&quot;</span><span style="color:#abb2bf;">&gt;
+</span><span style="color:#abb2bf;">    &lt;</span><span style="color:#eb6772;">defaultlayout:TaskbarLayout</span><span style="color:#abb2bf;">&gt;
+</span><span style="color:#abb2bf;">      &lt;</span><span style="color:#eb6772;">taskbar:TaskbarPinList</span><span style="color:#abb2bf;">&gt;
+</span><span style="color:#abb2bf;">        &lt;</span><span style="color:#eb6772;">taskbar:DesktopApp </span><span style="color:#db9d63;">DesktopApplicationLinkPath</span><span style="color:#abb2bf;">=</span><span style="color:#9acc76;">&quot;%ALLUSERSPROFILE%\Microsoft\Windows\Start Menu\Programs\Microsoft Edge.lnk&quot; </span><span style="color:#abb2bf;">/&gt;
+</span><span style="color:#abb2bf;">        &lt;</span><span style="color:#eb6772;">taskbar:DesktopApp </span><span style="color:#db9d63;">DesktopApplicationLinkPath</span><span style="color:#abb2bf;">=</span><span style="color:#9acc76;">&quot;%APPDATA%\Microsoft\Windows\Start Menu\Programs\File Explorer.lnk&quot; </span><span style="color:#abb2bf;">/&gt;
+</span><span style="color:#abb2bf;">        &lt;</span><span style="color:#eb6772;">taskbar:DesktopApp </span><span style="color:#db9d63;">DesktopApplicationLinkPath</span><span style="color:#abb2bf;">=</span><span style="color:#9acc76;">&quot;%ALLUSERSPROFILE%\Microsoft\Windows\Start Menu\Programs\Notepad.lnk&quot; </span><span style="color:#abb2bf;">/&gt;
+</span><span style="color:#abb2bf;">        &lt;</span><span style="color:#eb6772;">taskbar:DesktopApp </span><span style="color:#db9d63;">DesktopApplicationLinkPath</span><span style="color:#abb2bf;">=</span><span style="color:#9acc76;">&quot;%ALLUSERSPROFILE%\Microsoft\Windows\Start Menu\Programs\Calculator.lnk&quot; </span><span style="color:#abb2bf;">/&gt;
+</span><span style="color:#abb2bf;">      &lt;/</span><span style="color:#eb6772;">taskbar:TaskbarPinList</span><span style="color:#abb2bf;">&gt;
+</span><span style="color:#abb2bf;">    &lt;/</span><span style="color:#eb6772;">defaultlayout:TaskbarLayout</span><span style="color:#abb2bf;">&gt;
+</span><span style="color:#abb2bf;">  &lt;/</span><span style="color:#eb6772;">CustomTaskbarLayoutCollection</span><span style="color:#abb2bf;">&gt;
+</span><span style="color:#abb2bf;">&lt;/</span><span style="color:#eb6772;">LayoutModificationTemplate</span><span style="color:#abb2bf;">&gt;
+</span></code></pre>
+<p>The <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows/configuration/taskbar/xsd">full XML schema</a> supports more than shortcut files (.lnk), but I won't be covering them to keep things simple. Instead of manually editing the XML, let's use a PowerShell cmdlet to generate it from a list of shortcut files:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#cd74e8;">function </span><span style="color:#5cb3fa;">New-LayoutModificationXml </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    [</span><span style="color:#5ebfcc;">CmdletBinding</span><span style="color:#abb2bf;">()]
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">param </span><span style="color:#abb2bf;">(
+</span><span style="color:#abb2bf;">        [</span><span style="color:#cd74e8;">string</span><span style="color:#abb2bf;">[]] </span><span style="color:#eb6772;">$LnkPaths</span><span style="color:#adb7c9;">,
+</span><span style="color:#abb2bf;">        [</span><span style="color:#cd74e8;">string</span><span style="color:#abb2bf;">] </span><span style="color:#eb6772;">$OutputPath </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;C:\Users\Default\AppData\Local\Microsoft\Windows\Shell\LayoutModification.xml&quot;</span><span style="color:#adb7c9;">,
+</span><span style="color:#abb2bf;">        [</span><span style="color:#5ebfcc;">ValidateSet</span><span style="color:#abb2bf;">(</span><span style="color:#9acc76;">&quot;Append&quot;</span><span style="color:#adb7c9;">, </span><span style="color:#9acc76;">&quot;Replace&quot;</span><span style="color:#abb2bf;">)]
+</span><span style="color:#abb2bf;">        [</span><span style="color:#cd74e8;">string</span><span style="color:#abb2bf;">] </span><span style="color:#eb6772;">$PinListPlacement </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;Replace&quot;
+</span><span style="color:#abb2bf;">    )
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$xml </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">New-Object</span><span style="color:#abb2bf;"> System.Xml.XmlDocument
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$root </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$xml.CreateElement</span><span style="color:#abb2bf;">(</span><span style="color:#9acc76;">&quot;LayoutModificationTemplate&quot;</span><span style="color:#adb7c9;">, </span><span style="color:#9acc76;">&quot;http://schemas.microsoft.com/Start/2014/LayoutModification&quot;</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$xml.AppendChild</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$root</span><span style="color:#abb2bf;">) </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Out-Null
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$root.SetAttribute</span><span style="color:#abb2bf;">(</span><span style="color:#9acc76;">&quot;xmlns:defaultlayout&quot;</span><span style="color:#adb7c9;">, </span><span style="color:#9acc76;">&quot;http://schemas.microsoft.com/Start/2014/FullDefaultLayout&quot;</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$root.SetAttribute</span><span style="color:#abb2bf;">(</span><span style="color:#9acc76;">&quot;xmlns:taskbar&quot;</span><span style="color:#adb7c9;">, </span><span style="color:#9acc76;">&quot;http://schemas.microsoft.com/Start/2014/TaskbarLayout&quot;</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$root.SetAttribute</span><span style="color:#abb2bf;">(</span><span style="color:#9acc76;">&quot;Version&quot;</span><span style="color:#adb7c9;">, </span><span style="color:#9acc76;">&quot;1&quot;</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$collection </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$xml.CreateElement</span><span style="color:#abb2bf;">(</span><span style="color:#9acc76;">&quot;CustomTaskbarLayoutCollection&quot;</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">$root.NamespaceURI</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$collection.SetAttribute</span><span style="color:#abb2bf;">(</span><span style="color:#9acc76;">&quot;PinListPlacement&quot;</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">$PinListPlacement</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$root.AppendChild</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$collection</span><span style="color:#abb2bf;">) </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Out-Null
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$layout </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$xml.CreateElement</span><span style="color:#abb2bf;">(</span><span style="color:#9acc76;">&quot;defaultlayout:TaskbarLayout&quot;</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">$root.GetAttribute</span><span style="color:#abb2bf;">(</span><span style="color:#9acc76;">&quot;xmlns:defaultlayout&quot;</span><span style="color:#abb2bf;">))
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$collection.AppendChild</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$layout</span><span style="color:#abb2bf;">) </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Out-Null
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$pinList </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$xml.CreateElement</span><span style="color:#abb2bf;">(</span><span style="color:#9acc76;">&quot;taskbar:TaskbarPinList&quot;</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">$root.GetAttribute</span><span style="color:#abb2bf;">(</span><span style="color:#9acc76;">&quot;xmlns:taskbar&quot;</span><span style="color:#abb2bf;">))
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$layout.AppendChild</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$pinList</span><span style="color:#abb2bf;">) </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Out-Null
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">foreach </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$lnk </span><span style="color:#cd74e8;">in </span><span style="color:#eb6772;">$LnkPaths</span><span style="color:#abb2bf;">) {
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$desktopApp </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$xml.CreateElement</span><span style="color:#abb2bf;">(</span><span style="color:#9acc76;">&quot;taskbar:DesktopApp&quot;</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">$root.GetAttribute</span><span style="color:#abb2bf;">(</span><span style="color:#9acc76;">&quot;xmlns:taskbar&quot;</span><span style="color:#abb2bf;">))
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$desktopApp.SetAttribute</span><span style="color:#abb2bf;">(</span><span style="color:#9acc76;">&quot;DesktopApplicationLinkPath&quot;</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">$lnk</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$pinList.AppendChild</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$desktopApp</span><span style="color:#abb2bf;">) </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Out-Null
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$xml.Save</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$OutputPath</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">}
+</span></code></pre>
+<p>Paste the <code>New-LayoutModificationXml</code> cmdlet into a PowerShell terminal, and then paste the following code snippet to generate a sample LayoutModification.xml file in the default location:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$LnkPaths </span><span style="color:#adb7c9;">= </span><span style="color:#cd74e8;">@</span><span style="color:#abb2bf;">(
+</span><span style="color:#abb2bf;">    </span><span style="color:#9acc76;">&quot;%ALLUSERSPROFILE%\Microsoft\Windows\Start Menu\Programs\Microsoft Edge.lnk&quot;
+</span><span style="color:#abb2bf;">    </span><span style="color:#9acc76;">&quot;%APPDATA%\Microsoft\Windows\Start Menu\Programs\File Explorer.lnk&quot;
+</span><span style="color:#abb2bf;">    </span><span style="color:#9acc76;">&quot;%ALLUSERSPROFILE%\Microsoft\Windows\Start Menu\Programs\Notepad.lnk&quot;
+</span><span style="color:#abb2bf;">    </span><span style="color:#9acc76;">&quot;%ALLUSERSPROFILE%\Microsoft\Windows\Start Menu\Programs\Calculator.lnk&quot;
+</span><span style="color:#abb2bf;">)
+</span><span style="color:#5ebfcc;">New-LayoutModificationXml </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">LnkPaths </span><span style="color:#eb6772;">$LnkPaths </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">PinListPlacement </span><span style="color:#9acc76;">&quot;Replace&quot;
+</span></code></pre>
+<p>Inspect the resulting <code>LayoutModification.xml</code> file in Notepad:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">notepad </span><span style="color:#9acc76;">&quot;C:\Users\Default\AppData\Local\Microsoft\Windows\Shell\LayoutModification.xml&quot;
+</span></code></pre>
+<p>Feel free to edit the XML manually, but I would recommend updating the original cmdlet to accommodate your needs. ChatGPT or Claude can handle this kind of task quite well.</p>
+<h2 id="testing-taskbar-layout-modifications">Testing Taskbar Layout Modifications</h2>
+<p>So, you now have a <code>LayoutModification.xml</code> file which looks good in theory, but you want to see the end result. Instead of using RDP to login interactively with newly created users, I offer you the much simpler <code>Reset-TaskbarLayout</code> PowerShell cmdlet instead:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#cd74e8;">function </span><span style="color:#5cb3fa;">Reset-TaskbarLayout </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Get-Process</span><span style="color:#abb2bf;"> explorer </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Stop-Process </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Remove-Item </span><span style="color:#9acc76;">&quot;</span><span style="color:#eb6772;">$Env:AppData</span><span style="color:#9acc76;">\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\*&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ErrorAction SilentlyContinue
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Remove-Item </span><span style="color:#9acc76;">&quot;</span><span style="color:#eb6772;">$Env:AppData</span><span style="color:#9acc76;">\Microsoft\Windows\Shell\*.dat&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ErrorAction SilentlyContinue
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Remove-Item </span><span style="color:#9acc76;">&quot;</span><span style="color:#eb6772;">$Env:AppData</span><span style="color:#9acc76;">\Microsoft\Windows\Shell\LayoutModification.xml&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ErrorAction SilentlyContinue
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Remove-Item </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#9acc76;">&quot;HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Taskband&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Recurse </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ErrorAction SilentlyContinue
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Remove-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#9acc76;">&quot;HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\TrayNotify&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#9acc76;">&quot;IconStreams&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ErrorAction SilentlyContinue
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Remove-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#9acc76;">&quot;HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\TrayNotify&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#9acc76;">&quot;PastIconsStream&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ErrorAction SilentlyContinue
+</span><span style="color:#abb2bf;">}
+</span></code></pre>
+<p>All you have to do is open a terminal, paste the cmdlet definition, then invoke <code>Reset-TaskbarLayout</code> after updating the <code>LayoutModification.xml</code> file. Here's what a successfully customized taskbar looks like:</p>
+<p><img src="/images/posts/taskbar-pinned-apps-customized.png" alt="customized pinned apps in taskbar" /></p>
+<p>If you delete the files without deleting the registry keys, you can end up with blank icons:</p>
+<p><img src="/images/posts/taskbar-pinned-apps-blank-icons.png" alt="blank pinned app icons in taskbar" /></p>
+<p>If this happens, just right-click and unpin all the blank icons manually, then reset the taskbar layout again. While this approach has worked reliably in my testing, keep in mind that it's an unsupported workaround that could break in the future.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>While taskbar pinning in Windows 11 was never meant to be scripted in this way, using PowerShell to generate <code>LayoutModification.xml</code> and forcing a taskbar layout reset gets the job done.</p>
+<p>Is this officially supported? No.<br />
+Is it reliable for automation? Mostly.<br />
+Is it good enough? For many scenarios — yes.</p>
+<p>If you've found other reliable tricks to simplify taskbar app pinning, feel free to share them with me!</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;rd-gateway-without-kdc-proxy-causes-ntlm-downgrade&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              RD Gateway Without KDC Proxy Causes NTLM Downgrade
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;automating-hyper-v-network-adapter-cleanup-migration&#x2F;">
+              Automating Hyper-V Network Adapter Cleanup and IP Migration<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+      <title>AwakeCoding ☀️💻 - Rust</title>
+      <link>https://awakecoding.com</link>
+      <description>awakecoding - Adventures of a CTO</description>
+      <generator>Zola</generator>
+      <language>en</language>
+      <atom:link href="https://awakecoding.com/tags/rust/rss.xml" rel="self" type="application/rss+xml"/>
+      <lastBuildDate>Mon, 28 Jul 2025 00:00:00 +0000</lastBuildDate>
+      <item>
+          <title>Vibe Coding a Rust MCP proxy in VSCode with GitHub Copilot</title>
+          <pubDate>Mon, 28 Jul 2025 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/vibe-coding-a-rust-mcp-proxy-in-vscode-with-github-copilot/</link>
+          <guid>https://awakecoding.com/posts/vibe-coding-a-rust-mcp-proxy-in-vscode-with-github-copilot/</guid>
+          <description>A hands-off experiment building a Rust-based Model Context Protocol (MCP) proxy tool using only GitHub Copilot agent mode. Covers setup, multi-transport support, and lessons learned from letting Copilot do all the coding.</description>
+          <bannerImage>https://awakecoding.com/images/banners/vibe-coding-a-rust-mcp-proxy-in-vscode-with-github-copilot.png</bannerImage><tags>
+              <tag>MCP</tag>
+              <tag>Rust</tag>
+              <tag>CTO</tag>
+            </tags></item>
+    </channel>
+</rss>

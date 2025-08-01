@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/deleting-hidden-proxy-settings-that-break-windows-apps/">
+  <link rel="alternate" href="https://awakecoding.com/posts/deleting-hidden-proxy-settings-that-break-windows-apps/" hreflang="en" />
+  
+  <meta name="description" content="Windows leaves behind hidden proxy configurations in the ProxyMgr registry that break apps even after disabling proxy settings. Learn how to identify and completely eliminate these phantom settings that affect system services like Kerberos authentication." />
+  <meta property="og:title" content="Deleting Hidden Proxy Settings that Break Windows Apps" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;deleting-hidden-proxy-settings-that-break-windows-apps&#x2F;" />
+  <meta property="og:description" content="Windows leaves behind hidden proxy configurations in the ProxyMgr registry that break apps even after disabling proxy settings. Learn how to identify and completely eliminate these phantom settings that affect system services like Kerberos authentication." />
+  <meta name="twitter:title" content="Deleting Hidden Proxy Settings that Break Windows Apps" />
+  <meta name="twitter:description" content="Windows leaves behind hidden proxy configurations in the ProxyMgr registry that break apps even after disabling proxy settings. Learn how to identify and completely eliminate these phantom settings that affect system services like Kerberos authentication." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;deleting-hidden-proxy-settings-that-break-windows-apps&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/deleting-hidden-proxy-settings-that-break-windows-apps.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/deleting-hidden-proxy-settings-that-break-windows-apps.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Deleting Hidden Proxy Settings that Break Windows Apps",
+  "description": "Windows leaves behind hidden proxy configurations in the ProxyMgr registry that break apps even after disabling proxy settings. Learn how to identify and completely eliminate these phantom settings that affect system services like Kerberos authentication.",
+  "datePublished": "2025-08-01",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/deleting-hidden-proxy-settings-that-break-windows-apps.png",
+  "url": "https://awakecoding.com/posts/deleting-hidden-proxy-settings-that-break-windows-apps/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/deleting-hidden-proxy-settings-that-break-windows-apps/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | Deleting Hidden Proxy Settings that Break Windows Apps
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            Deleting Hidden Proxy Settings that Break Windows Apps
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2025-08-01">August 01, 2025</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>5 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>869 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/windows/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Windows</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/powershell/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>PowerShell</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/networking/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Networking</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>Ever disabled proxy settings in Windows only to find that some apps still can't connect to the internet? You're not alone. Windows has a sneaky habit of leaving behind hidden proxy configurations that continue to interfere with network connections long after you've "turned off" proxy settings through the GUI. This isn't just an annoyance—it's a design flaw that can break everything from Windows Store apps to enterprise software.</p>
+<p>In my case, my first experience with this problem was after installing <em>and uninstalling</em> <a rel="noopener nofollow noreferrer" target="_blank" href="https://www.telerik.com/fiddler/fiddler-everywhere">Fiddler Everywhere</a>. Through my work at <a rel="noopener nofollow noreferrer" target="_blank" href="https://devolutions.net/">Devolutions</a>, I had been pulling my hair out wondering why KDC proxying was broken. Using <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/sysinternals/downloads/procmon">Process Monitor</a>, I could see failed connections from lsass.exe going to a localhost proxy that was no longer there.</p>
+<p>In this post, I'll show you how to identify these phantom proxy settings and completely eliminate them from your system.</p>
+<h2 id="enable-and-disable-proxy-settings">Enable and Disable Proxy Settings</h2>
+<p>Follow these steps to enable and disable proxy settings in Windows, which is sufficient to reproduce the problem. Don't worry, I will show you how to remove the hidden proxy settings after:</p>
+<p><img src="/images/posts/proxymgr-settings-ui-edit-and-save.png" alt="ProxyMgr settings UI edit and save" /></p>
+<ol>
+<li><strong>Open Windows Settings</strong> - Press <code>Win + I</code></li>
+<li><strong>Navigate to Network &amp; Internet</strong> → <strong>Proxy</strong></li>
+<li><strong>Turn on proxy settings</strong>:
+<ul>
+<li>Toggle "Use a proxy server" to <strong>On</strong></li>
+<li>Enter any proxy server information</li>
+<li>Click <strong>Save</strong></li>
+</ul>
+</li>
+<li><strong>Turn off proxy settings</strong>:
+<ul>
+<li>Toggle "Use a proxy server" to <strong>Off</strong></li>
+<li>Click <strong>Save</strong></li>
+</ul>
+</li>
+</ol>
+<p>Beware that if you leave bogus proxy settings <strong>enabled</strong>, you will experience networking issues.</p>
+<h2 id="hidden-proxy-settings-the-real-problem">Hidden Proxy Settings: The Real Problem</h2>
+<p>Here's where things get ugly. Windows automatically creates additional proxy settings that the GUI <strong>never shows you</strong> and <strong>never cleans up</strong>. These phantom settings live under:</p>
+<p><strong><code>HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\iphlpsvc\Parameters\ProxyMgr</code></strong></p>
+<p>Let's expose these hidden configurations:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS</span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-ChildItem </span><span style="color:#9acc76;">&quot;HKLM:\SYSTEM\CurrentControlSet\Services\iphlpsvc\Parameters\ProxyMgr&quot; </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Format-Table </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">AutoSize
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">Name                                   Property
+</span><span style="color:#adb7c9;">----                                   --------
+</span><span style="color:#abb2bf;">{6A42EAA0</span><span style="color:#adb7c9;">-</span><span style="color:#db9d63;">3831</span><span style="color:#adb7c9;">-</span><span style="color:#db9d63;">4006</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">8F95</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">7A6C372D26B1} StaticProxy : http:</span><span style="color:#adb7c9;">//</span><span style="color:#abb2bf;">proxy</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">server:</span><span style="color:#db9d63;">808
+</span><span style="color:#abb2bf;">                                       LastUseTime : </span><span style="color:#db9d63;">133985369088357795
+</span><span style="color:#abb2bf;">{9A02AD85</span><span style="color:#adb7c9;">-</span><span style="color:#db9d63;">8292</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">4B3D</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">B9D0</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">36AAB45B42E9} StaticProxy : http:</span><span style="color:#adb7c9;">//</span><span style="color:#abb2bf;">proxy</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">server:</span><span style="color:#db9d63;">808
+</span><span style="color:#abb2bf;">                                       LastUseTime : </span><span style="color:#db9d63;">133985369088357795
+</span><span style="color:#abb2bf;">{C9A5E798</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">F5DF</span><span style="color:#adb7c9;">-</span><span style="color:#db9d63;">460F</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">8AEE</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">837A463CBC27} StaticProxy : http:</span><span style="color:#adb7c9;">//</span><span style="color:#abb2bf;">proxy</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">server:</span><span style="color:#db9d63;">808
+</span><span style="color:#abb2bf;">                                       LastUseTime : </span><span style="color:#db9d63;">133985369088357795
+</span></code></pre>
+<p>Unlike <strong>Internet Settings</strong>, <strong>ProxyMgr</strong> entries don't have a <strong>ProxyEnable</strong> registry key, and since they are stored under <strong>HKEY_LOCAL_MACHINE</strong>, they affect the entire system, not just the current user.</p>
+<p><img src="/images/posts/proxymgr-proxy-settings-in-registry.png" alt="ProxyMgr remaining registry keys" /></p>
+<p>From an elevated PowerShell terminal, remove the <strong>ProxyMgr</strong> registry keys:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Remove-Item </span><span style="color:#9acc76;">&quot;HKLM:\SYSTEM\CurrentControlSet\Services\iphlpsvc\Parameters\ProxyMgr&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Recurse </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ErrorAction SilentlyContinue
+</span></code></pre>
+<p>If you have already tried everything to disable proxy settings that were mysteriously still used by some applications, this is the command that will finally fix things.</p>
+<h2 id="internet-proxy-settings">Internet Proxy Settings</h2>
+<p>The proxy settings for the current user are stored under <strong><code>HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings</code></strong>:</p>
+<p><img src="/images/posts/proxymgr-internet-settings-registry.png" alt="ProxyMgr internet settings registry" /></p>
+<p>You can also inspect them through PowerShell:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS</span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#9acc76;">&quot;HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings&quot; </span><span style="color:#adb7c9;">|
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Select-Object</span><span style="color:#abb2bf;"> ProxyEnable</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;"> ProxyServer</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;"> ProxyOverride</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;"> AutoConfigURL
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">ProxyEnable ProxyServer             ProxyOverride AutoConfigURL
+</span><span style="color:#adb7c9;">----------- -----------             ------------- -------------
+</span><span style="color:#abb2bf;">          </span><span style="color:#db9d63;">0</span><span style="color:#abb2bf;"> http:</span><span style="color:#adb7c9;">//</span><span style="color:#abb2bf;">proxy</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">server:</span><span style="color:#db9d63;">808
+</span></code></pre>
+<p>These settings are also often called the "Internet Explorer" proxy settings. This is what the Windows Settings app lets you see.</p>
+<h3 id="testing-net-proxy-detection">Testing .NET Proxy Detection</h3>
+<p>In .NET, applications dynamically detect proxy settings based on the target URL. You can easily test this behavior using some PowerShell:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#cd74e8;">function </span><span style="color:#5cb3fa;">Test-ProxyConnection </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">param</span><span style="color:#abb2bf;">([</span><span style="color:#cd74e8;">string</span><span style="color:#abb2bf;">]</span><span style="color:#eb6772;">$Url </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;http://example.com&quot;</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">    
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$proxy </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">System.Net.WebRequest</span><span style="color:#abb2bf;">]::GetSystemWebProxy()
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$proxyUri </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$proxy.GetProxy</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$Url</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$isBypassed </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$proxy.IsBypassed</span><span style="color:#abb2bf;">([</span><span style="color:#cd74e8;">System.Uri</span><span style="color:#abb2bf;">]</span><span style="color:#eb6772;">$Url</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$isDirectConnection </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$isBypassed </span><span style="color:#adb7c9;">-or !</span><span style="color:#eb6772;">$proxyUri </span><span style="color:#adb7c9;">-or </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$proxyUri.ToString</span><span style="color:#abb2bf;">() </span><span style="color:#adb7c9;">-eq </span><span style="color:#eb6772;">$Url</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">    
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">if </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$isDirectConnection</span><span style="color:#abb2bf;">) {
+</span><span style="color:#abb2bf;">        </span><span style="color:#5ebfcc;">Write-Host </span><span style="color:#9acc76;">&quot;Direct connection (no proxy)&quot;
+</span><span style="color:#abb2bf;">    } </span><span style="color:#cd74e8;">else </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">        </span><span style="color:#5ebfcc;">Write-Host </span><span style="color:#9acc76;">&quot;Using proxy: </span><span style="color:#eb6772;">$proxyUri</span><span style="color:#9acc76;">&quot;
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">}
+</span><span style="color:#abb2bf;">PS </span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Test-ProxyConnection </span><span style="color:#9acc76;">&quot;http://example.com&quot; </span><span style="font-style:italic;color:#5f697a;"># with proxy disabled
+</span><span style="color:#abb2bf;">Direct connection (no proxy)
+</span><span style="color:#abb2bf;">PS </span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Test-ProxyConnection </span><span style="color:#9acc76;">&quot;http://example.com&quot; </span><span style="font-style:italic;color:#5f697a;"># with proxy enabled
+</span><span style="color:#abb2bf;">Using proxy: http:</span><span style="color:#adb7c9;">//</span><span style="color:#abb2bf;">proxy</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">server:</span><span style="color:#db9d63;">808</span><span style="color:#adb7c9;">/
+</span></code></pre>
+<p>This is a good code snippet to have at hand, because I once investigated a weird customer issue where complex proxy resolution logic was not the same between .NET Framework (Windows PowerShell) and .NET Core (PowerShell 7).</p>
+<h2 id="winhttp-proxy-settings">WinHTTP Proxy Settings</h2>
+<p>WinHTTP maintains a completely separate proxy configuration from <strong>Internet Settings</strong>. This separation is by design—WinHTTP is used by system services and applications that need more control over networking. You can inspect those settings using the <code>netsh winhttp show proxy</code> command:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS</span><span style="color:#adb7c9;">&gt;</span><span style="color:#abb2bf;"> netsh winhttp show proxy
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">Current WinHTTP proxy settings:
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    Direct access (no proxy server).
+</span></code></pre>
+<p>While the Settings app doesn't modify the WinHTTP proxy settings, the <strong>ProxyMgr</strong> registry keys <em>can affect system components using WinHTTP</em>, such as KDC proxying in lsass.exe. Yes, this means that simply enabling and disabling bogus proxy settings from your unelevated user context can result in broken Kerberos with an NTLM downgrade. If you have malicious intent, this is also a good way to redirect KDC proxying traffic somewhere else without elevated permissions.</p>
+<p>You can manually configure WinHTTP proxy settings (requires elevated privileges):</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS</span><span style="color:#adb7c9;">&gt;</span><span style="color:#abb2bf;"> netsh winhttp set proxy proxy</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">server:</span><span style="color:#db9d63;">8080
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">Current WinHTTP proxy settings:
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    Proxy Server(s) :  proxy</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">server:</span><span style="color:#db9d63;">8080
+</span><span style="color:#abb2bf;">    Bypass List     :  (none)
+</span></code></pre>
+<p>You can then remove WinHTTP proxy settings using <code>netsh winhttp reset proxy</code>:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS</span><span style="color:#adb7c9;">&gt;</span><span style="color:#abb2bf;"> netsh winhttp reset proxy
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">Current WinHTTP proxy settings:
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    Direct access (no proxy server).
+</span></code></pre>
+<h2 id="broken-glass">Broken Glass</h2>
+<p>Which broken parts of Windows are involved here? I did spend some time identifying the system component responsible for creating the <strong>ProxyMgr</strong> registry settings.</p>
+<p>httpprxym.dll hosts an RPC server in a system service, with 3 relevant functions:</p>
+<ul>
+<li>ProxyMgrConfigReadConfigCacheEntry</li>
+<li>ProxyMgrConfigWriteConfigCacheEntry</li>
+<li>ProxyMgrConfigDeleteConfigCacheEntry</li>
+</ul>
+<p>Here's the critical issue: <code>ProxyMgrConfigDeleteConfigCacheEntry</code> is never called by the Windows Settings app. The GUI only "disables" proxy settings by modifying user-level registry entries, but it never actually deletes the system-wide ProxyMgr cache entries.</p>
+<p>If there's a documented Windows API or GUI method to properly clear these phantom proxy settings, I'm not aware of it and could not find it—manual registry deletion appears to be the only reliable solution.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>Windows proxy management has a fundamental design flaw that creates persistent networking issues long after you think you've disabled proxy settings. The root cause is simple: when you enable proxy settings, Windows creates per-interface configurations in both user (<code>HKCU</code>) and system (<code>HKLM</code>) registry locations, but when you disable them, only the user-level settings get cleared.</p>
+<p>This leaves behind hidden <strong>ProxyMgr</strong> registry entries that continue affecting system services and applications. The most concerning impact is on WinHTTP-based components like the Kerberos KDC proxying client in <code>lsass.exe</code>, where a simple proxy configuration mistake can break enterprise authentication and force NTLM downgrades—all from an unprivileged user context.</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;vibe-coding-a-rust-mcp-proxy-in-vscode-with-github-copilot&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              Vibe Coding a Rust MCP proxy in VSCode with GitHub Copilot
+            </a>
+          </div>
+           
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>

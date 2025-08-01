@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>AwakeCoding ☀️💻</title>
+        <link>https://awakecoding.com</link>
+        <description>awakecoding - Adventures of a CTO</description>
+        <generator>Zola</generator>
+        <language>en</language>
+        <atom:link href="https://awakecoding.com/rss.xml" rel="self" type="application/rss+xml" />
+        <lastBuildDate>Fri, 01 Aug 2025 00:00:00 +0000</lastBuildDate>
+        <item>
+            <title>Deleting Hidden Proxy Settings that Break Windows Apps</title>
+            <pubDate>Fri, 01 Aug 2025 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/deleting-hidden-proxy-settings-that-break-windows-apps/</link>
+            <guid>https://awakecoding.com/posts/deleting-hidden-proxy-settings-that-break-windows-apps/</guid>
+            <description>Windows leaves behind hidden proxy configurations in the ProxyMgr registry that break apps even after disabling proxy settings. Learn how to identify and completely eliminate these phantom settings that affect system services like Kerberos authentication.</description>
+            <bannerImage>https://awakecoding.com/images/banners/deleting-hidden-proxy-settings-that-break-windows-apps.png</bannerImage>
+            <tags>
+                <tag>Windows</tag>
+                <tag>PowerShell</tag>
+                <tag>Networking</tag>
+                <tag>CTO</tag>
+            </tags>
+        </item>
+        <item>
+            <title>Vibe Coding a Rust MCP proxy in VSCode with GitHub Copilot</title>
+            <pubDate>Mon, 28 Jul 2025 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/vibe-coding-a-rust-mcp-proxy-in-vscode-with-github-copilot/</link>
+            <guid>https://awakecoding.com/posts/vibe-coding-a-rust-mcp-proxy-in-vscode-with-github-copilot/</guid>
+            <description>A hands-off experiment building a Rust-based Model Context Protocol (MCP) proxy tool using only GitHub Copilot agent mode. Covers setup, multi-transport support, and lessons learned from letting Copilot do all the coding.</description>
+            <bannerImage>https://awakecoding.com/images/banners/vibe-coding-a-rust-mcp-proxy-in-vscode-with-github-copilot.png</bannerImage>
+            <tags>
+                <tag>MCP</tag>
+                <tag>Rust</tag>
+                <tag>CTO</tag>
+            </tags>
+        </item>
+        <item>
+            <title>Saving Microsoft Remote Desktop (MSRDC) before it's gone</title>
+            <pubDate>Fri, 18 Jul 2025 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/saving-microsoft-remote-desktop-msrdc-before-its-gone/</link>
+            <guid>https://awakecoding.com/posts/saving-microsoft-remote-desktop-msrdc-before-its-gone/</guid>
+            <description>Microsoft’s Remote Desktop client (MSRDC) is being deprecated, and recent updates have broken MsRdpEx support. Learn how to download and pin a stable version, disable auto-updates, and preserve access before MSRDC goes away for good.</description>
+            <bannerImage>https://awakecoding.com/images/banners/saving-microsoft-remote-desktop-msrdc-before-its-gone.png</bannerImage>
+            <tags>
+                <tag>RDP</tag>
+                <tag>Windows</tag>
+                <tag>PowerShell</tag>
+                <tag>CTO</tag>
+            </tags>
+        </item>
+        <item>
+            <title>Disabling the Windows 11 Taskbar Search Box for All Users</title>
+            <pubDate>Fri, 06 Jun 2025 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/disabling-the-windows-11-taskbar-search-box-for-all-users/</link>
+            <guid>https://awakecoding.com/posts/disabling-the-windows-11-taskbar-search-box-for-all-users/</guid>
+            <description>Learn how to disable the Windows 11 taskbar search box for all users by default using PowerShell and registry edits. Includes a deep dive into why the setting gets reset and how to prevent it with a reliable fix.</description>
+            <bannerImage>https://awakecoding.com/images/banners/disabling-the-windows-11-taskbar-search-box-for-all-users.png</bannerImage>
+            <lastUpdated>Fri, 06 Jun 2025 00:00:00 +0000</lastUpdated>
+            <tags>
+                <tag>Windows</tag>
+                <tag>PowerShell</tag>
+                <tag>CTO</tag>
+            </tags>
+        </item>
+        <item>
+            <title>Automating Hyper-V Network Adapter Cleanup and IP Migration</title>
+            <pubDate>Sat, 17 May 2025 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/automating-hyper-v-network-adapter-cleanup-migration/</link>
+            <guid>https://awakecoding.com/posts/automating-hyper-v-network-adapter-cleanup-migration/</guid>
+            <description>Learn how to automate the cleanup of ghost Hyper-V network adapters and migrate static IP configurations using PowerShell. This post walks through detecting stale adapters, reassigning IP settings, and setting up a scheduled task to keep your lab environments self-healing on boot.</description>
+            <bannerImage>https://awakecoding.com/images/banners/automating-hyper-v-network-adapter-cleanup-migration.png</bannerImage>
+            <lastUpdated>Sun, 18 May 2025 00:00:00 +0000</lastUpdated>
+            <tags>
+                <tag>Windows</tag>
+                <tag>Networking</tag>
+                <tag>PowerShell</tag>
+                <tag>CTO</tag>
+            </tags>
+        </item>
+        <item>
+            <title>Pinning Apps to the Windows 11 Taskbar with PowerShell</title>
+            <pubDate>Wed, 14 May 2025 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/pinning-apps-to-the-windows-11-taskbar-with-powershell/</link>
+            <guid>https://awakecoding.com/posts/pinning-apps-to-the-windows-11-taskbar-with-powershell/</guid>
+            <description>Learn how to automate taskbar app pinning in Windows 11 using PowerShell by generating a LayoutModification.xml file and forcing the shell to reinitialize the layout without creating new user profiles.</description>
+            <bannerImage>https://awakecoding.com/images/banners/pinning-apps-to-the-windows-11-taskbar-with-powershell.png</bannerImage>
+            <lastUpdated>Thu, 15 May 2025 00:00:00 +0000</lastUpdated>
+            <tags>
+                <tag>Windows</tag>
+                <tag>PowerShell</tag>
+                <tag>CTO</tag>
+            </tags>
+        </item>
+        <item>
+            <title>RD Gateway Without KDC Proxy Causes NTLM Downgrade</title>
+            <pubDate>Sat, 26 Apr 2025 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/rd-gateway-without-kdc-proxy-causes-ntlm-downgrade/</link>
+            <guid>https://awakecoding.com/posts/rd-gateway-without-kdc-proxy-causes-ntlm-downgrade/</guid>
+            <description>Learn why mstsc requires the RD Gateway to act as a KDC proxy for Kerberos authentication, how this undocumented behavior causes silent NTLM downgrades, and how to fix it by enabling the KDC proxy service.</description>
+            <bannerImage>https://awakecoding.com/images/banners/rd-gateway-without-kdc-proxy-causes-ntlm-downgrade.png</bannerImage>
+            <tags>
+                <tag>Windows</tag>
+                <tag>Kerberos</tag>
+                <tag>RDP</tag>
+                <tag>CTO</tag>
+            </tags>
+        </item>
+        <item>
+            <title>Fix CRL Not Published When Revocation Server Is Offline</title>
+            <pubDate>Sat, 19 Apr 2025 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/fix-crl-not-published-when-revocation-server-is-offline/</link>
+            <guid>https://awakecoding.com/posts/fix-crl-not-published-when-revocation-server-is-offline/</guid>
+            <description>Learn why AD CS may silently skip CRL publishing when the server is turned off or running with constrained resources, leading to revocation errors like CRYPT_E_REVOCATION_OFFLINE. This post breaks down the root cause, highlights overlooked pitfalls in default AD CS configurations, and provides practical fixes using PowerShell, HTTP CRL distribution, and scheduled tasks.</description>
+            <bannerImage>https://awakecoding.com/images/banners/fix-crl-not-published-when-revocation-server-is-offline.png</bannerImage>
+            <lastUpdated>Sun, 20 Apr 2025 00:00:00 +0000</lastUpdated>
+            <tags>
+                <tag>ActiveDirectory</tag>
+                <tag>Windows</tag>
+                <tag>PowerShell</tag>
+                <tag>CTO</tag>
+            </tags>
+        </item>
+        <item>
+            <title>Disable Bing Search in Start Menu for Faster Results</title>
+            <pubDate>Sun, 13 Apr 2025 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/disable-bing-search-in-start-menu-for-faster-results/</link>
+            <guid>https://awakecoding.com/posts/disable-bing-search-in-start-menu-for-faster-results/</guid>
+            <description>Discover how to disable Bing search in the Windows Start Menu for faster, more responsive local search results. This step-by-step guide shows how to modify the registry with PowerShell or a .reg file, apply the setting for all users, and optionally use Group Policy or Intune to deploy the change across an organization. Improve Start Menu performance and streamline your Windows experience.</description>
+            <bannerImage>https://awakecoding.com/images/banners/disable-bing-search-in-start-menu-for-faster-results.png</bannerImage>
+            <tags>
+                <tag>Windows</tag>
+                <tag>PowerShell</tag>
+                <tag>CTO</tag>
+            </tags>
+        </item>
+        <item>
+            <title>Isolating a Windows Service Process for Easier Debugging</title>
+            <pubDate>Sun, 06 Apr 2025 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/isolating-a-windows-service-process-for-easier-debugging/</link>
+            <guid>https://awakecoding.com/posts/isolating-a-windows-service-process-for-easier-debugging/</guid>
+            <description>Learn how to isolate a Windows system service into its own process for easier debugging. This guide walks you through identifying service process IDs, listing service group members, and using PowerShell to move a service into a new, dedicated service group.</description>
+            <bannerImage>https://awakecoding.com/images/banners/isolating-a-windows-service-process-for-easier-debugging.png</bannerImage>
+            <tags>
+                <tag>Windows</tag>
+                <tag>PowerShell</tag>
+                <tag>CTO</tag>
+            </tags>
+        </item>
+        <item>
+            <title>Windows Virtual Network using Wintun and tun2socks</title>
+            <pubDate>Tue, 21 Jan 2025 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/windows-virtual-network-using-wintun-and-tun2socks/</link>
+            <guid>https://awakecoding.com/posts/windows-virtual-network-using-wintun-and-tun2socks/</guid>
+            <description>Learn how to set up a TUN-based virtual network interface in Windows using WinTun and tun2socks, route traffic through a SOCKS proxy, and build your own custom VPN solution from scratch</description>
+            <bannerImage>https://awakecoding.com/images/banners/windows-virtual-network-using-wintun-and-tun2socks.png</bannerImage>
+            <tags>
+                <tag>Windows</tag>
+                <tag>Networking</tag>
+                <tag>CTO</tag>
+            </tags>
+        </item>
+        <item>
+            <title>PowerShell Host IPC for any .NET application</title>
+            <pubDate>Wed, 25 Sep 2024 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/powershell-host-ipc-for-any-dotnet-application/</link>
+            <guid>https://awakecoding.com/posts/powershell-host-ipc-for-any-dotnet-application/</guid>
+            <description>Explore how PowerShell enables interprocess communication (IPC) using named pipes in .NET applications, allowing seamless remote control and API access. This hands-on guide walks through creating custom named pipes, using Enter-PSHostProcess for connection, and integrating PowerShell with your .NET projects to enhance flexibility and streamline automation workflows with real-world examples.</description>
+            <bannerImage>https://awakecoding.com/images/banners/powershell-host-ipc-for-any-dotnet-application.png</bannerImage>
+            <tags>
+                <tag>PowerShell</tag>
+                <tag>CTO</tag>
+            </tags>
+        </item>
+        <item>
+            <title>Mac RDP Client: Kerberos and Protected Users Guide</title>
+            <pubDate>Thu, 13 Jun 2024 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/mac-rdp-client-kerberos-and-protected-users-guide/</link>
+            <guid>https://awakecoding.com/posts/mac-rdp-client-kerberos-and-protected-users-guide/</guid>
+            <description>Explore the essential steps to secure Mac RDP connections using Kerberos authentication with a focus on troubleshooting Protected Users and NTLM issues. This guide provides practical solutions for configuring Kerberos in an Active Directory environment, ensuring robust security for remote desktop access.</description>
+            <bannerImage>https://awakecoding.com/images/banners/mac-rdp-client-kerberos-and-protected-users-guide.png</bannerImage>
+            <tags>
+                <tag>RDP</tag>
+                <tag>Kerberos</tag>
+                <tag>ActiveDirectory</tag>
+                <tag>CTO</tag>
+            </tags>
+        </item>
+        <item>
+            <title>Enable PowerShell WinRM Remoting in PowerShell 7</title>
+            <pubDate>Wed, 07 Feb 2024 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/enable-powershell-winrm-remoting-in-powershell-7/</link>
+            <guid>https://awakecoding.com/posts/enable-powershell-winrm-remoting-in-powershell-7/</guid>
+            <description>Enable PowerShell 7 WinRM remoting for efficient server management without relying on SSH. This post provides a straightforward method to incorporate PowerShell 7 into Windows environments, ensuring compatibility and simplifying remoting tasks with practical code snippets and configuration advice.</description>
+            <bannerImage>https://awakecoding.com/images/banners/enable-powershell-winrm-remoting-in-powershell-7.png</bannerImage>
+            <tags>
+                <tag>PowerShell</tag>
+                <tag>Hyper-V</tag>
+                <tag>CTO</tag>
+            </tags>
+        </item>
+        <item>
+            <title>Decompiling Hyper-V Manager to rebuild it from source</title>
+            <pubDate>Tue, 02 Jan 2024 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/decompiling-hyper-v-manager-to-rebuild-it-from-source/</link>
+            <guid>https://awakecoding.com/posts/decompiling-hyper-v-manager-to-rebuild-it-from-source/</guid>
+            <description>This post guides through decompiling Hyper-V Manager to rebuild it from source, aiming to assess its value for potential open-sourcing. It explores manual and automated decompilation processes, including troubleshooting and enhancing the tool, advocating for community-led improvements to this widely-used but neglected software.</description>
+            <bannerImage>https://awakecoding.com/images/banners/decompiling-hyper-v-manager-to-rebuild-it-from-source.png</bannerImage>
+            <tags>
+                <tag>Hyper-V</tag>
+                <tag>Reversing</tag>
+                <tag>CTO</tag>
+            </tags>
+        </item>
+        <item>
+            <title>Debugging PowerShell Binary Modules in Visual Studio</title>
+            <pubDate>Sat, 21 Oct 2023 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/debugging-powershell-binary-modules-in-visual-studio/</link>
+            <guid>https://awakecoding.com/posts/debugging-powershell-binary-modules-in-visual-studio/</guid>
+            <description>Learn to create and debug PowerShell binary modules in Visual Studio, covering both local and remote debugging. This guide simplifies the development process for PowerShell modules, enhancing productivity with practical examples and troubleshooting tips for common issues.</description>
+            <bannerImage>https://awakecoding.com/images/banners/debugging-powershell-binary-modules-in-visual-studio.png</bannerImage>
+            <tags>
+                <tag>PowerShell</tag>
+                <tag>CTO</tag>
+            </tags>
+        </item>
+        <item>
+            <title>Active Directory Kerberos KDC certificate selection</title>
+            <pubDate>Wed, 06 Sep 2023 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/active-directory-kerberos-kdc-certificate-selection/</link>
+            <guid>https://awakecoding.com/posts/active-directory-kerberos-kdc-certificate-selection/</guid>
+            <description>Discover the intricacies of Active Directory's Kerberos KDC certificate selection for PKINIT, including techniques for choosing a specific certificate, analysis using IDA Pro, and PowerShell cmdlets for managing certificates. This deep dive explores the challenges and solutions for ensuring the right KDC certificate is used, overcoming the unpredictability of certificate selection in Windows environments.</description>
+            <bannerImage>https://awakecoding.com/images/banners/active-directory-kerberos-kdc-certificate-selection.png</bannerImage>
+            <lastUpdated>Thu, 07 Sep 2023 00:00:00 +0000</lastUpdated>
+            <tags>
+                <tag>Kerberos</tag>
+                <tag>ActiveDirectory</tag>
+                <tag>Windows</tag>
+                <tag>CTO</tag>
+            </tags>
+        </item>
+        <item>
+            <title>Active Directory LDAPS certificate selection deep dive</title>
+            <pubDate>Sat, 12 Aug 2023 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/active-directory-ldaps-certificate-selection-deep-dive/</link>
+            <guid>https://awakecoding.com/posts/active-directory-ldaps-certificate-selection-deep-dive/</guid>
+            <description>A deep dive into Active Directory LDAPS certificate selection, detailing the technical intricacies of ensuring secure communications through TLS. This guide covers the validation and selection process, including PowerShell scripts for certificate management, aiming to clarify and resolve common issues with LDAPS implementation.</description>
+            <bannerImage>https://awakecoding.com/images/banners/active-directory-ldaps-certificate-selection-deep-dive.png</bannerImage>
+            <tags>
+                <tag>Kerberos</tag>
+                <tag>ActiveDirectory</tag>
+                <tag>Windows</tag>
+                <tag>CTO</tag>
+            </tags>
+        </item>
+        <item>
+            <title>RDP NLA with Azure AD: The PKU2U Nightmare</title>
+            <pubDate>Thu, 10 Aug 2023 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/rdp-nla-with-azure-ad-the-pku2u-nightmare/</link>
+            <guid>https://awakecoding.com/posts/rdp-nla-with-azure-ad-the-pku2u-nightmare/</guid>
+            <description>This post tackles the challenges of RDP Network Level Authentication (NLA) with Azure AD, labeled as the PKU2U nightmare, offering detailed solutions for common problems. It addresses enabling PKU2U authentication, Azure AD workplace joining, the correct Azure AD username format, and third-party application support, providing both technical insights and practical steps to mitigate these issues in Azure AD environments.</description>
+            <bannerImage>https://awakecoding.com/images/banners/rdp-nla-with-azure-ad-the-pku2u-nightmare.png</bannerImage>
+            <tags>
+                <tag>RDP</tag>
+                <tag>Windows</tag>
+                <tag>Azure</tag>
+                <tag>CTO</tag>
+            </tags>
+        </item>
+        <item>
+            <title>RDP Smartcard Logon: User Name Does Not Exist</title>
+            <pubDate>Fri, 04 Aug 2023 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/rdp-smartcard-logon-user-name-does-not-exist/</link>
+            <guid>https://awakecoding.com/posts/rdp-smartcard-logon-user-name-does-not-exist/</guid>
+            <description>Navigate through the confusion of "the specified user name does not exist" error during RDP smartcard logon, offering insights into common misinterpretations and actionable solutions. This post breaks down error messages, suggests disabling strict KDC validation, and guides on certificate trust validation, ensuring successful authentication with practical steps and PowerShell commands.</description>
+            <bannerImage>https://awakecoding.com/images/banners/rdp-smartcard-logon-user-name-does-not-exist.png</bannerImage>
+            <tags>
+                <tag>RDP</tag>
+                <tag>Kerberos</tag>
+                <tag>Windows</tag>
+                <tag>CTO</tag>
+            </tags>
+        </item>
+        <item>
+            <title>PowerShell Remoting Trusted Hosts: What does it mean?</title>
+            <pubDate>Sat, 17 Jun 2023 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/powershell-remoting-trusted-hosts-what-does-it-mean/</link>
+            <guid>https://awakecoding.com/posts/powershell-remoting-trusted-hosts-what-does-it-mean/</guid>
+            <description>This guide demystifies the "TrustedHosts" setting in PowerShell remoting, explaining its significance and how to configure it to avoid common errors. It offers solutions for enabling remote connections, particularly when Kerberos or HTTPS isn't used, ensuring security and connectivity for non-domain-joined machines or across different domains.</description>
+            <bannerImage>https://awakecoding.com/images/banners/powershell-remoting-trusted-hosts-what-does-it-mean.png</bannerImage>
+            <tags>
+                <tag>PowerShell</tag>
+                <tag>Kerberos</tag>
+                <tag>CTO</tag>
+            </tags>
+        </item>
+        <item>
+            <title>Windows Hello: Cloud Kerberos Trust, or Key Trust?</title>
+            <pubDate>Mon, 15 May 2023 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/windows-hello-cloud-kerberos-trust-or-key-trust/</link>
+            <guid>https://awakecoding.com/posts/windows-hello-cloud-kerberos-trust-or-key-trust/</guid>
+            <description>Unpack the dilemma between Cloud Kerberos Trust and Key Trust in Windows Hello for Business deployments. This post navigates through troubleshooting login issues, clarifying deployment types, and offering solutions for transitioning between deployment models with Group Policy and PowerShell, ensuring a smoother Windows Hello setup and operational reliability.</description>
+            <bannerImage>https://awakecoding.com/images/banners/windows-hello-cloud-kerberos-trust-or-key-trust.png</bannerImage>
+            <tags>
+                <tag>Windows</tag>
+                <tag>Azure</tag>
+                <tag>CTO</tag>
+            </tags>
+        </item>
+        <item>
+            <title>Fix Kerberos Machine TGT Fetching on Startup</title>
+            <pubDate>Sun, 26 Feb 2023 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/fix-kerberos-machine-tgt-fetching-on-startup/</link>
+            <guid>https://awakecoding.com/posts/fix-kerberos-machine-tgt-fetching-on-startup/</guid>
+            <description>Resolve RDP NLA issues on domain-joined devices outside the corporate network by configuring a scheduled task to fetch the Kerberos machine TGT at startup. This practical solution ensures secure, remote desktop access without compromising network security, detailed with step-by-step instructions and troubleshooting tips.</description>
+            <bannerImage>https://awakecoding.com/images/banners/fix-kerberos-machine-tgt-fetching-on-startup.png</bannerImage>
+            <tags>
+                <tag>Kerberos</tag>
+                <tag>ActiveDirectory</tag>
+                <tag>CTO</tag>
+            </tags>
+        </item>
+        <item>
+            <title>Pleroma Backup and Restore Procedure</title>
+            <pubDate>Sun, 04 Dec 2022 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/pleroma-backup-and-restore-procedure/</link>
+            <guid>https://awakecoding.com/posts/pleroma-backup-and-restore-procedure/</guid>
+            <description>Master the Pleroma backup and restore process with this comprehensive guide, which offers detailed steps for efficiently securing your Pleroma instance. From creating a backup script to restoring data on a new machine, this tutorial ensures you're prepared for data migration or recovery, tailored for administrators with limited system administration experience.</description>
+            <bannerImage>https://awakecoding.com/images/banners/pleroma-backup-and-restore-procedure.png</bannerImage>
+            <tags>
+                <tag>Linux</tag>
+            </tags>
+        </item>
+        <item>
+            <title>Add Trusted Root CA certificate on Ubuntu</title>
+            <pubDate>Thu, 24 Nov 2022 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/add-trusted-root-ca-certificate-ubuntu/</link>
+            <guid>https://awakecoding.com/posts/add-trusted-root-ca-certificate-ubuntu/</guid>
+            <description>A concise guide on adding a trusted Root CA certificate on Ubuntu, ideal for those who frequently need to ensure their system trusts custom Root CAs. It offers a straightforward procedure, from verifying the certificate format with the file command to converting and installing it, ensuring system-wide trust with practical commands.</description>
+            <bannerImage>https://awakecoding.com/images/banners/add-trusted-root-ca-certificate-ubuntu.png</bannerImage>
+            <tags>
+                <tag>Linux</tag>
+            </tags>
+        </item>
+        <item>
+            <title>Free ARM server with 4 CPUs, 24GB of RAM and 200GB storage!</title>
+            <pubDate>Wed, 23 Nov 2022 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/free-arm-server-4-cpus-24gb-ram-200gb-storage/</link>
+            <guid>https://awakecoding.com/posts/free-arm-server-4-cpus-24gb-ram-200gb-storage/</guid>
+            <description>Discover how to leverage Oracle Cloud's Free Tier to deploy an ARM server, complete with 4 CPUs, 24GB RAM, and 200GB storage, without any costs. This guide walks you through creating an Oracle Cloud account, setting up a virtual machine, and initial configurations to get you started on utilizing these robust free cloud resources for your projects.</description>
+            <bannerImage>https://awakecoding.com/images/banners/free-arm-server-4-cpus-24gb-ram-200gb-storage.png</bannerImage>
+            <tags>
+                <tag>Linux</tag>
+            </tags>
+        </item>
+        <item>
+            <title>Pleroma: same fediverse, better than Mastodon!</title>
+            <pubDate>Sun, 20 Nov 2022 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/pleroma-same-fediverse-better-than-mastodon/</link>
+            <guid>https://awakecoding.com/posts/pleroma-same-fediverse-better-than-mastodon/</guid>
+            <description>Dive into the advantages of Pleroma over Mastodon within the same Fediverse, showcasing how it remains lightweight yet feature-rich, offering full-text search, quote posts, and emoji reactions while maintaining compatibility with Mastodon. This step-by-step guide for installing Pleroma on Linux ensures an easy setup, emphasizing its superiority with practical examples for a more efficient and enriched social media experience.</description>
+            <bannerImage>https://awakecoding.com/images/banners/pleroma-same-fediverse-better-than-mastodon.png</bannerImage>
+            <tags>
+                <tag>Linux</tag>
+            </tags>
+        </item>
+        <item>
+            <title>Disabling Web Proxy Auto Detect (WPAD) Correctly</title>
+            <pubDate>Tue, 22 Feb 2022 00:00:00 +0000</pubDate>
+            <author>Marc-André Moreau</author>
+            <link>https://awakecoding.com/posts/disabling-web-proxy-auto-detect-wpad-correctly/</link>
+            <guid>https://awakecoding.com/posts/disabling-web-proxy-auto-detect-wpad-correctly/</guid>
+            <description>Explore the correct method to disable Web Proxy Auto Detect (WPAD) in Windows to enhance security without breaking essential components. This guide clarifies common misconceptions and provides a safe approach using registry modifications, avoiding potential pitfalls associated with service deactivation.</description>
+            <bannerImage>https://awakecoding.com/images/banners/disabling-web-proxy-auto-detect-wpad-correctly.png</bannerImage>
+            <tags>
+                <tag>Windows</tag>
+                <tag>Kerberos</tag>
+                <tag>CTO</tag>
+            </tags>
+        </item>
+    </channel>
+</rss>

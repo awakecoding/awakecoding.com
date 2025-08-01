@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/pleroma-same-fediverse-better-than-mastodon/">
+  <link rel="alternate" href="https://awakecoding.com/posts/pleroma-same-fediverse-better-than-mastodon/" hreflang="en" />
+  
+  <meta name="description" content="Dive into the advantages of Pleroma over Mastodon within the same Fediverse, showcasing how it remains lightweight yet feature-rich, offering full-text search, quote posts, and emoji reactions while maintaining compatibility with Mastodon. This step-by-step guide for installing Pleroma on Linux ensures an easy setup, emphasizing its superiority with practical examples for a more efficient and enriched social media experience." />
+  <meta property="og:title" content="Pleroma: same fediverse, better than Mastodon!" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;pleroma-same-fediverse-better-than-mastodon&#x2F;" />
+  <meta property="og:description" content="Dive into the advantages of Pleroma over Mastodon within the same Fediverse, showcasing how it remains lightweight yet feature-rich, offering full-text search, quote posts, and emoji reactions while maintaining compatibility with Mastodon. This step-by-step guide for installing Pleroma on Linux ensures an easy setup, emphasizing its superiority with practical examples for a more efficient and enriched social media experience." />
+  <meta name="twitter:title" content="Pleroma: same fediverse, better than Mastodon!" />
+  <meta name="twitter:description" content="Dive into the advantages of Pleroma over Mastodon within the same Fediverse, showcasing how it remains lightweight yet feature-rich, offering full-text search, quote posts, and emoji reactions while maintaining compatibility with Mastodon. This step-by-step guide for installing Pleroma on Linux ensures an easy setup, emphasizing its superiority with practical examples for a more efficient and enriched social media experience." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;pleroma-same-fediverse-better-than-mastodon&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/pleroma-same-fediverse-better-than-mastodon.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/pleroma-same-fediverse-better-than-mastodon.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Pleroma: same fediverse, better than Mastodon!",
+  "description": "Dive into the advantages of Pleroma over Mastodon within the same Fediverse, showcasing how it remains lightweight yet feature-rich, offering full-text search, quote posts, and emoji reactions while maintaining compatibility with Mastodon. This step-by-step guide for installing Pleroma on Linux ensures an easy setup, emphasizing its superiority with practical examples for a more efficient and enriched social media experience.",
+  "datePublished": "2022-11-20",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/pleroma-same-fediverse-better-than-mastodon.png",
+  "url": "https://awakecoding.com/posts/pleroma-same-fediverse-better-than-mastodon/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/pleroma-same-fediverse-better-than-mastodon/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | Pleroma: same fediverse, better than Mastodon!
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            Pleroma: same fediverse, better than Mastodon!
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2022-11-20">November 20, 2022</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>3 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>408 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/linux/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Linux</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>This step-by-step guide shows how to build and install the <a rel="noopener nofollow noreferrer" target="_blank" href="https://pleroma.social/">Pleroma back-end</a> on a Linux server. While Mastodon is the most popular software on the <a rel="noopener nofollow noreferrer" target="_blank" href="https://fediverse.party/">Fediverse</a>, it is not the only one, or the best. Alternative back-ends like Pleroma are more lightweight and support features like full text search for all users, or in the federated timeline. Aside from extended features like quote posts and emoji reactions, Pleroma remains fully compatible with Mastodon.</p>
+<p>The steps have been tested on Ubuntu 20.04 and 22.04. but it should be similar for other Linux distributions. Let's get started by updating packages and installing base Pleroma dependencies:</p>
+<pre style="background-color:#2b303b;color:#6c7079;"><code><span style="color:#abb2bf;">sudo apt update &amp;&amp; sudo apt upgrade -y
+</span><span style="color:#abb2bf;">sudo apt install -y curl unzip net-tools
+</span><span style="color:#abb2bf;">sudo apt install -y libncurses5 libmagic-dev libssl-dev
+</span><span style="color:#abb2bf;">sudo apt install -y imagemagick ffmpeg exiftool
+</span></code></pre>
+<p>Install PostgreSQL with the RUM extension for faster full text search:</p>
+<pre style="background-color:#2b303b;color:#6c7079;"><code><span style="color:#abb2bf;">sudo apt install -y postgresql postgresql-contrib
+</span><span style="color:#abb2bf;">apt-cache search &quot;PostgreSQL RUM&quot; | cut -d &#39; &#39; -f 1 | xargs sudo apt install -y
+</span><span style="color:#abb2bf;">sudo systemctl restart postgresql
+</span></code></pre>
+<p>Create the 'pleroma' user:</p>
+<pre style="background-color:#2b303b;color:#6c7079;"><code><span style="color:#abb2bf;">sudo adduser --system --shell /bin/false --home /opt/pleroma pleroma
+</span></code></pre>
+<p>Create Pleroma directories:</p>
+<pre style="background-color:#2b303b;color:#6c7079;"><code><span style="color:#abb2bf;">sudo mkdir -p /var/lib/pleroma/uploads
+</span><span style="color:#abb2bf;">sudo mkdir -p /var/lib/pleroma/static
+</span><span style="color:#abb2bf;">sudo chown -R pleroma /var/lib/pleroma
+</span><span style="color:#abb2bf;">sudo mkdir -p /etc/pleroma
+</span><span style="color:#abb2bf;">sudo chown -R pleroma /etc/pleroma
+</span></code></pre>
+<p>Install development dependencies:</p>
+<pre style="background-color:#2b303b;color:#6c7079;"><code><span style="color:#abb2bf;">sudo apt install git cmake automake autoconf
+</span><span style="color:#abb2bf;">sudo apt install libmagic-dev libncurses5-dev libssl-dev
+</span><span style="color:#abb2bf;">sudo apt install build-essential elixir erlang-dev erlang-nox
+</span></code></pre>
+<p>Clone the Pleroma sources using a release tag (v2.4.4):</p>
+<pre style="background-color:#2b303b;color:#6c7079;"><code><span style="color:#abb2bf;">mkdir ~/git &amp;&amp; cd ~/git
+</span><span style="color:#abb2bf;">git clone -b v2.4.4 https://git.pleroma.social/pleroma/pleroma pleroma
+</span><span style="color:#abb2bf;">cd pleroma
+</span></code></pre>
+<p>Create symlinks to Pleroma executables such that you can call 'pleroma' and 'pleroma_ctl' more easily:</p>
+<pre style="background-color:#2b303b;color:#6c7079;"><code><span style="color:#abb2bf;">sudo ln -s /opt/pleroma/bin/pleroma /usr/local/bin/pleroma
+</span><span style="color:#abb2bf;">sudo ln -s /opt/pleroma/bin/pleroma_ctl /usr/local/bin/pleroma_ctl
+</span></code></pre>
+<p>Build Pleroma for release, install it in a temporary directory, then create a tarball:</p>
+<pre style="background-color:#2b303b;color:#6c7079;"><code><span style="color:#abb2bf;">export MIX_ENV=&quot;prod&quot;
+</span><span style="color:#abb2bf;">mix local.hex --force
+</span><span style="color:#abb2bf;">mix local.rebar --force
+</span><span style="color:#abb2bf;">mix deps.get --only prod
+</span><span style="color:#abb2bf;">mkdir /tmp/pleroma
+</span><span style="color:#abb2bf;">mix release --path /tmp/pleroma
+</span><span style="color:#abb2bf;">tar -czf ~/pleroma.tar.gz -C /tmp pleroma
+</span></code></pre>
+<p>Extract and install the Pleroma tarball in /opt/pleroma:</p>
+<pre style="background-color:#2b303b;color:#6c7079;"><code><span style="color:#abb2bf;">sudo tar -xzf ~/pleroma.tar.gz -C /opt
+</span><span style="color:#abb2bf;">sudo chown -R pleroma /opt/pleroma
+</span></code></pre>
+<p>Generate the Pleroma configuration file:</p>
+<pre style="background-color:#2b303b;color:#6c7079;"><code><span style="color:#abb2bf;">export MIX_ENV=&quot;prod&quot;
+</span><span style="color:#abb2bf;">sudo -Hu pleroma pleroma_ctl instance gen --output /etc/pleroma/config.exs --output-psql /etc/pleroma/setup_db.psql
+</span></code></pre>
+<p>Answer the questions when prompted:</p>
+<pre style="background-color:#2b303b;color:#6c7079;"><code><span style="color:#abb2bf;">What domain will your instance use? (e.g pleroma.soykaf.com) [] packet.social
+</span><span style="color:#abb2bf;">What is the name of your instance? (e.g. The Corndog Emporium) [packet.social]
+</span><span style="color:#abb2bf;">What is your admin email address? [] admin@packet.social
+</span><span style="color:#abb2bf;">What email address do you want to use for sending email notifications? [admin@packet.social]
+</span><span style="color:#abb2bf;">Do you want search engines to index your site? (y/n) [y]
+</span><span style="color:#abb2bf;">Do you want to store the configuration in the database (allows controlling it from admin-fe)? (y/n) [n] y
+</span><span style="color:#abb2bf;">What is the hostname of your database? [localhost]
+</span><span style="color:#abb2bf;">What is the name of your database? [pleroma]
+</span><span style="color:#abb2bf;">What is the user used to connect to your database? [pleroma]
+</span><span style="color:#abb2bf;">What is the password used to connect to your database? [autogenerated]
+</span><span style="color:#abb2bf;">Would you like to use RUM indices? [n] y
+</span><span style="color:#abb2bf;">What port will the app listen to (leave it if you are using the default setup with nginx)? [4000]
+</span><span style="color:#abb2bf;">What ip will the app listen to (leave it if you are using the default setup with nginx)? [127.0.0.1]
+</span><span style="color:#abb2bf;">What directory should media uploads go in (when using the local uploader)? [/var/lib/pleroma/uploads]
+</span><span style="color:#abb2bf;">What directory should custom public files be read from (custom emojis, frontend bundle overrides, robots.txt, etc.)? [/var/lib/pleroma/static]
+</span><span style="color:#abb2bf;">Do you want to strip location (GPS) data from uploaded images? This requires exiftool, it was detected as not installed, please install it if you answer yes. (y/n) [n] y
+</span><span style="color:#abb2bf;">Do you want to anonymize the filenames of uploads? (y/n) [n]
+</span><span style="color:#abb2bf;">Do you want to deduplicate uploaded files? (y/n) [n]
+</span><span style="color:#abb2bf;">Writing config to /etc/pleroma/config.exs.
+</span><span style="color:#abb2bf;">Writing the postgres script to /tmp/setup_db.psql.
+</span><span style="color:#abb2bf;">Writing /var/lib/pleroma/static/robots.txt.
+</span></code></pre>
+<p>Return to the regular user shell (type <code>exit</code>).</p>
+<p>Run the database setup script:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">sudo -Hu</span><span style="color:#abb2bf;"> postgres psql</span><span style="color:#eb6772;"> -f</span><span style="color:#abb2bf;"> /tmp/setup_db.psql
+</span></code></pre>
+<p>Run the following 'pleroma_ctl commands to initialize the database properly:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">sudo -Hu</span><span style="color:#abb2bf;"> pleroma pleroma_ctl migrate
+</span><span style="color:#eb6772;">sudo -Hu</span><span style="color:#abb2bf;"> pleroma pleroma_ctl migrate</span><span style="color:#eb6772;"> --migrations-path</span><span style="color:#abb2bf;"> priv/repo/optional_migrations/rum_indexing/
+</span></code></pre>
+<p>Enable and start the pleroma system service:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">sudo</span><span style="color:#abb2bf;"> cp /opt/pleroma/installation/pleroma.service /etc/systemd/system/pleroma.service
+</span><span style="color:#eb6772;">sudo</span><span style="color:#abb2bf;"> systemctl enable</span><span style="color:#eb6772;"> --now</span><span style="color:#abb2bf;"> pleroma.service
+</span></code></pre>
+<p>Make sure that the pleroma service is up and running:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">$</span><span style="color:#abb2bf;"> netstat</span><span style="color:#eb6772;"> -tln </span><span style="color:#adb7c9;">| </span><span style="color:#eb6772;">grep</span><span style="color:#abb2bf;"> 4000
+</span><span style="color:#eb6772;">tcp</span><span style="color:#abb2bf;">        0      0 127.0.0.1:4000          0.0.0.0:</span><span style="color:#adb7c9;">*</span><span style="color:#abb2bf;">               LISTEN
+</span></code></pre>
+<p>Set up nginx with letsencrypt:</p>
+<pre style="background-color:#2b303b;color:#6c7079;"><code><span style="color:#abb2bf;">sudo apt install -y nginx certbot
+</span></code></pre>
+<p>Stop nginx temporarily to make TCP port 80 available to certbot:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">sudo</span><span style="color:#abb2bf;"> systemctl stop nginx
+</span><span style="color:#eb6772;">sudo</span><span style="color:#abb2bf;"> mkdir</span><span style="color:#eb6772;"> -p</span><span style="color:#abb2bf;"> /var/lib/letsencrypt
+</span></code></pre>
+<p>Use certbot to request your letsencrypt certificate:</p>
+<pre style="background-color:#2b303b;color:#6c7079;"><code><span style="color:#abb2bf;">sudo certbot certonly --email admin@packet.social -d packet.social --standalone
+</span></code></pre>
+<p>If you encounter an error, review your firewall configuration to ensure port 80 is allowed. Use --test-cert with certbot to debug such issues, otherwise <a rel="noopener nofollow noreferrer" target="_blank" href="https://letsencrypt.org/docs/failed-validation-limit/">letsencrypt failed validation limits</a> may be reached.</p>
+<p>Create a script to automatically renew certificates (<code>sudo nano /etc/cron.daily/pleroma-cert</code>) with the following contents:</p>
+<pre style="background-color:#2b303b;color:#6c7079;"><code><span style="color:#abb2bf;">#!/bin/sh
+</span><span style="color:#abb2bf;">certbot renew --cert-name packet.social --webroot -w /var/lib/letsencrypt/ --post-hook &quot;systemctl reload nginx&quot;
+</span></code></pre>
+<p>Make the script executable (<code>sudo chmod +x /etc/cron.daily/pleroma-cert</code>), and it will be launched as a daily cron job.</p>
+<p>Copy the pleroma nginx configuration, modify it, then enable the site:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">sudo</span><span style="color:#abb2bf;"> cp /opt/pleroma/installation/pleroma.nginx /etc/nginx/sites-available/pleroma.nginx
+</span><span style="color:#eb6772;">sudo</span><span style="color:#abb2bf;"> ln</span><span style="color:#eb6772;"> -s</span><span style="color:#abb2bf;"> /etc/nginx/sites-available/pleroma.nginx /etc/nginx/sites-enabled/pleroma.nginx
+</span><span style="color:#eb6772;">sudo</span><span style="color:#abb2bf;"> sed</span><span style="color:#eb6772;"> -i </span><span style="color:#9acc76;">&#39;s/example.tld/packet.social/g&#39;</span><span style="color:#abb2bf;"> /etc/nginx/sites-available/pleroma.nginx
+</span></code></pre>
+<p>Enable and start nginx system service:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">sudo</span><span style="color:#abb2bf;"> systemctl enable</span><span style="color:#eb6772;"> --now</span><span style="color:#abb2bf;"> nginx.service
+</span></code></pre>
+<p>Create a first admin user:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#5ebfcc;">cd</span><span style="color:#abb2bf;"> /opt/pleroma
+</span><span style="color:#eb6772;">sudo -Hu</span><span style="color:#abb2bf;"> pleroma pleroma_ctl user new awakecoding admin@packet.social</span><span style="color:#eb6772;"> --admin --password</span><span style="color:#abb2bf;"> Password123!
+</span></code></pre>
+<p>You can also create a moderator account using the --moderator command-line argument.</p>
+<p>That's it! You can now login to your new Pleroma instance and start using it with other people on the fediverse, including Mastodon!</p>
+<p>Special thanks to <a rel="noopener nofollow noreferrer" target="_blank" href="https://patricia.no/">Patricia</a> for the initial <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/patricia-gallardo/pleroma-setup">Pleroma</a> guide I followed to get started.</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;disabling-web-proxy-auto-detect-wpad-correctly&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              Disabling Web Proxy Auto Detect (WPAD) Correctly
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;free-arm-server-4-cpus-24gb-ram-200gb-storage&#x2F;">
+              Free ARM server with 4 CPUs, 24GB of RAM and 200GB storage!<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>

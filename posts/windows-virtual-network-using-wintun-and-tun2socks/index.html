@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/windows-virtual-network-using-wintun-and-tun2socks/">
+  <link rel="alternate" href="https://awakecoding.com/posts/windows-virtual-network-using-wintun-and-tun2socks/" hreflang="en" />
+  
+  <meta name="description" content="Learn how to set up a TUN-based virtual network interface in Windows using WinTun and tun2socks, route traffic through a SOCKS proxy, and build your own custom VPN solution from scratch" />
+  <meta property="og:title" content="Windows Virtual Network using Wintun and tun2socks" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;windows-virtual-network-using-wintun-and-tun2socks&#x2F;" />
+  <meta property="og:description" content="Learn how to set up a TUN-based virtual network interface in Windows using WinTun and tun2socks, route traffic through a SOCKS proxy, and build your own custom VPN solution from scratch" />
+  <meta name="twitter:title" content="Windows Virtual Network using Wintun and tun2socks" />
+  <meta name="twitter:description" content="Learn how to set up a TUN-based virtual network interface in Windows using WinTun and tun2socks, route traffic through a SOCKS proxy, and build your own custom VPN solution from scratch" />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;windows-virtual-network-using-wintun-and-tun2socks&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/windows-virtual-network-using-wintun-and-tun2socks.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/windows-virtual-network-using-wintun-and-tun2socks.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Windows Virtual Network using Wintun and tun2socks",
+  "description": "Learn how to set up a TUN-based virtual network interface in Windows using WinTun and tun2socks, route traffic through a SOCKS proxy, and build your own custom VPN solution from scratch",
+  "datePublished": "2025-01-21",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/windows-virtual-network-using-wintun-and-tun2socks.png",
+  "url": "https://awakecoding.com/posts/windows-virtual-network-using-wintun-and-tun2socks/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/windows-virtual-network-using-wintun-and-tun2socks/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | Windows Virtual Network using Wintun and tun2socks
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            Windows Virtual Network using Wintun and tun2socks
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2025-01-21">January 21, 2025</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>5 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>810 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/windows/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Windows</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/networking/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Networking</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>A <a rel="noopener nofollow noreferrer" target="_blank" href="https://www.baeldung.com/linux/tun-interface-purpose">TUN interface</a> is a virtual network device operating at Layer 3 that routes IP packets between user space and the kernel, allowing software to process IP traffic as if it were traveling through a real network interface and making it particularly useful for VPN and tunneling scenarios.</p>
+<p>Historically, TUN support in Windows has been limited, but the <a rel="noopener nofollow noreferrer" target="_blank" href="https://www.wireguard.com/">WireGuard project</a> developed <a rel="noopener nofollow noreferrer" target="_blank" href="https://www.wintun.net/">Wintun</a>, providing developers with a code-signed driver and a simple API to create and manage TUN interfaces in Windows.</p>
+<h2 id="overview">Overview</h2>
+<p>Today, we'll guide you through the steps required to create a virtual network interface mapped to a SOCKS proxy, and configure the client to connect through it to detect its external IP address using [https://ipinfo.io/ip].</p>
+<ul>
+<li><strong>Proxy VM</strong>: A virtual machine in a <em>separate</em> network with a public IP address, like an Azure VM. Fictional IP address: 52.235.58.59</li>
+<li><strong>Client VM</strong>: A local virtual machine that you will configure to connect <em>through</em> the Proxy VM. Fictional IP address: 74.56.34.56</li>
+</ul>
+<p>It is important that both VMs used to follow these steps have <em>different</em> external IP addresses, since we'll be using <a rel="noopener nofollow noreferrer" target="_blank" href="https://ipinfo.io/">IPInfo</a> to test if we're going through the proxy or not. The final flow will look like this:</p>
+<p>curl ➙ wintun ➙ tun2socks ➙ ccproxy ➙ ipinfo.io</p>
+<h2 id="ccproxy">CCProxy</h2>
+<p>In the <em>proxy VM</em>, <a rel="noopener nofollow noreferrer" target="_blank" href="https://update.youngzsoft.com/ccproxy/update/ccproxysetup.exe">download</a> and install <a rel="noopener nofollow noreferrer" target="_blank" href="https://www.youngzsoft.net/ccproxy/">CCProxy</a>, a simple proxy application for Windows, with a free version sufficient for testing.</p>
+<p><img src="/images/posts/wintun-ccproxy-up-and-running.png" alt="CCProxy up and running" /></p>
+<p>Add a Windows firewall rule to allow inbound traffic on TCP/1080, the default port used for SOCKS in CCProxy:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">New-NetFirewallRule </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">DisplayName </span><span style="color:#9acc76;">&quot;CCProxy SOCKS&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Direction Inbound </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Protocol TCP </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">LocalPort </span><span style="color:#db9d63;">1080 </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Action Allow
+</span></code></pre>
+<p>Last but not least, figure out what your external IP address is:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">curl.exe</span><span style="color:#abb2bf;"> https:</span><span style="color:#adb7c9;">//</span><span style="color:#abb2bf;">ipinfo.io</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">ip
+</span><span style="color:#db9d63;">52.235</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">58.59
+</span></code></pre>
+<p>Make sure that your <em>proxy VM</em> has a public IP address that can be used to reach it, and that it is the same one returned by the previous command.</p>
+<h2 id="wintun">wintun</h2>
+<p>In the <em>client VM</em>, open a PowerShell terminal, move to the Downloads directory (<code>cd ~\Downloads</code>), then run the following to download and extract wintun.dll:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$Arch </span><span style="color:#adb7c9;">= </span><span style="color:#cd74e8;">if </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$Env:PROCESSOR_ARCHITECTURE </span><span style="color:#adb7c9;">-eq </span><span style="color:#9acc76;">&#39;ARM64&#39;</span><span style="color:#abb2bf;">) { </span><span style="color:#9acc76;">&quot;arm64&quot; </span><span style="color:#abb2bf;">} </span><span style="color:#cd74e8;">else </span><span style="color:#abb2bf;">{ </span><span style="color:#9acc76;">&quot;amd64&quot; </span><span style="color:#abb2bf;">}
+</span><span style="color:#eb6772;">$WintunUrl </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;https://www.wintun.net/builds/wintun-0.14.1.zip&quot;
+</span><span style="color:#5ebfcc;">Invoke-WebRequest </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Uri </span><span style="color:#eb6772;">$WintunUrl </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">OutFile </span><span style="color:#9acc76;">&quot;wintun.zip&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ErrorAction Stop
+</span><span style="color:#5ebfcc;">Expand-Archive </span><span style="color:#9acc76;">&quot;wintun.zip&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Destination .
+</span><span style="color:#5ebfcc;">Remove-Item </span><span style="color:#9acc76;">&quot;wintun.zip&quot;
+</span><span style="color:#5ebfcc;">Move-Item </span><span style="color:#9acc76;">&quot;./wintun/bin/</span><span style="color:#eb6772;">$Arch</span><span style="color:#9acc76;">/wintun.dll&quot; &quot;wintun.dll&quot;
+</span><span style="color:#5ebfcc;">Remove-Item </span><span style="color:#9acc76;">&quot;./wintun&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Recurse </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Out-Null
+</span></code></pre>
+<p>Wintun ships as a DLL (wintun.dll) that exports an API - the driver is embedded into that DLL to be extracted and installed when necessary as you call those APIs. This is why there is no separate driver file in the Wintun zip package, but we'll come back to this later.</p>
+<h2 id="tun2socks">tun2socks</h2>
+<p>Next, in the same PowerShell terminal, run the following to <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/xjasonlyu/tun2socks/releases">download</a> and extract tun2socks.exe alongside wintun.dll:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$Arch </span><span style="color:#adb7c9;">= </span><span style="color:#cd74e8;">if </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$Env:PROCESSOR_ARCHITECTURE </span><span style="color:#adb7c9;">-eq </span><span style="color:#9acc76;">&#39;ARM64&#39;</span><span style="color:#abb2bf;">) { </span><span style="color:#9acc76;">&quot;arm64&quot; </span><span style="color:#abb2bf;">} </span><span style="color:#cd74e8;">else </span><span style="color:#abb2bf;">{ </span><span style="color:#9acc76;">&quot;amd64&quot; </span><span style="color:#abb2bf;">}
+</span><span style="color:#eb6772;">$BaseUrl </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;https://github.com/xjasonlyu/tun2socks/releases/download/v2.5.2&quot;
+</span><span style="color:#eb6772;">$ZipFileName </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;tun2socks-windows-</span><span style="color:#eb6772;">$Arch</span><span style="color:#9acc76;">.zip&quot;
+</span><span style="color:#5ebfcc;">Invoke-WebRequest </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Uri </span><span style="color:#9acc76;">&quot;</span><span style="color:#eb6772;">$BaseUrl</span><span style="color:#9acc76;">/</span><span style="color:#eb6772;">$ZipFileName</span><span style="color:#9acc76;">&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">OutFile </span><span style="color:#eb6772;">$ZipFileName </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ErrorAction Stop
+</span><span style="color:#5ebfcc;">Expand-Archive </span><span style="color:#eb6772;">$ZipFileName </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Destination .
+</span><span style="color:#5ebfcc;">Remove-Item </span><span style="color:#eb6772;">$ZipFileName </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Out-Null
+</span><span style="color:#5ebfcc;">Move-Item </span><span style="color:#9acc76;">&quot;tun2socks-windows-</span><span style="color:#eb6772;">$Arch</span><span style="color:#9acc76;">.exe&quot; &quot;tun2socks.exe&quot;
+</span></code></pre>
+<p><a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/xjasonlyu/tun2socks">tun2socks</a> is a tool that implements a TUN interface wrapping a SOCKS proxy, accepting IP packets on one side, and making SOCKS proxy on the other side. While this approach has limited performance, it can be used to build a <em>functional</em> VPN solution.</p>
+<h2 id="testing-the-socks-proxy">Testing the SOCKS proxy</h2>
+<p>From your <em>local VM</em>, find out your external IP address without going through a proxy:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">curl.exe</span><span style="color:#abb2bf;"> https:</span><span style="color:#adb7c9;">//</span><span style="color:#abb2bf;">ipinfo.io</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">ip
+</span><span style="color:#db9d63;">74.56</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">34.56
+</span></code></pre>
+<p>Now do the same, using your SOCKS proxy <em>explicitly</em>:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">curl </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">x socks5h:</span><span style="color:#adb7c9;">//</span><span style="color:#db9d63;">52.235</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">58.59</span><span style="color:#abb2bf;">:</span><span style="color:#db9d63;">1080</span><span style="color:#abb2bf;"> https:</span><span style="color:#adb7c9;">//</span><span style="color:#abb2bf;">ipinfo.io</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">ip
+</span><span style="color:#db9d63;">52.235</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">58.59
+</span></code></pre>
+<p>If it worked, a different IP address should be returned. It should also confirm that CCProxy in your <em>proxy VM</em> is working.</p>
+<h2 id="putting-it-all-together">Putting it all together</h2>
+<p>Open an <strong>elevated</strong> PowerShell terminal, move to the same directory used earlier, then launch tun2socks:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">.\</span><span style="color:#5ebfcc;">tun2socks.exe </span><span style="color:#adb7c9;">--</span><span style="color:#abb2bf;">device tun:</span><span style="color:#adb7c9;">//</span><span style="color:#abb2bf;">ProxyAdapter </span><span style="color:#adb7c9;">--</span><span style="color:#abb2bf;">proxy socks5:</span><span style="color:#adb7c9;">//</span><span style="color:#db9d63;">52.235</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">58.59</span><span style="color:#abb2bf;">:</span><span style="color:#db9d63;">1080 </span><span style="color:#adb7c9;">--</span><span style="color:#abb2bf;">loglevel debug
+</span><span style="color:#db9d63;">2025</span><span style="color:#adb7c9;">/</span><span style="color:#db9d63;">01</span><span style="color:#adb7c9;">/</span><span style="color:#db9d63;">17 13</span><span style="color:#abb2bf;">:</span><span style="color:#db9d63;">21</span><span style="color:#abb2bf;">:</span><span style="color:#db9d63;">05</span><span style="color:#abb2bf;"> Installing driver </span><span style="color:#db9d63;">0.14
+</span><span style="color:#db9d63;">2025</span><span style="color:#adb7c9;">/</span><span style="color:#db9d63;">01</span><span style="color:#adb7c9;">/</span><span style="color:#db9d63;">17 13</span><span style="color:#abb2bf;">:</span><span style="color:#db9d63;">21</span><span style="color:#abb2bf;">:</span><span style="color:#db9d63;">05</span><span style="color:#abb2bf;"> Extracting driver
+</span><span style="color:#db9d63;">2025</span><span style="color:#adb7c9;">/</span><span style="color:#db9d63;">01</span><span style="color:#adb7c9;">/</span><span style="color:#db9d63;">17 13</span><span style="color:#abb2bf;">:</span><span style="color:#db9d63;">21</span><span style="color:#abb2bf;">:</span><span style="color:#db9d63;">05</span><span style="color:#abb2bf;"> Installing driver
+</span><span style="color:#db9d63;">2025</span><span style="color:#adb7c9;">/</span><span style="color:#db9d63;">01</span><span style="color:#adb7c9;">/</span><span style="color:#db9d63;">17 13</span><span style="color:#abb2bf;">:</span><span style="color:#db9d63;">21</span><span style="color:#abb2bf;">:</span><span style="color:#db9d63;">06</span><span style="color:#abb2bf;"> Creating adapter
+</span></code></pre>
+<p>On first use, the Wintun driver will be extracted and installed to "C:\Windows\System32\wintun.sys":</p>
+<p><img src="/images/posts/wintun-driver-file-from-wireguard.png" alt="Wintun driver file from WireGuard" /></p>
+<p>Open another elevated Powershell terminal, then assign an IP address to the virtual network interface:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">netsh interface ip set address name</span><span style="color:#adb7c9;">=</span><span style="color:#9acc76;">&quot;ProxyAdapter&quot; </span><span style="color:#cd74e8;">static </span><span style="color:#db9d63;">10.7</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">0.1 255.255</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">255.0
+</span></code></pre>
+<p>The assigned IP address doesn't matter that much, as long as it doesn't conflict with other network interfaces.</p>
+<p>The new "ProxyAdapter" network adapter should now be listed by the "ipconfig /all" command:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">Unknown adapter ProxyAdapter:
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">   Connection</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">specific DNS Suffix  </span><span style="color:#adb7c9;">.</span><span style="color:#abb2bf;"> :
+</span><span style="color:#abb2bf;">   Description </span><span style="color:#adb7c9;">. . . . . . . . . . .</span><span style="color:#abb2bf;"> : WireGuard Tunnel
+</span><span style="color:#abb2bf;">   Physical Address. </span><span style="color:#adb7c9;">. . . . . . . .</span><span style="color:#abb2bf;"> :
+</span><span style="color:#abb2bf;">   DHCP Enabled. </span><span style="color:#adb7c9;">. . . . . . . . . .</span><span style="color:#abb2bf;"> : No
+</span><span style="color:#abb2bf;">   Autoconfiguration Enabled </span><span style="color:#adb7c9;">. . . .</span><span style="color:#abb2bf;"> : Yes
+</span><span style="color:#abb2bf;">   Link</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">local IPv6 Address </span><span style="color:#adb7c9;">. . . . .</span><span style="color:#abb2bf;"> : fe80::e827:8d87:72c9:4c3b</span><span style="color:#adb7c9;">%</span><span style="color:#db9d63;">77</span><span style="color:#abb2bf;">(Preferred)
+</span><span style="color:#abb2bf;">   IPv4 Address. </span><span style="color:#adb7c9;">. . . . . . . . . .</span><span style="color:#abb2bf;"> : </span><span style="color:#db9d63;">10.7</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">0.1</span><span style="color:#abb2bf;">(Preferred)
+</span><span style="color:#abb2bf;">   Subnet Mask </span><span style="color:#adb7c9;">. . . . . . . . . . .</span><span style="color:#abb2bf;"> : </span><span style="color:#db9d63;">255.255</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">255.0
+</span><span style="color:#abb2bf;">   </span><span style="color:#cd74e8;">Default</span><span style="color:#abb2bf;"> Gateway </span><span style="color:#adb7c9;">. . . . . . . . .</span><span style="color:#abb2bf;"> :
+</span><span style="color:#abb2bf;">   NetBIOS over Tcpip. </span><span style="color:#adb7c9;">. . . . . . .</span><span style="color:#abb2bf;"> : Enabled
+</span></code></pre>
+<p>Create a new rule to route traffic going to ipinfo.io through the network adapter:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$ifIndex </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">(</span><span style="color:#5ebfcc;">Get-NetAdapter </span><span style="color:#9acc76;">&quot;ProxyAdapter&quot;</span><span style="color:#abb2bf;">).ifIndex
+</span><span style="color:#eb6772;">$ipInfo </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">(</span><span style="color:#5ebfcc;">Resolve-DnsName </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#9acc76;">&quot;ipinfo.io&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Type A).IPAddress
+</span><span style="color:#abb2bf;">route add </span><span style="color:#eb6772;">$ipInfo</span><span style="color:#abb2bf;"> mask </span><span style="color:#db9d63;">255.255</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">255.255 10.7</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">0.1</span><span style="color:#abb2bf;"> metric </span><span style="color:#db9d63;">1 </span><span style="color:#cd74e8;">if </span><span style="color:#eb6772;">$ifIndex
+</span></code></pre>
+<p>Confirm that the rule worked by fetching "https://ipinfo.io/ip" <em>without</em> using an explicit proxy:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">curl.exe</span><span style="color:#abb2bf;"> https:</span><span style="color:#adb7c9;">//</span><span style="color:#abb2bf;">ipinfo.io</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">ip
+</span><span style="color:#db9d63;">52.235</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">58.59
+</span></code></pre>
+<p>You can then delete the rule:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">route delete </span><span style="color:#eb6772;">$ipInfo
+</span></code></pre>
+<h2 id="wrapping-up">Wrapping Up</h2>
+<p>So, what just happened? The curl command resolved ipinfo.io to the same IP address matching our rule, then connected to our virtual network interface. tun2socks processed the TCP connection from the IP packets, and adapted it to an outgoing SOCKS proxy connection through CCProxy running in the <em>proxy VM</em>. Since ipinfo.io saw the request coming from the <em>proxy VM</em> and not the <em>client VM</em>, the external IP address of the <em>proxy VM</em> was returned. This is all done without the need for explicit proxy support in the client application (curl).</p>
+<h2 id="closing-thoughts">Closing Thoughts</h2>
+<p>This guide was short and functional, but should illustrate the most basic usage of a TUN interface in Windows. Rules can be added to forward entire subnets to a virtual network interface, instead of individual IPs. Getting private DNS mapped properly requires more fiddling. While UDP is supported by some SOCKS proxies like CCProxy, it is only useful to make UDP-based protocols like QUIC in modern HTTP work, but don't except good performance.</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;powershell-host-ipc-for-any-dotnet-application&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              PowerShell Host IPC for any .NET application
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;isolating-a-windows-service-process-for-easier-debugging&#x2F;">
+              Isolating a Windows Service Process for Easier Debugging<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>

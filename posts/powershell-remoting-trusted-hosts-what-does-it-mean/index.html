@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/powershell-remoting-trusted-hosts-what-does-it-mean/">
+  <link rel="alternate" href="https://awakecoding.com/posts/powershell-remoting-trusted-hosts-what-does-it-mean/" hreflang="en" />
+  
+  <meta name="description" content="This guide demystifies the &quot;TrustedHosts&quot; setting in PowerShell remoting, explaining its significance and how to configure it to avoid common errors. It offers solutions for enabling remote connections, particularly when Kerberos or HTTPS isn&#x27;t used, ensuring security and connectivity for non-domain-joined machines or across different domains." />
+  <meta property="og:title" content="PowerShell Remoting Trusted Hosts: What does it mean?" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;powershell-remoting-trusted-hosts-what-does-it-mean&#x2F;" />
+  <meta property="og:description" content="This guide demystifies the &quot;TrustedHosts&quot; setting in PowerShell remoting, explaining its significance and how to configure it to avoid common errors. It offers solutions for enabling remote connections, particularly when Kerberos or HTTPS isn&#x27;t used, ensuring security and connectivity for non-domain-joined machines or across different domains." />
+  <meta name="twitter:title" content="PowerShell Remoting Trusted Hosts: What does it mean?" />
+  <meta name="twitter:description" content="This guide demystifies the &quot;TrustedHosts&quot; setting in PowerShell remoting, explaining its significance and how to configure it to avoid common errors. It offers solutions for enabling remote connections, particularly when Kerberos or HTTPS isn&#x27;t used, ensuring security and connectivity for non-domain-joined machines or across different domains." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;powershell-remoting-trusted-hosts-what-does-it-mean&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/powershell-remoting-trusted-hosts-what-does-it-mean.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/powershell-remoting-trusted-hosts-what-does-it-mean.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "PowerShell Remoting Trusted Hosts: What does it mean?",
+  "description": "This guide demystifies the \"TrustedHosts\" setting in PowerShell remoting, explaining its significance and how to configure it to avoid common errors. It offers solutions for enabling remote connections, particularly when Kerberos or HTTPS isn't used, ensuring security and connectivity for non-domain-joined machines or across different domains.",
+  "datePublished": "2023-06-17",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/powershell-remoting-trusted-hosts-what-does-it-mean.png",
+  "url": "https://awakecoding.com/posts/powershell-remoting-trusted-hosts-what-does-it-mean/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/powershell-remoting-trusted-hosts-what-does-it-mean/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | PowerShell Remoting Trusted Hosts: What does it mean?
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            PowerShell Remoting Trusted Hosts: What does it mean?
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2023-06-17">June 17, 2023</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>7 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>1271 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/powershell/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>PowerShell</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/kerberos/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Kerberos</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>If you're trying to use PowerShell remoting and hit this cryptic error about a "TrustedHosts" configuration setting, you've come to the right place:</p>
+<blockquote>
+<p>Enter-PSSession : Connecting to remote server 10.10.0.7 failed with the following error message : The WinRM client cannot process the request. If the authentication scheme is different from Kerberos, or if the client computer is not joined to a domain, then HTTPS transport must be used or the destination machine must be added to the TrustedHosts configuration setting. Use winrm.cmd to configure TrustedHosts. Note that computers in the TrustedHosts list might not be authenticated. You can get more information about that by running the following command: winrm help config. For more information, see the about_Remote_Troubleshooting Help topic.</p>
+</blockquote>
+<p>Here is what it looks like on a brand new Windows Server 2022 virtual machine that is not domain-joined (yes, <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows">PowerShell 7 still isn't pre-installed</a>):</p>
+<p><img src="/images/posts/psremoting-client-trusted-hosts-error.png" alt="PowerShell Remoting Client Trusted Hosts Error" /></p>
+<p>Notice how I've used the IP address to connect - I didn't bother changing DNS servers to resolve the hostnames for my lab environment on that VM. Let's be honest, we know we should be doing all of these extra steps, but don't always do them. Here the side effect is an NTLM downgrade, but I'll explain later why that matters for the trusted hosts setting.</p>
+<h2 id="i-don-t-care-just-tell-me-how-to-fix-it">I Don't Care, Just Tell Me How To Fix It</h2>
+<p>I couldn't agree more! Just don't forget to read the rest of this blog after. Here are all the ways you can resolve the issue quickly, in order of difficulty:</p>
+<p>Open an elevated PowerShell terminal, then set the trusted hosts value to '*':</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Set-Item </span><span style="color:#9acc76;">&#39;WSMan:localhost\Client\TrustedHosts&#39; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#9acc76;">&#39;*&#39; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force
+</span></code></pre>
+<p>If the <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/powershell/module/microsoft.wsman.management/about/about_wsman_provider">WSMan Provider</a> throws an error like this:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Set-Item</span><span style="color:#abb2bf;">: The config setting TrustedHosts cannot be changed because is controlled by policies. The policy would need to be set to </span><span style="color:#9acc76;">&quot;Not Configured&quot; </span><span style="color:#cd74e8;">in</span><span style="color:#abb2bf;"> order to change the config setting.
+</span></code></pre>
+<p>Then you can try setting the registry keys directly instead:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$WinRMClientRegPath </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&#39;HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client&#39;
+</span><span style="color:#5ebfcc;">New-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$WinRMClientRegPath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name TrustedHosts </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#db9d63;">1 </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force
+</span><span style="color:#5ebfcc;">New-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$WinRMClientRegPath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name TrustedHostsList </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#9acc76;">&#39;*&#39; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force
+</span></code></pre>
+<p>Instead of using PowerShell, you can also download and import <a href="/files/WinRMClientTrustedHosts.reg">WinRMClientTrustedHosts.reg</a></p>
+<p>Last but not least, in the Group Policy Editor (gpedit.msc), you can navigate to <strong>Administrative Templates / Windows Components / Windows Remote Management (WinRM) / WinRM Client</strong>:</p>
+<p><img src="/images/posts/psremoting-client-trusted-hosts-gpo.png" alt="PowerShell Remoting Client Trusted Hosts GPO" /></p>
+<p>Enable the <strong>Trusted Hosts</strong> setting and enter '*' for the value of the <strong>TrustedHostList</strong> option, and then click OK.</p>
+<p>Finally, you can verify your current TrustedHosts configuration using <code>Get-Item 'WSMan:localhost\Client\TrustedHosts'</code></p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS </span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-Item </span><span style="color:#9acc76;">&#39;WSMan:localhost\Client\TrustedHosts&#39;
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">   WSManConfig: Microsoft.WSMan.Management\WSMan::localhost\Client
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">Type            Name                           SourceOfValue   Value
+</span><span style="color:#adb7c9;">----            ----                           -------------   -----
+</span><span style="color:#abb2bf;">System.String   TrustedHosts                   GPO             </span><span style="color:#adb7c9;">*
+</span></code></pre>
+<h2 id="now-that-it-s-working-what-does-it-even-mean">Now That It's Working, What Does It Even Mean?</h2>
+<p>Simply put, <strong>"TrustedHosts" is a list of host names that you allow connecting to despite being unable to validate the server identity through TLS or Kerberos</strong>. Yes, you've read that right, the hosts in the "trusted" list are actually <em>less</em> trustworthy, because it really is a <em>security exception</em> list.</p>
+<p>PowerShell Remoting in Windows uses WinRM over HTTP by default, where transport security of the protocol is handled by SPNEGO instead of TLS with HTTPS. The WinRM messages are exchanged over plain HTTP, but the payloads are encrypted using a session key derived from an NTLM or Kerberos exchange at the beginning of the connection. Kerberos, unlike NTLM, has a way to prove server identity to the client, similar to TLS with X.509 server certificate validation.</p>
+<table><thead><tr><th>WinRM Server Authentication</th><th>HTTP</th><th>HTTPS</th></tr></thead><tbody>
+<tr><td>NTLM</td><td>✘</td><td>✔</td></tr>
+<tr><td>Kerberos</td><td>✔</td><td>✔</td></tr>
+</tbody></table>
+<p>Confused? Let's say you load facebook.com in your browser only to get a big, read, scary invalid certificate warning. The connection is encrypted because it's using TLS, but the server identity for facebook.com could not be automatically validated from the X.509 server certificate chain. The error could be benign, but it could also be caused by an attacker impersonating facebook.com.</p>
+<p>As for WinRM versus WSMan, they're often used interchangeably, with no real consistency, even in the Microsoft UI. Just remember that WinRM (Windows Remote Management) is the Microsoft implementation of WSMan or WS-Management (Web Services for Management), a standardized protocol for managing resources using web services.</p>
+<h2 id="wait-that-sounds-bad-how-do-i-fix-this-properly">Wait, That Sounds Bad - How Do I Fix This Properly?</h2>
+<p>There are two options to avoid using the PowerShell Remoting client "trusted hosts" list: use Kerberos instead of NTLM for authentication, or use WinRM HTTPS instead of WinRM HTTP for transport security. In a <a rel="noopener nofollow noreferrer" target="_blank" href="https://twitter.com/awakecoding/status/1522669345486352384">recent poll I did on Twitter</a>, more than two thirds of respondents are using WinRM HTTP instead of WinRM HTTPS:</p>
+<p><img src="/images/posts/psremoting-client-winrm-transport-poll.png" alt="PowerShell Remoting WinRM Transport Poll" /></p>
+<p>To be fair, the security of WinRM HTTP is good-enough on the local network. The biggest threat comes from NTLM, regardless of transport security: when using WinRM HTTP, an attacker could passively grab NetNTLMv2 hashes for offline cracking. When using WinRM HTTPS, an attacker could use an NTLM responder to collect NetNTLMv2 hashes to be cracked in a similar way, but it requires more effort due to X.509 server certificate validation.</p>
+<p>On a domain-joined machine with a domain controller line-of-sight, Kerberos should work out-of-the-box, as long as you use the FQDN (IT-HELP-GW.ad.it-help.ninja) and not the IP address (10.10.0.7) to connect:</p>
+<p><img src="/images/posts/psremoting-winrm-kerberos-domain-joined.png" alt="PowerShell Remoting WinRM Kerberos Domain-Joined" /></p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$Username </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&#39;Administrator@ad.it-help.ninja&#39;
+</span><span style="color:#eb6772;">$Password </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&#39;DevoLabs123!&#39;
+</span><span style="color:#eb6772;">$SecurePassword </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">ConvertTo-SecureString </span><span style="color:#eb6772;">$Password </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">AsPlainText </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force
+</span><span style="color:#eb6772;">$Credential </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">New-Object</span><span style="color:#abb2bf;"> System.Management.Automation.PSCredential </span><span style="color:#cd74e8;">@</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$Username</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">$SecurePassword</span><span style="color:#abb2bf;">)
+</span><span style="color:#5ebfcc;">Enter-PSSession </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ComputerName </span><span style="color:#9acc76;">&#39;IT-HELP-GW.ad.it-help.ninja&#39; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Credential </span><span style="color:#eb6772;">$Credential
+</span></code></pre>
+<p>On my non domain-joined virtual machine, I added a DNS client NRPT rule that redirects all requests ending in '.ad.it-help.ninja' to the domain controller of my lab environment (10.10.0.3):</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Add-DnsClientNrptRule </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Namespace .ad.it</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">help.ninja </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">NameServers </span><span style="color:#db9d63;">10.10</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">0.3
+</span></code></pre>
+<p>The target FQDN (IT-HELP-GW.ad.it-help.ninja) should now correctly resolve to '10.10.0.7'. Alternatively, the host DNS servers can be modified to achieve the same result. Please note that NRPT rules do not affect the 'nslookup' command on Windows because it uses its own DNS client stack. To remove the NRPT rule later, you can use <code>Get-DnsClientNrptRule | Remove-DnsClientNrptRule</code>.</p>
+<p>With WinRM HTTPS configured on the target (out-of-scope for this blog), The <code>-UseSSL</code> parameter can be added to the <code>Enter-PSSession</code> command. Since it is not a domain-joined machine, the trusted root CA certificate needs to manually imported on the client:</p>
+<p><img src="/images/posts/psremoting-winrm-https-non-domain-joined.png" alt="PowerShell Remoting WinRM Kerberos Domain-Joined" /></p>
+<p>WinRM HTTPS works with both NTLM and Kerberos authentication, since server authentication is provided by TLS X.509 server certificate validation.</p>
+<p>For WinRM HTTP + Kerberos, additional steps are required. Even with working DNS, the Kerberos realm needs to be mapped to a KDC first:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">ksetup </span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">addkdc AD.IT</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">HELP.NINJA IT</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">HELP</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">DC.ad.it</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">help.ninja
+</span></code></pre>
+<p>The KDC hostname can be omitted from the <code>ksetup /addkdc</code> command if <a rel="noopener nofollow noreferrer" target="_blank" href="https://serverfault.com/questions/384719/how-to-ensure-machine-is-kerberos-domain-joined">DNS SRV detection works, but I'd rather be explicit than sorry later</a>.</p>
+<p>You can then test if the domain controller can be detected properly for the 'ad.it-help.ninja' realm using <code>nltest /dsgetdc:ad.it-help.ninja</code>:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS </span><span style="color:#adb7c9;">&gt;</span><span style="color:#abb2bf;"> nltest </span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">dsgetdc:ad.it</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">help.ninja
+</span><span style="color:#abb2bf;">           DC: \\IT</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">HELP</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">DC.ad.it</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">help.ninja
+</span><span style="color:#abb2bf;">      Address: \\</span><span style="color:#db9d63;">10.10</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">0.3
+</span><span style="color:#abb2bf;">     Dom Guid: a6752972</span><span style="color:#adb7c9;">-</span><span style="color:#db9d63;">0358</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">44a0</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">acf4</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">491ae2b913f2
+</span><span style="color:#abb2bf;">     Dom Name: ad.it</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">help.ninja
+</span><span style="color:#abb2bf;">  Forest Name: ad.it</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">help.ninja
+</span><span style="color:#abb2bf;"> Dc Site Name: </span><span style="color:#cd74e8;">Default</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">First</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Site</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name
+</span><span style="color:#abb2bf;">Our Site Name: </span><span style="color:#cd74e8;">Default</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">First</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Site</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name
+</span><span style="color:#abb2bf;">        Flags: PDC GC DS LDAP KDC TIMESERV WRITABLE DNS_DC DNS_DOMAIN DNS_FOREST CLOSE_SITE FULL_SECRET WS DS_8 DS_9 DS_10 KEYLIST
+</span><span style="color:#abb2bf;">The command completed successfully
+</span></code></pre>
+<p>Cross your fingers, then try using Enter-PSSession, but this time, don't forget to add <code>-Authentication Negotiate</code> to your command parameters:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$Username </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&#39;Administrator@ad.it-help.ninja&#39;
+</span><span style="color:#eb6772;">$Password </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&#39;DevoLabs123!&#39;
+</span><span style="color:#eb6772;">$SecurePassword </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">ConvertTo-SecureString </span><span style="color:#eb6772;">$Password </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">AsPlainText </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force
+</span><span style="color:#eb6772;">$Credential </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">New-Object</span><span style="color:#abb2bf;"> System.Management.Automation.PSCredential </span><span style="color:#cd74e8;">@</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$Username</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">$SecurePassword</span><span style="color:#abb2bf;">)
+</span><span style="color:#5ebfcc;">Enter-PSSession </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ComputerName </span><span style="color:#9acc76;">&#39;IT-HELP-GW.ad.it-help.ninja&#39; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Credential </span><span style="color:#eb6772;">$Credential </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Authentication Negotiate
+</span></code></pre>
+<p><img src="/images/posts/psremoting-winrm-kerberos-non-domain-joined.png" alt="PowerShell Remoting WinRM Kerberos Non Domain-Joined" /></p>
+<p>For some reason, Enter-PSSession does not always default to the Negotiate authentication method, making Kerberos fail, and therefore requiring the trusted hosts configuration. This works just fine between domain-joined machines, but if you explicitly set the authentication method, it should always work.</p>
+<h2 id="well-that-was-easy-is-there-anything-else">Well, That Was Easy! Is There Anything Else?</h2>
+<p>This is just the tip of the iceberg when it comes to PowerShell Remoting and WinRM configuration. Setting up WinRM HTTPS would require a long explanation on how to set up your own CA using AD CS or something else. If you're feeling courageous, I suggest reading on what <a rel="noopener nofollow noreferrer" target="_blank" href="https://manage-the.cloud/2023/06/02/windows-remote-management-winrm-on-azure-ad-joined-devices/">PowerShell Remoting to pure Azure AD joined devices looks like right now</a> with PKU2U instead of Kerberos.</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;windows-hello-cloud-kerberos-trust-or-key-trust&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              Windows Hello: Cloud Kerberos Trust, or Key Trust?
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;rdp-smartcard-logon-user-name-does-not-exist&#x2F;">
+              RDP Smartcard Logon: User Name Does Not Exist<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>
