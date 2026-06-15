@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/saving-microsoft-remote-desktop-msrdc-before-its-gone/">
+  <link rel="alternate" href="https://awakecoding.com/posts/saving-microsoft-remote-desktop-msrdc-before-its-gone/" hreflang="en" />
+  
+  <meta name="description" content="Microsoft’s Remote Desktop client (MSRDC) is being deprecated, and recent updates have broken MsRdpEx support. Learn how to download and pin a stable version, disable auto-updates, and preserve access before MSRDC goes away for good." />
+  <meta property="og:title" content="Saving Microsoft Remote Desktop (MSRDC) before it&#x27;s gone" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;saving-microsoft-remote-desktop-msrdc-before-its-gone&#x2F;" />
+  <meta property="og:description" content="Microsoft’s Remote Desktop client (MSRDC) is being deprecated, and recent updates have broken MsRdpEx support. Learn how to download and pin a stable version, disable auto-updates, and preserve access before MSRDC goes away for good." />
+  <meta name="twitter:title" content="Saving Microsoft Remote Desktop (MSRDC) before it&#x27;s gone" />
+  <meta name="twitter:description" content="Microsoft’s Remote Desktop client (MSRDC) is being deprecated, and recent updates have broken MsRdpEx support. Learn how to download and pin a stable version, disable auto-updates, and preserve access before MSRDC goes away for good." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;saving-microsoft-remote-desktop-msrdc-before-its-gone&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/saving-microsoft-remote-desktop-msrdc-before-its-gone.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/saving-microsoft-remote-desktop-msrdc-before-its-gone.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Saving Microsoft Remote Desktop (MSRDC) before it&amp;#x27;s gone",
+  "description": "Microsoft’s Remote Desktop client (MSRDC) is being deprecated, and recent updates have broken MsRdpEx support. Learn how to download and pin a stable version, disable auto-updates, and preserve access before MSRDC goes away for good.",
+  "datePublished": "2025-07-18",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/saving-microsoft-remote-desktop-msrdc-before-its-gone.png",
+  "url": "https://awakecoding.com/posts/saving-microsoft-remote-desktop-msrdc-before-its-gone/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/saving-microsoft-remote-desktop-msrdc-before-its-gone/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | Saving Microsoft Remote Desktop (MSRDC) before it&#x27;s gone
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            Saving Microsoft Remote Desktop (MSRDC) before it&#x27;s gone
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2025-07-18">July 18, 2025</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>3 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>555 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/rdp/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>RDP</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/windows/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Windows</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/powershell/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>PowerShell</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>Microsoft's Remote Desktop client for Windows (MSRDC) <a rel="noopener nofollow noreferrer" target="_blank" href="https://techcommunity.microsoft.com/blog/windows-itpro-blog/prepare-for-the-remote-desktop-client-for-windows-end-of-support/4397724">is being deprecated</a> — and recent updates have broken <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/Devolutions/MsRdpEx">MsRdpEx integration</a>.</p>
+<p>If you rely on MSRDC for features the new Windows App or mstsc don't handle well, now's the time to lock in a stable version and disable automatic updates before it disappears completely.</p>
+<h2 id="downloading-a-stable-msrdc-build">Downloading a Stable MSRDC Build</h2>
+<p>Here are direct download links to version <strong>1.2.6228.0</strong>, which is the last version of MSRDC that still works well with <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/Devolutions/MsRdpEx">MsRdpEx</a>:</p>
+<ul>
+<li><a rel="noopener nofollow noreferrer" target="_blank" href="https://res.cdn.office.net/remote-desktop-windows-client/ff46c1a3-9b23-4752-a79c-d13a309ca9d3/RemoteDesktop_1.2.6228.0_x64.msi">MSRDC 1.2.6228.0 x64 MSI</a></li>
+<li><a rel="noopener nofollow noreferrer" target="_blank" href="https://res.cdn.office.net/remote-desktop-windows-client/cb804398-63fd-494a-9ad5-34c1803296ac/RemoteDesktop_1.2.6228.0_ARM64.msi">MSRDC 1.2.6228.0 ARM64 MSI</a></li>
+</ul>
+<p>Starting with MSRDC 1.2.6277.0, loading the RDP ActiveX from rdclientax.dll fails with error code 4872, and I couldn't figure out what changed. Launching msrdc.exe from MsRdpEx still worked until MSRDC 1.2.6353.0, but now AVD connections fail with the connection information tampering error.</p>
+<p>With the MSRDC end of support date set to March 27, 2026, it just doesn't seem to be worth the effort anymore.</p>
+<h2 id="disabling-msrdc-automatic-updates">Disabling MSRDC Automatic Updates</h2>
+<p>By default, MSRDC is set to automatically update itself. Disable automatic updates so you can pin a version of MSRDC that is known to work:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$MsrdcPoliciesRegPath </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;HKLM:\Software\Microsoft\MSRDC\Policies&quot;
+</span><span style="color:#5ebfcc;">New-Item </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$MsrdcPoliciesRegPath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Out-Null
+</span><span style="color:#5ebfcc;">Set-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$MsrdcPoliciesRegPath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#9acc76;">&#39;AutomaticUpdates&#39; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#db9d63;">0 </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Type DWORD
+</span></code></pre>
+<p>You can then check that automatic updates are disabled from the Remote Desktop client GUI (msrdcw.exe):</p>
+<p><img src="/images/posts/save-msrdc-auto-update-disabled.png" alt="MSRDC automatic updates disabled" /></p>
+<h2 id="finding-msrdc-cdn-download-urls-using-winget">Finding MSRDC CDN Download URLs using winget</h2>
+<p>Let's say you want to save a different version of MSRDC for later, how do you go about it? The simplest is to extract the information from winget, like this:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS </span><span style="color:#adb7c9;">&gt;</span><span style="color:#abb2bf;"> winget show </span><span style="color:#adb7c9;">--</span><span style="color:#abb2bf;">id Microsoft.RemoteDesktopClient </span><span style="color:#adb7c9;">--</span><span style="color:#abb2bf;">version </span><span style="color:#db9d63;">1.2</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">6228.0 </span><span style="color:#adb7c9;">--</span><span style="color:#abb2bf;">exact </span><span style="color:#adb7c9;">--</span><span style="color:#abb2bf;">source winget
+</span><span style="color:#abb2bf;">Found Remote Desktop [</span><span style="color:#cd74e8;">Microsoft.RemoteDesktopClient</span><span style="color:#abb2bf;">]
+</span><span style="color:#abb2bf;">Version: </span><span style="color:#db9d63;">1.2</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">6228.0
+</span><span style="color:#abb2bf;">Publisher: Microsoft Corporation
+</span><span style="color:#abb2bf;">Publisher Url: https:</span><span style="color:#adb7c9;">//</span><span style="color:#5ebfcc;">www.microsoft.com</span><span style="color:#adb7c9;">/
+</span><span style="color:#abb2bf;">Publisher Support Url: https:</span><span style="color:#adb7c9;">//</span><span style="color:#5ebfcc;">support.microsoft.com</span><span style="color:#adb7c9;">/
+</span><span style="color:#abb2bf;">Author: Microsoft Corporation
+</span><span style="color:#abb2bf;">Moniker: msrdc
+</span><span style="color:#abb2bf;">Description: You can access Windows Virtual Desktop resources on devices with Windows </span><span style="color:#db9d63;">7</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;"> Windows </span><span style="color:#db9d63;">10</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;"> and Windows </span><span style="color:#db9d63;">10</span><span style="color:#abb2bf;"> IoT Enterprise using the Windows Desktop client.
+</span><span style="color:#abb2bf;">Homepage: https:</span><span style="color:#adb7c9;">//</span><span style="color:#5ebfcc;">learn.microsoft.com</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">azure</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">virtual</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">desktop</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">users</span><span style="color:#adb7c9;">/</span><span style="color:#5ebfcc;">connect-windows
+</span><span style="color:#abb2bf;">License: Proprietary
+</span><span style="color:#abb2bf;">License Url: https:</span><span style="color:#adb7c9;">//</span><span style="color:#5ebfcc;">www.microsoft.com</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">legal</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">terms</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">of</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">use
+</span><span style="color:#abb2bf;">Privacy Url: https:</span><span style="color:#adb7c9;">//</span><span style="color:#5ebfcc;">privacy.microsoft.com</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">privacystatement
+</span><span style="color:#abb2bf;">Copyright: © Microsoft Corporation
+</span><span style="color:#abb2bf;">All rights reserved.
+</span><span style="color:#abb2bf;">Copyright Url: https:</span><span style="color:#adb7c9;">//</span><span style="color:#5ebfcc;">www.microsoft.com</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">legal</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">intellectualproperty</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">trademarks
+</span><span style="color:#abb2bf;">Tags:
+</span><span style="color:#abb2bf;">  remote</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">desktop
+</span><span style="color:#abb2bf;">  virtual</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">desktop
+</span><span style="color:#abb2bf;">Installer:
+</span><span style="color:#abb2bf;">  Installer Type: wix
+</span><span style="color:#abb2bf;">  Installer Url: https:</span><span style="color:#adb7c9;">//</span><span style="color:#abb2bf;">res.cdn.office.net</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">remote</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">desktop</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">windows</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">client</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">ff46c1a3</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">9b23</span><span style="color:#adb7c9;">-</span><span style="color:#db9d63;">4752</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">a79c</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">d13a309ca9d3</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">RemoteDesktop_1.</span><span style="color:#db9d63;">2.6228</span><span style="color:#abb2bf;">.0_x64.msi
+</span><span style="color:#abb2bf;">  Installer SHA256: d39ae50b56e115d9bf9c0f86c8ab2029fefaeddfbc2c4a1c8cfb523d72c6a888
+</span><span style="color:#abb2bf;">  Offline Distribution Supported: true
+</span></code></pre>
+<p>By default, winget shows package information for your current platform, but you can use the architecture parameter (<code>-a x64</code> or <code>-a ARM64</code>) to force a different one.</p>
+<h2 id="finding-msrdc-cdn-download-urls-using-powershell">Finding MSRDC CDN Download URLs using PowerShell</h2>
+<p>If you just want to find the MSRDC CDN download URLs once to save them, calling winget works. However, if you'd like to automate it to bulk-download a lot of versions, you'll want to extract the information using PowerShell. Let's get a bit fancy by fetching the winget manifest files straight from GitHub.</p>
+<p>First, install the <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/jborean93/PowerShell-Yayaml">Yayaml PowerShell module</a> to parse YAML:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Install-Module </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name Yayaml </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force
+</span></code></pre>
+<p>You can find the manifest file on GitHub for <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/microsoft/winget-pkgs/blob/master/manifests/m/Microsoft/RemoteDesktopClient/1.2.6228.0/Microsoft.RemoteDesktopClient.installer.yaml">MSRDC version 1.2.6228.0 here</a>. Use <a rel="noopener nofollow noreferrer" target="_blank" href="https://git-rawify.vercel.app/">git-rawify.vercel.app</a> to convert the GitHub browser link to a "raw" GitHub URL that can be fetched directly in PowerShell. Run the following PowerShell code snippet:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$Version </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;1.2.6228.0&quot;
+</span><span style="color:#eb6772;">$YamlUrl </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;https://raw.githubusercontent.com/microsoft/winget-pkgs/master/manifests/m/Microsoft/RemoteDesktopClient/</span><span style="color:#eb6772;">$Version</span><span style="color:#9acc76;">/Microsoft.RemoteDesktopClient.installer.yaml&quot;
+</span><span style="color:#eb6772;">$YamlText </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Invoke-WebRequest </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Uri </span><span style="color:#eb6772;">$YamlUrl </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">UseBasicParsing </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Select-Object </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ExpandProperty Content
+</span><span style="color:#eb6772;">$Manifest </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">ConvertFrom-Yaml </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Yaml </span><span style="color:#eb6772;">$YamlText
+</span><span style="color:#eb6772;">$Manifest.Installers </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">ForEach-Object </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    [</span><span style="color:#cd74e8;">PSCustomObject</span><span style="color:#abb2bf;">]</span><span style="color:#cd74e8;">@</span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">Architecture    </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">$_</span><span style="color:#eb6772;">.Architecture
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">InstallerUrl    </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">$_</span><span style="color:#eb6772;">.InstallerUrl
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">InstallerSha256 </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">$_</span><span style="color:#eb6772;">.InstallerSha256
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">} </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Format-List
+</span></code></pre>
+<p>The output should now include package information for all architectures at once:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">Architecture    : x86
+</span><span style="color:#abb2bf;">InstallerUrl    : https:</span><span style="color:#adb7c9;">//</span><span style="color:#abb2bf;">res.cdn.office.net</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">remote</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">desktop</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">windows</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">client</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">e2971a84</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ac0d</span><span style="color:#adb7c9;">-</span><span style="color:#db9d63;">4836</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">a23c</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">7990bf81238e</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">RemoteDesktop_1.</span><span style="color:#db9d63;">2.6228</span><span style="color:#abb2bf;">.0_x86.msi
+</span><span style="color:#abb2bf;">InstallerSha256 : E55987A83A42FF3B1AB1C96EC215B69B87A7173D8DA9D272B8EECC9BD7A47538
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">Architecture    : x64
+</span><span style="color:#abb2bf;">InstallerUrl    : https:</span><span style="color:#adb7c9;">//</span><span style="color:#abb2bf;">res.cdn.office.net</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">remote</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">desktop</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">windows</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">client</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">ff46c1a3</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">9b23</span><span style="color:#adb7c9;">-</span><span style="color:#db9d63;">4752</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">a79c</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">d13a309ca9d3</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">RemoteDesktop_1.</span><span style="color:#db9d63;">2.6228</span><span style="color:#abb2bf;">.0_x64.msi
+</span><span style="color:#abb2bf;">InstallerSha256 : D39AE50B56E115D9BF9C0F86C8AB2029FEFAEDDFBC2C4A1C8CFB523D72C6A888
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">Architecture    : arm64
+</span><span style="color:#abb2bf;">InstallerUrl    : https:</span><span style="color:#adb7c9;">//</span><span style="color:#abb2bf;">res.cdn.office.net</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">remote</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">desktop</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">windows</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">client</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">cb804398</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">63fd</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">494a</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">9ad5</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">34c1803296ac</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">RemoteDesktop_1.</span><span style="color:#db9d63;">2.6228</span><span style="color:#abb2bf;">.0_ARM64.msi
+</span><span style="color:#abb2bf;">InstallerSha256 : 8BD1D9DB7DCD716B5A8741E69BD76F34AF868F6D29B9AD24EED8700C74AB3B6D
+</span></code></pre>
+<h2 id="saving-msrdc-for-later">Saving MSRDC for later</h2>
+<p>It’s unclear how long the CDN download URLs for MSRDC will remain active after end of support. They’ll likely be unlisted from the website first, but may eventually be removed entirely. To be safe, keep a local backup of the installer files.</p>
+<p>Even if the downloads disappear, the SHA256 hashes will remain available in the winget manifest history, which can still be used for integrity verification.</p>
+<h2 id="closing-note">Closing Note</h2>
+<p>MSRDC's end is near. This workaround won't last forever — but pinning a known-good version should buy you some time.</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;disabling-the-windows-11-taskbar-search-box-for-all-users&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              Disabling the Windows 11 Taskbar Search Box for All Users
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;vibe-coding-a-rust-mcp-proxy-in-vscode-with-github-copilot&#x2F;">
+              Vibe Coding a Rust MCP proxy in VSCode with GitHub Copilot<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>

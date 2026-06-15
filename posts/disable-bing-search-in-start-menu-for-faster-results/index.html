@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/disable-bing-search-in-start-menu-for-faster-results/">
+  <link rel="alternate" href="https://awakecoding.com/posts/disable-bing-search-in-start-menu-for-faster-results/" hreflang="en" />
+  
+  <meta name="description" content="Discover how to disable Bing search in the Windows Start Menu for faster, more responsive local search results. This step-by-step guide shows how to modify the registry with PowerShell or a .reg file, apply the setting for all users, and optionally use Group Policy or Intune to deploy the change across an organization. Improve Start Menu performance and streamline your Windows experience." />
+  <meta property="og:title" content="Disable Bing Search in Start Menu for Faster Results" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;disable-bing-search-in-start-menu-for-faster-results&#x2F;" />
+  <meta property="og:description" content="Discover how to disable Bing search in the Windows Start Menu for faster, more responsive local search results. This step-by-step guide shows how to modify the registry with PowerShell or a .reg file, apply the setting for all users, and optionally use Group Policy or Intune to deploy the change across an organization. Improve Start Menu performance and streamline your Windows experience." />
+  <meta name="twitter:title" content="Disable Bing Search in Start Menu for Faster Results" />
+  <meta name="twitter:description" content="Discover how to disable Bing search in the Windows Start Menu for faster, more responsive local search results. This step-by-step guide shows how to modify the registry with PowerShell or a .reg file, apply the setting for all users, and optionally use Group Policy or Intune to deploy the change across an organization. Improve Start Menu performance and streamline your Windows experience." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;disable-bing-search-in-start-menu-for-faster-results&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/disable-bing-search-in-start-menu-for-faster-results.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/disable-bing-search-in-start-menu-for-faster-results.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Disable Bing Search in Start Menu for Faster Results",
+  "description": "Discover how to disable Bing search in the Windows Start Menu for faster, more responsive local search results. This step-by-step guide shows how to modify the registry with PowerShell or a .reg file, apply the setting for all users, and optionally use Group Policy or Intune to deploy the change across an organization. Improve Start Menu performance and streamline your Windows experience.",
+  "datePublished": "2025-04-13",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/disable-bing-search-in-start-menu-for-faster-results.png",
+  "url": "https://awakecoding.com/posts/disable-bing-search-in-start-menu-for-faster-results/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/disable-bing-search-in-start-menu-for-faster-results/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | Disable Bing Search in Start Menu for Faster Results
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            Disable Bing Search in Start Menu for Faster Results
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2025-04-13">April 13, 2025</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>3 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>442 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/windows/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Windows</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/powershell/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>PowerShell</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>Modern Windows has a lot of features many users would consider bloat. Did you know what the Start menu always does a Bing search behind the scenes, introducing a significant delay in search results? Not only that, but it can also break search results completely, leaving you unable to start applications. I don't know about you, but launching applications is very high on the list of things the Start menu should do flawlessly at all times. Thankfully, there is a way to reclaim your Start menu performance, and ensure it doesn't randomly break its primary reason of existence for a feature you likely never wanted in the first place!</p>
+<h2 id="disabling-bing-search-in-start-menu">Disabling Bing Search in Start Menu</h2>
+<p>Open PowerShell, and paste this command to set <strong>BingSearchEnabled</strong> to <strong>0</strong> and disable the Bing search Start menu "feature":</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Set-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#9acc76;">&quot;HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#9acc76;">&quot;BingSearchEnabled&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#db9d63;">0
+</span></code></pre>
+<p>Instead of using PowerShell, you can also download and import <a href="/files/DisableStartMenuBingSearch.reg">DisableStartMenuBingSearch.reg</a> to set the registry key. The end result should look like this in regedit.exe, under <code>HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Search</code>:</p>
+<p><img src="/images/posts/start-menu-bing-search-disabled-registry.png" alt="Start menu Bing search disabled in registry" /></p>
+<p>Either reboot or force-restart all explorer.exe processes for the changes to become effective:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Get-Process</span><span style="color:#abb2bf;"> explorer </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Stop-Process
+</span></code></pre>
+<p>There is unfortunately no <strong>BingSearchEnabled</strong> registry key under HKEY_LOCAL_MACHINE, so the next best thing to disable it by default for all users is to modify the default user registry hive:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$DefaultUserReg </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;HKLM\TempDefault&quot;
+</span><span style="color:#eb6772;">$NtuserDatPath </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;C:\Users\Default\NTUSER.DAT&quot;
+</span><span style="color:#abb2bf;">reg load </span><span style="color:#eb6772;">$DefaultUserReg $NtuserDatPath
+</span><span style="color:#eb6772;">$HKDU </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;Registry::</span><span style="color:#eb6772;">$DefaultUserReg</span><span style="color:#9acc76;">&quot;
+</span><span style="color:#eb6772;">$RegPath </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;</span><span style="color:#eb6772;">$HKDU</span><span style="color:#9acc76;">\SOFTWARE\Microsoft\Windows\CurrentVersion\Search&quot;
+</span><span style="color:#5ebfcc;">New-Item </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$RegPath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Out-Null
+</span><span style="color:#5ebfcc;">Set-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$RegPath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#9acc76;">&quot;BingSearchEnabled&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#db9d63;">1 </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Type DWORD
+</span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">GC</span><span style="color:#abb2bf;">]::Collect()
+</span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">GC</span><span style="color:#abb2bf;">]::WaitForPendingFinalizers()
+</span><span style="color:#abb2bf;">reg unload </span><span style="color:#eb6772;">$DefaultUserReg
+</span></code></pre>
+<p>This last method is useful when creating a customized golden image of Windows, otherwise it is simpler to modify the registry key for the current user.</p>
+<h2 id="analyzing-start-menu-bing-search-with-the-kano-model">Analyzing Start Menu Bing Search with the Kano Model</h2>
+<p>From the <a rel="noopener nofollow noreferrer" target="_blank" href="https://www.productplan.com/glossary/kano-model/">Kano model of customer satisfaction</a>, features are categorized based on how they influence user delight or frustration. The Bing search integration in the Windows Start Menu is a perfect example of a reverse performance or even indifferent feature:</p>
+<p>When present, users often don’t notice it — or worse, they experience lag, irrelevant web results, or outright failure to launch local apps. This turns what should be a core system feature into a frustrating bottleneck.</p>
+<p>When absent, most users feel no loss. In fact, disabling it typically improves the Start Menu experience, making it faster and more reliable — which is what users truly expect from a core UX feature like application search.</p>
+<p>In this case, Bing search behaves more like a dissatisfier: it doesn’t add noticeable value when it works, and it actively degrades the experience when it doesn’t. From a Kano perspective, this makes it a low-ROI feature that may harm satisfaction more than it helps.</p>
+<p>Disabling it aligns the system closer to user expectations: fast, local app search without noise or delays.</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;isolating-a-windows-service-process-for-easier-debugging&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              Isolating a Windows Service Process for Easier Debugging
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;fix-crl-not-published-when-revocation-server-is-offline&#x2F;">
+              Fix CRL Not Published When Revocation Server Is Offline<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>

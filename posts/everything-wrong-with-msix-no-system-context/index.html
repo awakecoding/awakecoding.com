@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/everything-wrong-with-msix-no-system-context/">
+  <link rel="alternate" href="https://awakecoding.com/posts/everything-wrong-with-msix-no-system-context/" hreflang="en" />
+  
+  <meta name="description" content="PowerShell&#x27;s MSI deprecation exposes the problem with treating MSIX like a better MSI: user-registered packages can disappear from SYSTEM, breaking services, scheduled tasks, remoting, and automation." />
+  <meta property="og:title" content="Everything Wrong with MSIX: No System Context" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;everything-wrong-with-msix-no-system-context&#x2F;" />
+  <meta property="og:description" content="PowerShell&#x27;s MSI deprecation exposes the problem with treating MSIX like a better MSI: user-registered packages can disappear from SYSTEM, breaking services, scheduled tasks, remoting, and automation." />
+  <meta name="twitter:title" content="Everything Wrong with MSIX: No System Context" />
+  <meta name="twitter:description" content="PowerShell&#x27;s MSI deprecation exposes the problem with treating MSIX like a better MSI: user-registered packages can disappear from SYSTEM, breaking services, scheduled tasks, remoting, and automation." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;everything-wrong-with-msix-no-system-context&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/everything-wrong-with-msix-no-system-context.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/everything-wrong-with-msix-no-system-context.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Everything Wrong with MSIX: No System Context",
+  "description": "PowerShell's MSI deprecation exposes the problem with treating MSIX like a better MSI: user-registered packages can disappear from SYSTEM, breaking services, scheduled tasks, remoting, and automation.",
+  "datePublished": "2026-05-06",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/everything-wrong-with-msix-no-system-context.png",
+  "url": "https://awakecoding.com/posts/everything-wrong-with-msix-no-system-context/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/everything-wrong-with-msix-no-system-context/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | Everything Wrong with MSIX: No System Context
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            Everything Wrong with MSIX: No System Context
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2026-05-06">May 06, 2026</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>4 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>794 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/msix/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>MSIX</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/windows/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Windows</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/powershell/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>PowerShell</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>Microsoft has started a new <a rel="noopener nofollow noreferrer" target="_blank" href="https://devblogs.microsoft.com/insidemsix/">Inside MSIX</a> blog series, and I thought I'd start my own counter series called "Everything Wrong with MSIX". This is a topic I've considered writing about for years, but never mustered the courage to begin until now: I have a <em>lot</em> to unpack about MSIX.</p>
+<p>PowerShell recently announced the <a rel="noopener nofollow noreferrer" target="_blank" href="https://devblogs.microsoft.com/powershell/powershell-msi-deprecation/">deprecation of its MSI installer in favor of MSIX</a>, despite current known limitations acknowledged by the team:</p>
+<blockquote>
+<p>At this time, MSIX doesn't support all use case scenarios that MSI enabled, such as remoting and execution by system-level services (like Task Scheduler). We recognize this gap and are actively working to address it.</p>
+</blockquote>
+<p>That caveat matters because PowerShell is not just an app you launch from Windows Terminal. It is infrastructure used by scheduled tasks, deployment systems, services, remote administration workflows, and endpoint management tools. A large amount of that automation runs as <code>NT AUTHORITY\SYSTEM</code>.</p>
+<h2 id="msix-is-not-a-better-msi">MSIX Is Not a Better MSI</h2>
+<p>MSIX is not a better MSI. It is a different deployment model with different assumptions.</p>
+<p>MSIX stages package payloads on the machine, then registers them for users. That works for many desktop applications, but it is not the same thing as installing a command-line tool under <code>Program Files</code> and making it available to every account that has permission to run it.</p>
+<p>SYSTEM is not your interactive user. It is a separate security principal with its own profile, its own <code>%LOCALAPPDATA%</code>, and its own view of user-scoped package registrations and app execution aliases. That is why PowerShell can be staged on the machine, registered for your account, visible in <code>Get-AppxPackage -AllUsers</code>, and still disappear when the current user is <code>NT AUTHORITY\SYSTEM</code>.</p>
+<h2 id="testing-in-a-system-context">Testing in a System Context</h2>
+<p>First, let's install PowerShell 7 from the MSIX package using WinGet:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">winget install </span><span style="color:#adb7c9;">--</span><span style="color:#abb2bf;">id Microsoft.PowerShell </span><span style="color:#adb7c9;">--</span><span style="color:#abb2bf;">installer</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">type msix
+</span></code></pre>
+<p>So far, so good. <code>pwsh.exe</code> is available for the current user:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS</span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-AppxPackage</span><span style="color:#abb2bf;"> Microsoft.PowerShell </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Select-Object </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Property Name</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;">Version</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;">Publisher</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;">PackageFullName</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;">InstallLocation
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">Name            : Microsoft.PowerShell
+</span><span style="color:#abb2bf;">Version         : </span><span style="color:#db9d63;">7.6</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">1.0
+</span><span style="color:#abb2bf;">Publisher       : CN</span><span style="color:#adb7c9;">=</span><span style="color:#abb2bf;">Microsoft Corporation</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;"> O</span><span style="color:#adb7c9;">=</span><span style="color:#abb2bf;">Microsoft Corporation</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;"> L</span><span style="color:#adb7c9;">=</span><span style="color:#abb2bf;">Redmond</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;"> S</span><span style="color:#adb7c9;">=</span><span style="color:#abb2bf;">Washington</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;"> C</span><span style="color:#adb7c9;">=</span><span style="color:#abb2bf;">US
+</span><span style="color:#abb2bf;">PackageFullName : Microsoft.PowerShell_7.</span><span style="color:#db9d63;">6.1</span><span style="color:#abb2bf;">.0_x64__8wekyb3d8bbwe
+</span><span style="color:#abb2bf;">InstallLocation : C:\Program Files\WindowsApps\Microsoft.PowerShell_7.</span><span style="color:#db9d63;">6.1</span><span style="color:#abb2bf;">.0_x64__8wekyb3d8bbwe
+</span></code></pre>
+<p>The <code>pwsh</code> command is also available through an app execution alias under <code>%LOCALAPPDATA%\Microsoft\WindowsApps</code>:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS</span><span style="color:#adb7c9;">&gt; </span><span style="color:#abb2bf;">(</span><span style="color:#5ebfcc;">Get-Command</span><span style="color:#abb2bf;"> pwsh).Source
+</span><span style="color:#abb2bf;">C:\Users\Administrator.IT</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">HELP\AppData\Local\Microsoft\WindowsApps\</span><span style="color:#5ebfcc;">pwsh.exe
+</span></code></pre>
+<p>So, what's the problem? PowerShell is available to regular users who log on interactively to Windows, but it is not registered in the SYSTEM context. That matters as soon as PowerShell needs to run from a service, deployment agent, endpoint management tool, or scheduled task. Let's simulate that with <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/sysinternals/downloads/psexec">PsExec</a>:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">psexec </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">nobanner </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">s </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">i </span><span style="color:#5ebfcc;">pwsh.exe </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">NoLogo </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">NoProfile
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">PsExec could not start </span><span style="color:#5ebfcc;">pwsh.exe</span><span style="color:#abb2bf;"> on IT</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">HELP</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">TEST:
+</span><span style="color:#abb2bf;">The system cannot find the file specified.
+</span></code></pre>
+<p>Oops. Why can't <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/sysinternals/downloads/psexec">PsExec</a> find <code>pwsh.exe</code>? Launch <code>powershell.exe</code> instead, which ships with Windows and is not MSIX-packaged:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">psexec </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">nobanner </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">s </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">i </span><span style="color:#5ebfcc;">powershell.exe </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">NoLogo </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">NoProfile
+</span></code></pre>
+<p><img src="/images/posts/msix-no-pwsh-system-context.png" alt="MSIX no pwsh in system context" /></p>
+<p>If launching <code>powershell.exe</code> through <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/sysinternals/downloads/psexec">PsExec</a> worked, you should now see the "classic" console host, not Windows Terminal. I'm sure there are many reasons why Windows Terminal cannot run in a system context, but MSIX is at least one of them. Confirm the new shell runs as <code>nt authority\system</code>, then try using PowerShell 7:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS C:\WINDOWS\system3</span><span style="color:#adb7c9;">2&gt;</span><span style="color:#abb2bf;"> whoami
+</span><span style="color:#abb2bf;">nt authority\system
+</span><span style="color:#abb2bf;">PS C:\WINDOWS\system3</span><span style="color:#adb7c9;">2&gt; </span><span style="color:#5ebfcc;">Get-AppxPackage</span><span style="color:#abb2bf;"> Microsoft.PowerShell
+</span><span style="color:#abb2bf;">PS C:\WINDOWS\system3</span><span style="color:#adb7c9;">2&gt;</span><span style="color:#abb2bf;"> pwsh
+</span><span style="color:#abb2bf;">pwsh : The term </span><span style="color:#9acc76;">&#39;pwsh&#39;</span><span style="color:#abb2bf;"> is not recognized as the name of a cmdlet</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;"> function</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;"> script file</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;"> or operable program. Check
+</span><span style="color:#abb2bf;">the spelling of the name</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;"> or </span><span style="color:#cd74e8;">if</span><span style="color:#abb2bf;"> a path was included</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;"> verify that the path is correct and </span><span style="color:#cd74e8;">try</span><span style="color:#abb2bf;"> again.
+</span><span style="color:#abb2bf;">At line:</span><span style="color:#db9d63;">1</span><span style="color:#abb2bf;"> char:</span><span style="color:#db9d63;">1
+</span><span style="color:#adb7c9;">+</span><span style="color:#abb2bf;"> pwsh
+</span><span style="color:#adb7c9;">+</span><span style="color:#abb2bf;"> ~~~~
+</span><span style="color:#abb2bf;">    </span><span style="color:#adb7c9;">+</span><span style="color:#abb2bf;"> CategoryInfo          : ObjectNotFound: (pwsh:String) []</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;"> CommandNotFoundException
+</span><span style="color:#abb2bf;">    </span><span style="color:#adb7c9;">+</span><span style="color:#abb2bf;"> FullyQualifiedErrorId : CommandNotFoundException
+</span></code></pre>
+<p>If you try launching <code>winget.exe</code>, it fails in the same way. The same pattern applies: the payload may be staged on the machine, but the per-user registration and app execution alias are not present in the SYSTEM context.</p>
+<p>That is the part MSIX gets wrong for infrastructure tooling. It is not just a desktop application launcher problem. PowerShell scripts run from scheduled tasks in the SYSTEM context. Deployment and endpoint management agents run as services. Network services perform authentication and create sessions under identities that are not normal interactive desktop users. The <a rel="noopener nofollow noreferrer" target="_blank" href="https://awakecoding.com/posts/enable-powershell-winrm-remoting-in-powershell-7/">WinRM service uses a PowerShell plugin DLL for the PowerShell Remoting server environment</a>. Treating PowerShell as a per-user registered application breaks those assumptions by design.</p>
+<h2 id="winget-has-the-same-problem">WinGet Has the Same Problem</h2>
+<p>WinGet is another visible example of the same MSIX limitation.</p>
+<p>In <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/microsoft/winget-cli/issues/5991">microsoft/winget-cli#5991</a>, the maintainers were asked whether the WinGet CLI is supported from the SYSTEM user running in session 0. The answer was direct:</p>
+<blockquote>
+<p>The CLI is not supported from SYSTEM at all, as one cannot register the MSIX package for the SYSTEM user.</p>
+</blockquote>
+<p>Microsoft's own <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/windows/package-manager/winget/troubleshooting#exit-codes">WinGet troubleshooting documentation</a> now says the same thing: WinGet is delivered through App Installer as a packaged application, depends on an app execution alias being resolved on <code>PATH</code>, and is not supported in the system context.</p>
+<h2 id="closing-thoughts">Closing Thoughts</h2>
+<p>PowerShell is much more than an interactive shell in a user context, it is widely used for automation in non-interactive environments, often through system services. MSIX may be pitched as the "replacement" for MSI, but it's a completely different beast. Simply put, MSIX introduces new problems we didn't have before, while solving problems most of us weren't aware of.</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;configuring-ssh-for-personal-and-work-github-accounts&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              Configuring SSH for Personal and Work GitHub Accounts
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;everything-wrong-with-msix-the-virtual-filesystem-trap&#x2F;">
+              Everything Wrong with MSIX: The Virtual Filesystem Trap<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>

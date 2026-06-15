@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/pleroma-backup-and-restore-procedure/">
+  <link rel="alternate" href="https://awakecoding.com/posts/pleroma-backup-and-restore-procedure/" hreflang="en" />
+  
+  <meta name="description" content="Master the Pleroma backup and restore process with this comprehensive guide, which offers detailed steps for efficiently securing your Pleroma instance. From creating a backup script to restoring data on a new machine, this tutorial ensures you&#x27;re prepared for data migration or recovery, tailored for administrators with limited system administration experience." />
+  <meta property="og:title" content="Pleroma Backup and Restore Procedure" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;pleroma-backup-and-restore-procedure&#x2F;" />
+  <meta property="og:description" content="Master the Pleroma backup and restore process with this comprehensive guide, which offers detailed steps for efficiently securing your Pleroma instance. From creating a backup script to restoring data on a new machine, this tutorial ensures you&#x27;re prepared for data migration or recovery, tailored for administrators with limited system administration experience." />
+  <meta name="twitter:title" content="Pleroma Backup and Restore Procedure" />
+  <meta name="twitter:description" content="Master the Pleroma backup and restore process with this comprehensive guide, which offers detailed steps for efficiently securing your Pleroma instance. From creating a backup script to restoring data on a new machine, this tutorial ensures you&#x27;re prepared for data migration or recovery, tailored for administrators with limited system administration experience." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;pleroma-backup-and-restore-procedure&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/pleroma-backup-and-restore-procedure.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/pleroma-backup-and-restore-procedure.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Pleroma Backup and Restore Procedure",
+  "description": "Master the Pleroma backup and restore process with this comprehensive guide, which offers detailed steps for efficiently securing your Pleroma instance. From creating a backup script to restoring data on a new machine, this tutorial ensures you're prepared for data migration or recovery, tailored for administrators with limited system administration experience.",
+  "datePublished": "2022-12-04",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/pleroma-backup-and-restore-procedure.png",
+  "url": "https://awakecoding.com/posts/pleroma-backup-and-restore-procedure/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/pleroma-backup-and-restore-procedure/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | Pleroma Backup and Restore Procedure
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            Pleroma Backup and Restore Procedure
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2022-12-04">December 04, 2022</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>4 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>635 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/linux/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Linux</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>In previous posts, I have covered how to self-host your own <a rel="noopener nofollow noreferrer" target="_blank" href="https://cohost.org/awakecoding/post/390625-pleroma-same-fedive">Mastodon-interoperable Pleroma server</a> and how to get access to a <a rel="noopener nofollow noreferrer" target="_blank" href="https://cohost.org/awakecoding/post/384627-free-arm-server-with">free ARM server with 4 CPUs and 24GB of RAM</a>. After running my own Pleroma server for two weeks, I looked at the resource usage history: CPUs barely do any work, and memory usage is less than 1GB on average. While Pleroma can run on 1 CPU and 2GB of RAM for single-user instance, I have decided to play it safe and downsize to 2 CPUs and 8GB of RAM for now.</p>
+<h1 id="backup-procedure">Backup Procedure</h1>
+<p>If you are like me and have limited system administration experience, then following official <a rel="noopener nofollow noreferrer" target="_blank" href="https://docs.pleroma.social/backend/administration/backup/">Pleroma backup/restore documentation</a> doesn't feel straightforward. The first issue I encountered is that I didn't keep a copy of the setup_db.sql script created during the initial configuration generation. If you still have it, keep a copy under /etc/pleroma/setup_db.psql.</p>
+<p>If you lost it, generate a dummy configuration file using the answers matching the current server. Don't worry about using the right database password, we'll fix it in a moment:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#cd74e8;">export </span><span style="color:#eb6772;">MIX_ENV</span><span style="color:#adb7c9;">=</span><span style="color:#9acc76;">&quot;prod&quot;
+</span><span style="color:#eb6772;">sudo -Hu</span><span style="color:#abb2bf;"> pleroma pleroma_ctl instance gen</span><span style="color:#eb6772;"> --output</span><span style="color:#abb2bf;"> /tmp/config.exs</span><span style="color:#eb6772;"> --output-psql</span><span style="color:#abb2bf;"> /etc/pleroma/setup_db.psql
+</span></code></pre>
+<p>Grab the database password from <code>/etc/pleroma/config.exs</code> and update `/etc/pleroma/setup_db.sql' with the right value. This is what the setup_db.sql script should look like:</p>
+<pre style="background-color:#2b303b;color:#6c7079;"><code><span style="color:#abb2bf;">CREATE USER pleroma WITH ENCRYPTED PASSWORD &#39;SuperSecret123!&#39;;
+</span><span style="color:#abb2bf;">CREATE DATABASE pleroma OWNER pleroma;
+</span><span style="color:#abb2bf;">\c pleroma;
+</span><span style="color:#abb2bf;">--Extensions made by ecto.migrate that need superuser access
+</span><span style="color:#abb2bf;">CREATE EXTENSION IF NOT EXISTS citext;
+</span><span style="color:#abb2bf;">CREATE EXTENSION IF NOT EXISTS pg_trgm;
+</span><span style="color:#abb2bf;">CREATE EXTENSION IF NOT EXISTS &quot;uuid-ossp&quot;;
+</span><span style="color:#abb2bf;">CREATE EXTENSION IF NOT EXISTS rum;
+</span></code></pre>
+<p>Create a new backup Pleroma backup script (<code>sudo nano /etc/cron.daily/pleroma-backup</code>) with the following contents:</p>
+<pre style="background-color:#2b303b;color:#6c7079;"><code><span style="color:#abb2bf;">#!/bin/sh
+</span><span style="color:#abb2bf;">systemctl stop pleroma
+</span><span style="color:#abb2bf;">sudo -Hu postgres pg_dump -d pleroma --format=custom -f /tmp/pleroma.pgdump
+</span><span style="color:#abb2bf;">mv /tmp/pleroma.pgdump /etc/pleroma/pleroma.pgdump
+</span><span style="color:#abb2bf;">tar -czf /tmp/pleroma-backup.tar.gz -C / /opt/pleroma /etc/pleroma /var/lib/pleroma
+</span><span style="color:#abb2bf;">mv /tmp/pleroma-backup.tar.gz /var/backups/pleroma-`date +%F`.tar.gz
+</span><span style="color:#abb2bf;">systemctl start pleroma
+</span></code></pre>
+<p>Make the backup script executable, then run it manually at least once:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">sudo</span><span style="color:#abb2bf;"> chmod +x /etc/cron.daily/pleroma-backup
+</span><span style="color:#eb6772;">sudo</span><span style="color:#abb2bf;"> /etc/cron.daily/pleroma-backup
+</span></code></pre>
+<p>This script will be run daily as a cron job, and create backup tarballs under /var/backups:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">$</span><span style="color:#abb2bf;"> ls /var/backups/pleroma</span><span style="color:#adb7c9;">*</span><span style="color:#abb2bf;">.tar.gz
+</span><span style="color:#eb6772;">/var/backups/pleroma-2022-12-04.tar.gz
+</span></code></pre>
+<p>Copy the latest backup file from the virtual machine to another location. For regular backups, use additional storage attached to the virtual machine, and ensure that if the virtual machine is lost, you can still access the backups.</p>
+<p>Last but not least, take note of the uid of the <code>postgres</code> and <code>pleroma</code> users on the current machine.</p>
+<pre style="background-color:#2b303b;color:#6c7079;"><code><span style="color:#abb2bf;">id -u postgres
+</span><span style="color:#abb2bf;">112
+</span><span style="color:#abb2bf;">id -u pleroma
+</span><span style="color:#abb2bf;">113
+</span></code></pre>
+<p>The uid values will differ, but in order to avoid additional <code>chown</code> commands when restoring the backup, it is easier to use matching uid values for the same users on the new machine.</p>
+<h1 id="restore-procedure">Restore Procedure</h1>
+<p>Follow the instructions from my original <a rel="noopener nofollow noreferrer" target="_blank" href="https://cohost.org/awakecoding/post/390625-pleroma-same-fedive">Pleroma blog post</a> and stop when you reach the configuration generation command.</p>
+<p>At this point, you should have the <code>postgres</code> and <code>pleroma</code> users. Use the following commands to change the uid values such that they match the previous machine:</p>
+<pre style="background-color:#2b303b;color:#6c7079;"><code><span style="color:#abb2bf;">sudo usermod -u 112 postgres
+</span><span style="color:#abb2bf;">sudo usermod -u 113 pleroma
+</span></code></pre>
+<p>Transfer the backup file to the new machine, in the same location (/var/backups). When you are ready, restore the Pleroma backup on the new machine. Beware: this operation will overwrite existing Pleroma files, so don't restore a backup unless you intend to do it.</p>
+<pre style="background-color:#2b303b;color:#6c7079;"><code><span style="color:#abb2bf;">sudo tar -xzf /var/backups/pleroma-2022-12-04.tar.gz -C /
+</span></code></pre>
+<p>Delete existing pleroma database and user (may not be required on a new server):</p>
+<pre style="background-color:#2b303b;color:#6c7079;"><code><span style="color:#abb2bf;">sudo -Hu postgres psql -c &#39;DROP DATABASE pleroma;&#39;
+</span><span style="color:#abb2bf;">sudo -Hu postgres psql -c &#39;DROP USER pleroma;&#39;
+</span></code></pre>
+<p>Run pleroma database setup script:</p>
+<pre style="background-color:#2b303b;color:#6c7079;"><code><span style="color:#abb2bf;">sudo -Hu postgres psql -f /etc/pleroma/setup_db.psql
+</span></code></pre>
+<p>Restore database backup (this can take a few minutes):</p>
+<pre style="background-color:#2b303b;color:#6c7079;"><code><span style="color:#abb2bf;">sudo -Hu postgres pg_restore -d pleroma -v -1 /etc/pleroma/pleroma.pgdump
+</span></code></pre>
+<p>Run database internal cleanup to optimize queries:</p>
+<pre style="background-color:#2b303b;color:#6c7079;"><code><span style="color:#abb2bf;">sudo -Hu postgres vacuumdb --all --analyze-in-stages
+</span></code></pre>
+<p>You can resume following instructions from the original <a rel="noopener nofollow noreferrer" target="_blank" href="https://cohost.org/awakecoding/post/390625-pleroma-same-fedive">Pleroma blog post</a>, starting from the enabling and starting of the Pleroma system service:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">sudo</span><span style="color:#abb2bf;"> cp /opt/pleroma/installation/pleroma.service /etc/systemd/system/pleroma.service
+</span><span style="color:#eb6772;">sudo</span><span style="color:#abb2bf;"> systemctl enable</span><span style="color:#eb6772;"> --now</span><span style="color:#abb2bf;"> pleroma.service
+</span></code></pre>
+<p>Make sure that the Pleroma service is running before continuing further:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#6c7079;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#eb6772;">$</span><span style="color:#abb2bf;"> netstat</span><span style="color:#eb6772;"> -tln </span><span style="color:#adb7c9;">| </span><span style="color:#eb6772;">grep</span><span style="color:#abb2bf;"> 4000
+</span><span style="color:#eb6772;">tcp</span><span style="color:#abb2bf;">        0      0 127.0.0.1:4000          0.0.0.0:</span><span style="color:#adb7c9;">*</span><span style="color:#abb2bf;">               LISTEN
+</span></code></pre>
+<p>If it does, then congratulations! The trickiest part of the restore procedure has worked. You can now update DNS records to point your domain name to the public IP address of the new virtual machine and request a new certificate from <a rel="noopener nofollow noreferrer" target="_blank" href="https://letsencrypt.org/">letsencrypt</a>.</p>
+<p>Once everything is up and running, don't forget to flush the DNS cache (<code>ipconfig /flushdns</code> on Windows), shut down the previous machine, and try loading Pleroma from the new machine. If it works, you can now safely delete the older virtual machine, and consider the migration a success!</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;add-trusted-root-ca-certificate-ubuntu&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              Add Trusted Root CA certificate on Ubuntu
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;fix-kerberos-machine-tgt-fetching-on-startup&#x2F;">
+              Fix Kerberos Machine TGT Fetching on Startup<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>

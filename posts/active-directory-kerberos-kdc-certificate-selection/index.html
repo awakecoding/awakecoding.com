@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/active-directory-kerberos-kdc-certificate-selection/">
+  <link rel="alternate" href="https://awakecoding.com/posts/active-directory-kerberos-kdc-certificate-selection/" hreflang="en" />
+  
+  <meta name="description" content="Discover the intricacies of Active Directory&#x27;s Kerberos KDC certificate selection for PKINIT, including techniques for choosing a specific certificate, analysis using IDA Pro, and PowerShell cmdlets for managing certificates. This deep dive explores the challenges and solutions for ensuring the right KDC certificate is used, overcoming the unpredictability of certificate selection in Windows environments." />
+  <meta property="og:title" content="Active Directory Kerberos KDC certificate selection" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;active-directory-kerberos-kdc-certificate-selection&#x2F;" />
+  <meta property="og:description" content="Discover the intricacies of Active Directory&#x27;s Kerberos KDC certificate selection for PKINIT, including techniques for choosing a specific certificate, analysis using IDA Pro, and PowerShell cmdlets for managing certificates. This deep dive explores the challenges and solutions for ensuring the right KDC certificate is used, overcoming the unpredictability of certificate selection in Windows environments." />
+  <meta name="twitter:title" content="Active Directory Kerberos KDC certificate selection" />
+  <meta name="twitter:description" content="Discover the intricacies of Active Directory&#x27;s Kerberos KDC certificate selection for PKINIT, including techniques for choosing a specific certificate, analysis using IDA Pro, and PowerShell cmdlets for managing certificates. This deep dive explores the challenges and solutions for ensuring the right KDC certificate is used, overcoming the unpredictability of certificate selection in Windows environments." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;active-directory-kerberos-kdc-certificate-selection&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/active-directory-kerberos-kdc-certificate-selection.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/active-directory-kerberos-kdc-certificate-selection.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Active Directory Kerberos KDC certificate selection",
+  "description": "Discover the intricacies of Active Directory's Kerberos KDC certificate selection for PKINIT, including techniques for choosing a specific certificate, analysis using IDA Pro, and PowerShell cmdlets for managing certificates. This deep dive explores the challenges and solutions for ensuring the right KDC certificate is used, overcoming the unpredictability of certificate selection in Windows environments.",
+  "datePublished": "2023-09-06",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/active-directory-kerberos-kdc-certificate-selection.png",
+  "url": "https://awakecoding.com/posts/active-directory-kerberos-kdc-certificate-selection/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/active-directory-kerberos-kdc-certificate-selection/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | Active Directory Kerberos KDC certificate selection
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            Active Directory Kerberos KDC certificate selection
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2023-09-06">September 06, 2023</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>9 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>1711 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/kerberos/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Kerberos</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/activedirectory/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>ActiveDirectory</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/windows/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Windows</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>So, you've decided to embark on a quest to reliably select a specific KDC certificate in Active Directory, because randomly-selected certificates that you <em>think</em> you have control over are not a desirable thing? Here's what happened to the last person that went down this path:</p>
+<p><img src="/images/posts/ad-pkinit-he-tried-selecting-a-kdc-certificate.jpg" alt="Kerberos KDC he tried selecting a kdc certificate" /></p>
+<p>The Kerberos KDC certificate is used in PKINIT, a Kerberos extension used in <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows/security/identity-protection/smart-cards/smart-card-architecture">Windows smartcard authentication</a>, among other things. Contrary to popular belief, it is possible to select a <em>different</em> certificate for PKINIT and LDAPS, but the magical recipe had long been lost to time.</p>
+<p>Buckle up, because if you thought <a rel="noopener nofollow noreferrer" target="_blank" href="https://awakecoding.com/posts/active-directory-ldaps-certificate-selection-deep-dive/">selecting a specific LDAPS server certificate</a> in Active Directory was painful, this is nothing in comparison.</p>
+<h2 id="analysis-technique">Analysis Technique</h2>
+<p>I have used <a rel="noopener nofollow noreferrer" target="_blank" href="https://hex-rays.com/ida-pro/">IDA Pro</a> to look at the specific private functions located in kdcsvc.dll:</p>
+<ul>
+<li>KdcInitializeCerts</li>
+<li>KdcMyStoreWaitHandler</li>
+<li>KdcEventWriteKdcCertLog</li>
+<li>KdcCheckKdcCertificate</li>
+<li>KdcCheckLegacyKdcCertificate</li>
+<li>KdcGetKdcCertificate</li>
+<li>KdcCheckPkinitPreAuthData</li>
+</ul>
+<p>Please note that the KDC service is hosted inside lsass.exe despite being primarily handled by the code from kdcsvc.dll. I have mostly done static analysis combined with a lot of PowerShell code to try and confirm the actual application behavior.</p>
+<h2 id="preparing-test-certificates">Preparing Test Certificates</h2>
+<p>To properly test the KDC service selects its certificate from multiple valid candidates, I have duplicated the built-in "Kerberos Authentication" certificate template with the following modifications:</p>
+<ul>
+<li>On the <strong>Request Handling</strong> tab, check <strong>Allow private key to exported</strong></li>
+<li>On the <strong>Subject Name</strong> tab, select <strong>Supply in the request</strong></li>
+</ul>
+<p><img src="/images/posts/ad-pkinit-kerberos-auth-cert-template-allow-export.png" alt="Kerberos Certificate Template - Allow Private Key Export" /></p>
+<p>I have then manually generated 5 certificates with numbers from to 1 to 5 to make them easier to distinguish. The certificate subject name and subject alternative names (SANs) are not relevant to the selection process itself, even if invalid names can cause trouble down the road. To manually specify valid subject name information, generate a certificate using the original "Kerberos Authentication" built-in template and then use the same values. When <strong>Subject Name</strong> is set to <strong>Build from Active Directory information</strong> in the template, only SANs are used, with no subject name:</p>
+<p><img src="/images/posts/ad-pkinit-kerberos-auth-cert-template-subject-name.png" alt="Kerberos Certificate Template - Subject Name Information" /></p>
+<p>Last but not least, to test certificate selection behavior with the <em>same</em> certificates, I have exported the test certificates to .pfx files with their private keys:</p>
+<p><img src="/images/posts/ad-pkinit-kerberos-test-server-certificates.png" alt="Kerberos Test Certificates" /></p>
+<p>Now that the certificates are prepared, I am free to delete them from the Windows certificate store and re-import them as desired to see what happens.</p>
+<h2 id="kdc-certificate-event-logs">KDC Certificate Event Logs</h2>
+<p>The KDC service only looks in the local machine personal certificate store (cert:\LocalMachine\My) for its KDC certificate, which is different from the <a rel="noopener nofollow noreferrer" target="_blank" href="https://awakecoding.com/posts/active-directory-ldaps-certificate-selection-deep-dive/">LDAPS certificate selection process</a> that looks in both the NTDS service certificate store and only then the local machine personal certificate store.</p>
+<p>So, how does one tell which KDC certificate was selected? Believe it or not, this time, there are logs you can enable! In the Windows Event Viewer (eventvwr.msc), go to <strong>Applications and Services Logs / Microsoft / Windows / Kerberos-Key-Distribution-Center</strong>, right-click Operational, then select <strong>Enable Log</strong>:</p>
+<blockquote>
+<p>The Key Distribution Center (KDC) uses the below KDC certificate for smart card or certificate authentication.</p>
+</blockquote>
+<p><img src="/images/posts/ad-pkinit-kerberos-kdc-certificate-event-viewer.png" alt="Windows Event Viewer - KDC selected certificate" /></p>
+<p>Once the logs are enabled, you can reboot the domain controller, or force a KDC certificate reload by "touching" the certificate store, causing new events to appear in the Event Viewer (don't forget to refresh!):</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$dummyCert </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">New-SelfSignedCertificate </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">DnsName </span><span style="color:#9acc76;">&quot;dummy.local&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">CertStoreLocation </span><span style="color:#9acc76;">&quot;cert:\LocalMachine\My&quot;
+</span><span style="color:#5ebfcc;">Get-ChildItem </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#9acc76;">&quot;cert:\LocalMachine\My&quot; </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Where-Object </span><span style="color:#abb2bf;">{ $_</span><span style="color:#eb6772;">.Thumbprint </span><span style="color:#adb7c9;">-eq </span><span style="color:#eb6772;">$dummyCert.Thumbprint </span><span style="color:#abb2bf;">} </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Remove-Item
+</span></code></pre>
+<p>You can also get the thumbprint of the currently selected KDC certificate in PowerShell by extracting it from the last Windows event:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$KdcLogName </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&#39;Microsoft-Windows-Kerberos-Key-Distribution-Center/Operational&#39;
+</span><span style="color:#5ebfcc;">Get-WinEvent </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">FilterHashtable </span><span style="color:#cd74e8;">@</span><span style="color:#abb2bf;">{</span><span style="color:#eb6772;">LogName</span><span style="color:#adb7c9;">=</span><span style="color:#eb6772;">$KdcLogName</span><span style="color:#abb2bf;">; </span><span style="color:#eb6772;">ID</span><span style="color:#adb7c9;">=</span><span style="color:#db9d63;">302</span><span style="color:#abb2bf;">} </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">MaxEvents </span><span style="color:#db9d63;">1 </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">ForEach-Object </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    $_</span><span style="color:#eb6772;">.Properties</span><span style="color:#abb2bf;">[</span><span style="color:#db9d63;">2</span><span style="color:#abb2bf;">].Value
+</span><span style="color:#abb2bf;">}
+</span></code></pre>
+<p>The KDC service watches the local machine personal certificate store (cert:\LocalMachine\My) for changes using the <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-certcontrolstore">CertControlStore function with the CERT_STORE_CTRL_NOTIFY_CHANGE type</a> and calls the internal KdcMyStoreWaitHandler function when triggered.</p>
+<blockquote>
+<p>The Key Distribution Center (KDC) cannot find a suitable certificate to use. This KDC is not enabled for smart card or certificate authentication.</p>
+</blockquote>
+<p><img src="/images/posts/ad-pkinit-kerberos-warning-no-suitable-certificate-found.png" alt="KDC no suitable certificate found warning event" /></p>
+<blockquote>
+<p>The Key Distribution Center (KDC) failed to validate its current KDC certificate. This KDC might not be enabled for smart card or certificate authentication.</p>
+</blockquote>
+<p><img src="/images/posts/ad-pkinit-kerberos-error-certificate-revocation-check.png" alt="KDC certificate revocation check failure event" /></p>
+<h2 id="enumerating-kdc-certificates">Enumerating KDC Certificates</h2>
+<p>The KDC service calls <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-certenumcertificatesinstore">CertEnumCertificatesInStore</a> to enumerate certificates from the local machine personal store, and picks the <em>first</em> valid KDC server certificate. Easy enough, right? Let's call the same Windows API from PowerShell to enumerate the certificates and filter them in the same way <code>KdcMyStoreWaitHandler</code> does it:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Import-Module </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name Microsoft.PowerShell.Security
+</span><span style="color:#abb2bf;">
+</span><span style="color:#5ebfcc;">Add-Type </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">TypeDefinition </span><span style="color:#9acc76;">@&quot;
+</span><span style="color:#9acc76;">    using System;
+</span><span style="color:#9acc76;">    using System.Runtime.InteropServices;
+</span><span style="color:#9acc76;">    
+</span><span style="color:#9acc76;">    public class Crypt32 {
+</span><span style="color:#9acc76;">        [DllImport(&quot;crypt32.dll&quot;, CharSet = CharSet.Auto, SetLastError = true)]
+</span><span style="color:#9acc76;">        public static extern IntPtr CertOpenStore(
+</span><span style="color:#9acc76;">            int storeProvider,
+</span><span style="color:#9acc76;">            int messageAndCertEncodingType,
+</span><span style="color:#9acc76;">            IntPtr cryptProvHandle,
+</span><span style="color:#9acc76;">            int certStoreFlags,
+</span><span style="color:#9acc76;">            string storeName);
+</span><span style="color:#9acc76;">            
+</span><span style="color:#9acc76;">        [DllImport(&quot;crypt32.dll&quot;, SetLastError = true)]
+</span><span style="color:#9acc76;">        public static extern IntPtr CertEnumCertificatesInStore(
+</span><span style="color:#9acc76;">            IntPtr storeProvider,
+</span><span style="color:#9acc76;">            IntPtr prevCertContext);
+</span><span style="color:#9acc76;">            
+</span><span style="color:#9acc76;">        [DllImport(&quot;crypt32.dll&quot;, SetLastError = true)]
+</span><span style="color:#9acc76;">        public static extern bool CertCloseStore(
+</span><span style="color:#9acc76;">            IntPtr certStoreHandle,
+</span><span style="color:#9acc76;">            int flags);
+</span><span style="color:#9acc76;">    }
+</span><span style="color:#9acc76;">&quot;@
+</span><span style="color:#abb2bf;">
+</span><span style="color:#cd74e8;">function </span><span style="color:#5cb3fa;">Get-KdcCertStoreEnumeratedCerts </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    [</span><span style="color:#5ebfcc;">CmdletBinding</span><span style="color:#abb2bf;">()]
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">Param</span><span style="color:#abb2bf;">(
+</span><span style="color:#abb2bf;">        [</span><span style="color:#cd74e8;">switch</span><span style="color:#abb2bf;">] </span><span style="color:#eb6772;">$SkipFilter
+</span><span style="color:#abb2bf;">    )
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$storeProvider </span><span style="color:#adb7c9;">= </span><span style="color:#db9d63;">0xA </span><span style="font-style:italic;color:#5f697a;"># CERT_STORE_PROV_SYSTEM
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$storeFlag </span><span style="color:#adb7c9;">= </span><span style="color:#db9d63;">0x20000 </span><span style="color:#adb7c9;">-bor </span><span style="color:#db9d63;">1 </span><span style="font-style:italic;color:#5f697a;"># CERT_SYSTEM_STORE_LOCAL_MACHINE | CERT_STORE_READONLY_FLAG
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$storeHandle </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">Crypt32</span><span style="color:#abb2bf;">]::CertOpenStore(</span><span style="color:#eb6772;">$storeProvider</span><span style="color:#adb7c9;">, </span><span style="color:#db9d63;">0</span><span style="color:#adb7c9;">, </span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">IntPtr</span><span style="color:#abb2bf;">]::Zero</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">$storeFlag</span><span style="color:#adb7c9;">, </span><span style="color:#9acc76;">&quot;MY&quot;</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">if </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$storeHandle </span><span style="color:#adb7c9;">-eq </span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">IntPtr</span><span style="color:#abb2bf;">]::Zero) {
+</span><span style="color:#abb2bf;">        </span><span style="color:#cd74e8;">throw </span><span style="color:#9acc76;">&quot;Failed to open certificate store&quot;
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">try </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$certContext </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">Crypt32</span><span style="color:#abb2bf;">]::CertEnumCertificatesInStore(</span><span style="color:#eb6772;">$storeHandle</span><span style="color:#adb7c9;">, </span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">IntPtr</span><span style="color:#abb2bf;">]::Zero)
+</span><span style="color:#abb2bf;">        </span><span style="color:#cd74e8;">while </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$certContext </span><span style="color:#adb7c9;">-ne </span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">IntPtr</span><span style="color:#abb2bf;">]::Zero) {
+</span><span style="color:#abb2bf;">            </span><span style="color:#eb6772;">$cert </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">(</span><span style="color:#5ebfcc;">New-Object</span><span style="color:#abb2bf;"> System.Security.Cryptography.X509Certificates.X509Certificate2 </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ArgumentList </span><span style="color:#eb6772;">$certContext</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">            </span><span style="color:#cd74e8;">if </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$SkipFilter </span><span style="color:#adb7c9;">-or </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$cert.HasPrivateKey </span><span style="color:#adb7c9;">-and
+</span><span style="color:#abb2bf;">                (</span><span style="color:#eb6772;">$cert.EnhancedKeyUsageList.ObjectId </span><span style="color:#adb7c9;">-contains </span><span style="color:#9acc76;">&quot;1.3.6.1.5.2.3.5&quot;</span><span style="color:#abb2bf;">))) { </span><span style="font-style:italic;color:#5f697a;"># KDC Authentication
+</span><span style="color:#abb2bf;">                </span><span style="color:#5ebfcc;">Write-Output </span><span style="color:#eb6772;">$cert
+</span><span style="color:#abb2bf;">            }
+</span><span style="color:#abb2bf;">            </span><span style="color:#eb6772;">$certContext </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">Crypt32</span><span style="color:#abb2bf;">]::CertEnumCertificatesInStore(</span><span style="color:#eb6772;">$storeHandle</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">$certContext</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">        }
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">finally </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">        [</span><span style="color:#cd74e8;">void</span><span style="color:#abb2bf;">][</span><span style="color:#cd74e8;">Crypt32</span><span style="color:#abb2bf;">]::CertCloseStore(</span><span style="color:#eb6772;">$storeHandle</span><span style="color:#adb7c9;">, </span><span style="color:#db9d63;">0</span><span style="color:#abb2bf;">)
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">}
+</span></code></pre>
+<p>Let's give our new <code>Get-KdcCertStoreEnumeratedCerts</code> PowerShell cmdlet a try, and list candidate KDC certificates:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Get-KdcCertStoreEnumeratedCerts </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Select-Object </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Property Thumbprint</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;">Subject</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;">SerialNumber
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">Thumbprint                               Subject          SerialNumber
+</span><span style="color:#adb7c9;">----------                               -------          ------------
+</span><span style="color:#abb2bf;">E7BD43BC57EC891EDD630CD8A58F264550A9214B CN</span><span style="color:#adb7c9;">=</span><span style="color:#abb2bf;">IT</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">HELP</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">TEST1 2B0000002FEB4AA6D7E7A1177400000000002F
+</span><span style="color:#abb2bf;">9FDEBF3E1FF9C1124E582D1E725D00A1601192CB CN</span><span style="color:#adb7c9;">=</span><span style="color:#abb2bf;">IT</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">HELP</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">TEST3 2B00000031C26575890844C2E5000000000031
+</span><span style="color:#abb2bf;">9CEAA4D79905047605671A3FC8AFCB1D39FAF4A8 CN</span><span style="color:#adb7c9;">=</span><span style="color:#abb2bf;">IT</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">HELP</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">TEST5 2B0000003356E7262CEB5B1EE1000000000033
+</span><span style="color:#abb2bf;">78690FD0A7CE804D02511E03662801162D6A25D6 CN</span><span style="color:#adb7c9;">=</span><span style="color:#abb2bf;">IT</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">HELP</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">TEST4 2B000000328F9E1508D59AACEC000000000032
+</span><span style="color:#abb2bf;">4020607270DCCDB7EF0B383EAB3AF88F62BF52E4 CN</span><span style="color:#adb7c9;">=</span><span style="color:#abb2bf;">IT</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">HELP</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">TEST2 2B00000030B74823097E00754F000000000030
+</span></code></pre>
+<p>Notice how the ordering doesn't seem to follow a specific pattern. If you look at the certificate store registry keys, we can see they are in the <em>reverse</em> order than what <code>CertEnumCertificatesInStore</code> returns:</p>
+<p><img src="/images/posts/ad-pkinit-kerberos-cert-store-ordering-registry.png" alt="Kerberos certificate store ordering registry keys" /></p>
+<p>So, which order is the correct one to predict KDC server certificate selection? Neither, because experimentally, the order doesn't match the KDC service certificate selection ordering! We'll come back to this later, since we still need to cover certificate validation rules.</p>
+<h2 id="kdc-certificate-validation">KDC Certificate Validation</h2>
+<p>Our previous <code>Get-KdcCertStoreEnumeratedCerts</code> PowerShell cmdlet enumerates candidate KDC certificates with some filtering, but it does not <em>validate</em> them. The subject name and subject alternative names on the certificate are <em>not</em> checked, so dummy certificates with incorrect subject names could accidentally be selected if you're not careful.</p>
+<h3 id="ca-chain">CA Chain</h3>
+<p>The root CA needs to be in the machine <strong>Trusted Root Certification Authorities</strong> store, and the issuer CA needs to be in the machine <strong>Intermediate Certification Authorities</strong> store. The CA chain also needs to suitable for Kerberos authentication with the right EKU (1.3.6.1.5.2.3.5).</p>
+<h3 id="ntauth-store">NTAuth Store</h3>
+<p>The issuer CA certificate needs to be in the NTAuth store of the domain controller, otherwise <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-certverifycertificatechainpolicy">CertVerifyCertificateChainPolicy</a> with CERT_CHAIN_POLICY_NT_AUTH will fail. This is the exact same requirement <a rel="noopener nofollow noreferrer" target="_blank" href="https://awakecoding.com/posts/rdp-smartcard-logon-user-name-does-not-exist/">for strict KDC validation on the client that can result in "the specified user name does not exist" errors in mstsc</a>.</p>
+<p>You can view the list of certificates in the machine NTAuth store using <code>certutil.exe -viewstore -enterprise ntauth</code>.</p>
+<p>If your issuer CA certificate is missing from the NTAuth store, you can add it from an elevated shell with the</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">certutil.exe </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">enterprise </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">addstore NTAuth .\ISSUER</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">CA.cer
+</span></code></pre>
+<h3 id="revocation-checks">Revocation Checks</h3>
+<p>Certificate revocation checks need to work during the certificate selection process. This can be a problem during boot time, if the check happens before the network is fully available. For CRL-based checks, the <strong>CRLTimeoutPeriod</strong> registry key can be used to set a timeout:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$KdcRegPath </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&#39;HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\Kdc\Parameters&#39;
+</span><span style="color:#5ebfcc;">Set-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$KdcRegPath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#9acc76;">&#39;CRLTimeoutPeriod&#39; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#9acc76;">&#39;15&#39; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Type DWORD
+</span></code></pre>
+<p>You can also disable revocation checking by the KDC service when it selects its KDC certificate:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$KdcRegPath </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&#39;HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\Kdc\Parameters&#39;
+</span><span style="color:#5ebfcc;">Set-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$KdcRegPath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#9acc76;">&#39;UseCachedCRLOnlyAndIgnoreRevocationUnknownErrors&#39; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Value </span><span style="color:#9acc76;">&#39;1&#39; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Type DWORD
+</span></code></pre>
+<p>However, you should not leave revocation checking issues unresolved, as they will likely cause problems with the Kerberos clients down the road.</p>
+<h2 id="legacy-kdc-certificates">Legacy KDC Certificates</h2>
+<p>Domain controllers with AD CS enabled usually have a certificate generated using the <strong>Domain Controller</strong> built-in template. This is a <em>legacy</em> certificate, identified as such using the <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-wcce/3aec3e50-511a-42f9-a5d5-240af503e470">certificate template name extension</a> (1.3.6.1.4.1.311.20.2) with the string value <strong>DomainController</strong>:</p>
+<p><img src="/images/posts/ad-pkinit-kerberos-legacy-kdc-certificate.png" alt="Kerberos Legacy KDC certificate" /></p>
+<p>Unlike "modern" KDC certificates, legacy KDC certificates do not have the Kerberos authentication EKU (1.3.6.1.5.2.3.5). The KDC service selects the first legacy KDC certificate only if no suitable modern KDC certificate can be found in the certificate store. Since legacy certificates require <strong>DomainController</strong> as the template name encoded inside the X.509 certificate, it is not possible to use a custom template, as it would result in a different name. For all of these reasons, it is recommended to use modern KDC certificates generated using the <strong>Kerberos Authentication</strong> built-in template (or equivalent).</p>
+<h2 id="kdc-certificate-selection">KDC Certificate Selection</h2>
+<p>Through a lot of trial and error, and I have devised a method to select a specific KDC certificate. I can't explain why, but experimentally, <strong>the certificate ordering as seen by the KDC service matches the certificate import order</strong>. In other words, the first suitable certificate imported in the certificate store will be picked. This means that if we export, delete and re-import all the <em>other</em> certificates, we should have a working <code>Select-KdcCertificate</code> cmdlet! Here's the additional PowerShell code for KDC certificate selection:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#cd74e8;">function </span><span style="color:#5cb3fa;">Reset-KdcCertificate </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    [</span><span style="color:#5ebfcc;">CmdletBinding</span><span style="color:#abb2bf;">()]
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">Param</span><span style="color:#abb2bf;">(
+</span><span style="color:#abb2bf;">        [</span><span style="color:#5ebfcc;">Parameter</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">Mandatory</span><span style="color:#adb7c9;">=</span><span style="color:#db9d63;">$true</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">Position</span><span style="color:#adb7c9;">=</span><span style="color:#db9d63;">0</span><span style="color:#abb2bf;">)]
+</span><span style="color:#abb2bf;">        [</span><span style="color:#cd74e8;">string</span><span style="color:#abb2bf;">] </span><span style="color:#eb6772;">$Thumbprint
+</span><span style="color:#abb2bf;">    )
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$Certificate </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-Item </span><span style="color:#9acc76;">&quot;cert:\LocalMachine\My\</span><span style="color:#eb6772;">$Thumbprint</span><span style="color:#9acc76;">&quot;
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">if </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$Certificate </span><span style="color:#adb7c9;">-eq </span><span style="color:#db9d63;">$null</span><span style="color:#abb2bf;">) {
+</span><span style="color:#abb2bf;">        </span><span style="color:#cd74e8;">throw </span><span style="color:#9acc76;">&quot;Certificate </span><span style="color:#eb6772;">$Thumbprint</span><span style="color:#9acc76;"> count not be found!&quot;
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$SerialNumber </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$Certificate.SerialNumber
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$ExportPath </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Join-Path </span><span style="color:#eb6772;">$Env:TEMP $Thumbprint
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Export-Certificate </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Cert </span><span style="color:#eb6772;">$Certificate </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">FilePath </span><span style="color:#eb6772;">$ExportPath </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Out-Null
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Remove-Item </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$Certificate.PSPath </span><span style="font-style:italic;color:#5f697a;"># delete cert, but leave private key intact
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Import-Certificate </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">FilePath </span><span style="color:#eb6772;">$ExportPath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">CertStoreLocation </span><span style="color:#9acc76;">&quot;cert:\LocalMachine\My&quot; </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Out-Null
+</span><span style="color:#abb2bf;">    </span><span style="color:#adb7c9;">&amp; </span><span style="color:#5ebfcc;">certutil.exe </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">repairstore My </span><span style="color:#eb6772;">$SerialNumber </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Out-Null </span><span style="font-style:italic;color:#5f697a;"># relink cert with private key
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Remove-Item </span><span style="color:#eb6772;">$ExportPath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ErrorAction SilentlyContinue
+</span><span style="color:#abb2bf;">}
+</span><span style="color:#abb2bf;">
+</span><span style="color:#cd74e8;">function </span><span style="color:#5cb3fa;">Select-KdcCertificate </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    [</span><span style="color:#5ebfcc;">CmdletBinding</span><span style="color:#abb2bf;">()]
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">Param</span><span style="color:#abb2bf;">(
+</span><span style="color:#abb2bf;">        [</span><span style="color:#5ebfcc;">Parameter</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">Mandatory</span><span style="color:#adb7c9;">=</span><span style="color:#db9d63;">$true</span><span style="color:#adb7c9;">, </span><span style="color:#eb6772;">Position</span><span style="color:#adb7c9;">=</span><span style="color:#db9d63;">0</span><span style="color:#abb2bf;">)]
+</span><span style="color:#abb2bf;">        [</span><span style="color:#cd74e8;">string</span><span style="color:#abb2bf;">] </span><span style="color:#eb6772;">$Thumbprint
+</span><span style="color:#abb2bf;">    )
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$Certificate </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-Item </span><span style="color:#9acc76;">&quot;cert:\LocalMachine\My\</span><span style="color:#eb6772;">$Thumbprint</span><span style="color:#9acc76;">&quot;
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">if </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$Certificate </span><span style="color:#adb7c9;">-eq </span><span style="color:#db9d63;">$null</span><span style="color:#abb2bf;">) {
+</span><span style="color:#abb2bf;">        </span><span style="color:#cd74e8;">throw </span><span style="color:#9acc76;">&quot;Certificate </span><span style="color:#eb6772;">$Thumbprint</span><span style="color:#9acc76;"> count not be found!&quot;
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$CandidateThumbprints </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-KdcCertStoreEnumeratedCerts </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Select-Object </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ExpandProperty Thumbprint
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$CandidateThumbprints </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Where-Object </span><span style="color:#abb2bf;">{ $_ </span><span style="color:#adb7c9;">-ne </span><span style="color:#eb6772;">$Thumbprint </span><span style="color:#abb2bf;">} </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">ForEach-Object </span><span style="color:#abb2bf;">{ </span><span style="color:#5ebfcc;">Reset-KdcCertificate </span><span style="color:#abb2bf;">$_ }
+</span><span style="color:#abb2bf;">}
+</span><span style="color:#abb2bf;">
+</span><span style="color:#cd74e8;">function </span><span style="color:#5cb3fa;">Get-SelectedKdcCertificate </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    [</span><span style="color:#5ebfcc;">CmdletBinding</span><span style="color:#abb2bf;">()]
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">Param</span><span style="color:#abb2bf;">()
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$KdcLogName </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&#39;Microsoft-Windows-Kerberos-Key-Distribution-Center/Operational&#39;
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Get-WinEvent </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">FilterHashtable </span><span style="color:#cd74e8;">@</span><span style="color:#abb2bf;">{</span><span style="color:#eb6772;">LogName</span><span style="color:#adb7c9;">=</span><span style="color:#eb6772;">$KdcLogName</span><span style="color:#abb2bf;">; </span><span style="color:#eb6772;">ID</span><span style="color:#adb7c9;">=</span><span style="color:#db9d63;">302</span><span style="color:#abb2bf;">} </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">MaxEvents </span><span style="color:#db9d63;">1 </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">ForEach-Object </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$Thumbprint </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">$_</span><span style="color:#eb6772;">.Properties</span><span style="color:#abb2bf;">[</span><span style="color:#db9d63;">2</span><span style="color:#abb2bf;">].Value
+</span><span style="color:#abb2bf;">        </span><span style="color:#5ebfcc;">Get-Item </span><span style="color:#9acc76;">&quot;cert:\LocalMachine\My\</span><span style="color:#eb6772;">$Thumbprint</span><span style="color:#9acc76;">&quot;
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">}
+</span></code></pre>
+<p>The tricky part is to remove certificates from the store without touching the private key, and to re-import the certificate <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/troubleshoot/developer/webapps/iis/development/assign-certificate-private-key">with a proper link to the same private key</a>. Some certificates also don't have exportable private keys, so even if wanted to make a temporary copy of the keys, it would not be possible. Let's give those new PowerShell cmdlets a try!</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS </span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-KdcCertStoreEnumeratedCerts </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Select-Object </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Property Thumbprint</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;">Subject
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">Thumbprint                               Subject
+</span><span style="color:#adb7c9;">----------                               -------
+</span><span style="color:#abb2bf;">E7BD43BC57EC891EDD630CD8A58F264550A9214B CN</span><span style="color:#adb7c9;">=</span><span style="color:#abb2bf;">IT</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">HELP</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">TEST1
+</span><span style="color:#abb2bf;">9FDEBF3E1FF9C1124E582D1E725D00A1601192CB CN</span><span style="color:#adb7c9;">=</span><span style="color:#abb2bf;">IT</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">HELP</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">TEST3
+</span><span style="color:#abb2bf;">9CEAA4D79905047605671A3FC8AFCB1D39FAF4A8 CN</span><span style="color:#adb7c9;">=</span><span style="color:#abb2bf;">IT</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">HELP</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">TEST5
+</span><span style="color:#abb2bf;">78690FD0A7CE804D02511E03662801162D6A25D6 CN</span><span style="color:#adb7c9;">=</span><span style="color:#abb2bf;">IT</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">HELP</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">TEST4
+</span><span style="color:#abb2bf;">4020607270DCCDB7EF0B383EAB3AF88F62BF52E4 CN</span><span style="color:#adb7c9;">=</span><span style="color:#abb2bf;">IT</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">HELP</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">TEST2
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">PS </span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-SelectedKdcCertificate </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Select-Object </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Property Thumbprint</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;">Subject
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">Thumbprint                               Subject
+</span><span style="color:#adb7c9;">----------                               -------
+</span><span style="color:#abb2bf;">E7BD43BC57EC891EDD630CD8A58F264550A9214B CN</span><span style="color:#adb7c9;">=</span><span style="color:#abb2bf;">IT</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">HELP</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">TEST1
+</span></code></pre>
+<p>The currently selected certificate is IT-HELP-TEST1 (E7BD43BC57EC891EDD630CD8A58F264550A9214B). Let's select IT-HELP-TEST5 instead (9CEAA4D79905047605671A3FC8AFCB1D39FAF4A8) using <code>Select-KdcCertificate</code>:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS </span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Select-KdcCertificate </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Thumbprint 9CEAA4D79905047605671A3FC8AFCB1D39FAF4A8
+</span><span style="color:#abb2bf;">PS </span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-SelectedKdcCertificate </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Select-Object </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Property Thumbprint</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;">Subject
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">Thumbprint                               Subject
+</span><span style="color:#adb7c9;">----------                               -------
+</span><span style="color:#abb2bf;">9CEAA4D79905047605671A3FC8AFCB1D39FAF4A8 CN</span><span style="color:#adb7c9;">=</span><span style="color:#abb2bf;">IT</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">HELP</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">TEST5
+</span></code></pre>
+<p>It worked! Now let's try it with IT-HELP-TEST3 (9FDEBF3E1FF9C1124E582D1E725D00A1601192CB), just to be sure it's not a fluke:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS </span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Select-KdcCertificate </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Thumbprint 9FDEBF3E1FF9C1124E582D1E725D00A1601192CB
+</span><span style="color:#abb2bf;">PS </span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-SelectedKdcCertificate </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Select-Object </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Property Thumbprint</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;">Subject
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">Thumbprint                               Subject
+</span><span style="color:#adb7c9;">----------                               -------
+</span><span style="color:#abb2bf;">9FDEBF3E1FF9C1124E582D1E725D00A1601192CB CN</span><span style="color:#adb7c9;">=</span><span style="color:#abb2bf;">IT</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">HELP</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">TEST3
+</span></code></pre>
+<p>It worked again! We've finally cracked it!</p>
+<h2 id="closing-thoughts">Closing Thoughts</h2>
+<p>This blog has been way harder to write than I originally expected, mostly because I couldn't figure out the certificate ordering. Active Directory is arguably one of the most important Microsoft products in existence alongside Windows, but even then, things as simple as selecting a certificate in a predictable and reliable manner have been overlooked. It's not rocket science, a simple <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/troubleshoot/windows-server/remote/remote-desktop-listener-certificate-configurations">registry key with a certificate thumbprint</a> like what the RDP server uses would have been enough. Instead, we have this semi-random, opaque, undocumented just-pick-any-cert-that-might-work selection process.</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;active-directory-ldaps-certificate-selection-deep-dive&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              Active Directory LDAPS certificate selection deep dive
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;debugging-powershell-binary-modules-in-visual-studio&#x2F;">
+              Debugging PowerShell Binary Modules in Visual Studio<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>

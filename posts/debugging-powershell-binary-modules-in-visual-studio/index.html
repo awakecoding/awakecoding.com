@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/debugging-powershell-binary-modules-in-visual-studio/">
+  <link rel="alternate" href="https://awakecoding.com/posts/debugging-powershell-binary-modules-in-visual-studio/" hreflang="en" />
+  
+  <meta name="description" content="Learn to create and debug PowerShell binary modules in Visual Studio, covering both local and remote debugging. This guide simplifies the development process for PowerShell modules, enhancing productivity with practical examples and troubleshooting tips for common issues." />
+  <meta property="og:title" content="Debugging PowerShell Binary Modules in Visual Studio" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;debugging-powershell-binary-modules-in-visual-studio&#x2F;" />
+  <meta property="og:description" content="Learn to create and debug PowerShell binary modules in Visual Studio, covering both local and remote debugging. This guide simplifies the development process for PowerShell modules, enhancing productivity with practical examples and troubleshooting tips for common issues." />
+  <meta name="twitter:title" content="Debugging PowerShell Binary Modules in Visual Studio" />
+  <meta name="twitter:description" content="Learn to create and debug PowerShell binary modules in Visual Studio, covering both local and remote debugging. This guide simplifies the development process for PowerShell modules, enhancing productivity with practical examples and troubleshooting tips for common issues." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;debugging-powershell-binary-modules-in-visual-studio&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/debugging-powershell-binary-modules-in-visual-studio.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/debugging-powershell-binary-modules-in-visual-studio.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Debugging PowerShell Binary Modules in Visual Studio",
+  "description": "Learn to create and debug PowerShell binary modules in Visual Studio, covering both local and remote debugging. This guide simplifies the development process for PowerShell modules, enhancing productivity with practical examples and troubleshooting tips for common issues.",
+  "datePublished": "2023-10-21",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/debugging-powershell-binary-modules-in-visual-studio.png",
+  "url": "https://awakecoding.com/posts/debugging-powershell-binary-modules-in-visual-studio/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/debugging-powershell-binary-modules-in-visual-studio/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | Debugging PowerShell Binary Modules in Visual Studio
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            Debugging PowerShell Binary Modules in Visual Studio
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2023-10-21">October 21, 2023</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>12 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>2353 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/powershell/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>PowerShell</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>So you've been tasked with creating a <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/powershell/scripting/developer/module/how-to-write-a-powershell-binary-module">PowerShell binary module</a> to expose functionality from a C# library you're working on, but don't know where to start in Visual Studio. Maybe you don't even like PowerShell and naively thought you could satisfy system administrators with a <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/dotnet/standard/commandline/">traditional .NET CLI</a> instead of a real PowerShell module like they've been asking for. You've then asked around for advice and all you got is <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/powershell/scripting/dev-cross-plat/vscode/using-vscode-for-debugging-compiled-cmdlets">"use VSCode"</a>, but you want to stick to Visual Studio because it's what you know, and it feels more appropriate for everything <em>except</em> PowerShell.</p>
+<p>Let's fix this the manual way for Powershell binary module development in Visual Studio, one manual step at a time, such that you can build and debug your PowerShell project like any other .NET project. This blog post covers both <em>local</em> and <em>remote</em> debugging of PowerShell <em>binary</em> modules, but doesn't cover <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/powershell/scripting/dev-cross-plat/vscode/using-vscode?#debugging-with-visual-studio-code">PowerShell <em>script</em> debugging</a>, which is another topic entirely.</p>
+<h2 id="creating-powershell-demo-project">Creating PowerShell Demo Project</h2>
+<p>Let's begin by creating a Visual Studio solution with a sample PowerShell binary module. Since absolute file paths are unfortunately required for many steps, I'll be using <code>C:\Users\Public\Projects</code> throughout this guide. Even if this isn't your regular project directory, I'd recommend using it temporarily before changing to something else:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$SolutionName </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;PowerShellDemo&quot;
+</span><span style="color:#eb6772;">$ProjectName </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;SampleModule&quot;
+</span><span style="color:#eb6772;">$SolutionDir </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;C:\Users\Public\Projects\</span><span style="color:#eb6772;">$SolutionName</span><span style="color:#9acc76;">&quot;
+</span><span style="color:#5ebfcc;">New-Item </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Type Directory </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$SolutionDir </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ErrorAction SilentlyContinue
+</span><span style="color:#5ebfcc;">Set-Location </span><span style="color:#eb6772;">$SolutionDir
+</span></code></pre>
+<p>Use the <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/dotnet/core/tools/"><code>dotnet</code> CLI</a> to create the <strong>PowerShellDemo</strong> solution and <strong>SampleModule</strong> project:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">dotnet new sln </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">n PowerShellDemo
+</span><span style="color:#abb2bf;">dotnet new classlib </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">n SampleModule </span><span style="color:#adb7c9;">-f</span><span style="color:#abb2bf;"> netstandard2.</span><span style="color:#db9d63;">0
+</span><span style="color:#abb2bf;">dotnet sln add SampleModule</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">SampleModule.csproj
+</span><span style="color:#abb2bf;">dotnet add SampleModule</span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">SampleModule.csproj package PowerShellStandard.Library </span><span style="color:#adb7c9;">--</span><span style="color:#abb2bf;">version </span><span style="color:#db9d63;">5.1</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">1
+</span></code></pre>
+<p>Open PowerShellDemo.sln in Visual Studio (<code>start .\PowerShellDemo.sln</code>), then rename Class1.cs to HelloWorldCmdlet.cs and replace its contents with the following code:</p>
+<pre data-lang="cs" style="background-color:#2b303b;color:#6c7079;" class="language-cs "><code class="language-cs" data-lang="cs"><span style="color:#cd74e8;">using </span><span style="color:#abb2bf;">System.Management.Automation;
+</span><span style="color:#abb2bf;">
+</span><span style="color:#cd74e8;">namespace </span><span style="color:#abb2bf;">SampleModule
+</span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    [</span><span style="color:#eb6772;">Cmdlet</span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">VerbsCommon</span><span style="color:#abb2bf;">.</span><span style="color:#eb6772;">Get</span><span style="color:#abb2bf;">, </span><span style="color:#9acc76;">&quot;HelloWorld&quot;</span><span style="color:#abb2bf;">)]
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">public class </span><span style="color:#f0c678;">HelloWorldCmdlet </span><span style="color:#adb7c9;">: </span><span style="color:#9acc76;">Cmdlet
+</span><span style="color:#adb7c9;">    {
+</span><span style="color:#adb7c9;">        </span><span style="color:#cd74e8;">protected override void </span><span style="color:#5cb3fa;">ProcessRecord</span><span style="color:#adb7c9;">()
+</span><span style="color:#adb7c9;">        {
+</span><span style="color:#adb7c9;">            </span><span style="color:#eb6772;">WriteObject</span><span style="color:#adb7c9;">(</span><span style="color:#9acc76;">&quot;Hello&quot;</span><span style="color:#adb7c9;">);
+</span><span style="color:#adb7c9;">            </span><span style="color:#eb6772;">WriteObject</span><span style="color:#adb7c9;">(</span><span style="color:#9acc76;">&quot;World&quot;</span><span style="color:#adb7c9;">);
+</span><span style="color:#adb7c9;">        }
+</span><span style="color:#adb7c9;">    }
+</span><span style="color:#abb2bf;">}
+</span></code></pre>
+<p>You can now build the solution (Ctrl+Shift+B):</p>
+<p><img src="/images/posts/pwsh-msvc-class-library-project-can-be-built.png" alt="Class library project can be built" /></p>
+<p>But when you try to start the project in the debugger (F5), or even without it (Ctrl+F5), all you get is this lousy error message:</p>
+<blockquote>
+<p>A project with an Output Type of Class Library cannot be started directly. In order to debug this project, add an executable project to this solution which references the library project. Set the executable project as the startup project.</p>
+</blockquote>
+<p><img src="/images/posts/pwsh-msvc-class-library-project-cannot-be-started.png" alt="Class library project cannot be started" /></p>
+<p>Well, that's not very helpful. How does one even run the Get-HelloWorld cmdlet manually?</p>
+<ol>
+<li>Look at the Visual Studio build logs to find the output file path for our binary module</li>
+<li>Open a <strong>fresh</strong> PowerShell terminal, call Import-Module on the binary module output file path</li>
+<li>Script a few useful things you want to call prior to your cmdlet of interest, then call it</li>
+<li>Close the PowerShell terminal to release file locks on the binary module output file path</li>
+</ol>
+<p>From an interactive PowerShell terminal, this is what it looks like:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS C:\</span><span style="color:#adb7c9;">&gt;</span><span style="color:#abb2bf;"> pwsh </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">NoLogo
+</span><span style="color:#abb2bf;">PS C:\</span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Import-Module </span><span style="color:#9acc76;">&quot;C:\Users\Public\Projects\PowerShellDemo\SampleModule\bin\Debug\netstandard2.0\SampleModule.dll&quot;
+</span><span style="color:#abb2bf;">PS C:\</span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-Command </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Module SampleModule
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">CommandType     Name                                               Version    Source
+</span><span style="color:#adb7c9;">-----------     ----                                               -------    ------
+</span><span style="color:#abb2bf;">Cmdlet          </span><span style="color:#5ebfcc;">Get-HelloWorld                                     </span><span style="color:#db9d63;">1.0</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">0.0</span><span style="color:#abb2bf;">    SampleModule
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">PS C:\</span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-HelloWorld
+</span><span style="color:#abb2bf;">Hello
+</span><span style="color:#abb2bf;">World
+</span><span style="color:#abb2bf;">PS C:\</span><span style="color:#adb7c9;">&gt; </span><span style="color:#cd74e8;">exit
+</span></code></pre>
+<p>If you try to rebuild the Visual Studio project without terminating all PowerShell processes that have the binary module loaded, you will encounter file locking problems:</p>
+<p><img src="/images/posts/pwsh-msvc-class-library-project-locked-by-another-process.png" alt="Class library project file locked by another process" /></p>
+<p>Launching a fresh pwsh.exe process inside an existing PowerShell terminal may look odd, but it makes it a lot easier to keep the same terminal window. The <code>exit</code> command terminates the child pwsh.exe process and returns control to the parent PowerShell terminal.</p>
+<h2 id="creating-powershell-launcher-project">Creating PowerShell Launcher Project</h2>
+<p>Right-click on the <strong>PowerShellDemo</strong> solution, navigate to <strong>Add</strong>, then select <strong>New Project...</strong>. In the <strong>Add a new project</strong> dialog, search for "Empty Project", select the template matching C++ for Windows, then click <strong>Next</strong>:</p>
+<p><img src="/images/posts/pwsh-msvc-create-new-empty-project-template.png" alt="Create new Empty Project C++ Template" /></p>
+<p>In the <strong>Configure your new project</strong> dialog, use "SampleModule.Launch" as the project name, then click <strong>Create</strong>:</p>
+<p><img src="/images/posts/pwsh-msvc-create-new-empty-project-options.png" alt="Create new Empty Project Template Options" /></p>
+<p>Right-click on the <strong>SampleModule.Launch</strong> project, then select <strong>Set as Startup Project</strong>.</p>
+<p><img src="/images/posts/pwsh-msvc-launch-project-set-as-startup-project.png" alt="Launch project set as startup project" /></p>
+<p>Right-click on the <strong>SampleModule.Launch</strong> project, then navigate to <strong>Build Dependencies</strong>, then select <strong>Project Dependencies</strong>. In the <strong>Project Dependencies</strong> dialog, under <strong>Depends on</strong>, select the SampleModule project, then click <strong>OK</strong>:</p>
+<p><img src="/images/posts/pwsh-msvc-launch-project-build-dependencies.png" alt="Launch project build dependencies" /></p>
+<p>Right-click on the <strong>SampleModule.Launch</strong> project, navigate to <strong>Add</strong>, then select <strong>New Item...</strong>. Name the new file "launch.ps1", then set the following contents:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Import-Module </span><span style="color:#9acc76;">&quot;..\SampleModule\bin\Debug\netstandard2.0\SampleModule.dll&quot;
+</span><span style="color:#5ebfcc;">Get-HelloWorld
+</span></code></pre>
+<p>Right-click on the <strong>SampleModule.Launch</strong> project, select <strong>Properties</strong> (it's the last menu item, you can also use the <code>Alt+Enter</code> keyboard shortcut).</p>
+<p>In the <strong>Property Pages</strong> dialog, navigate to the <strong>Debugging</strong> section, then change the following:</p>
+<ol>
+<li>Set <strong>Command</strong> to "pwsh.exe"</li>
+<li>Set <strong>Command Arguments</strong> to "-ExecutionPolicy Bypass -NoLogo -NoExit -File launch.ps1"</li>
+<li>Set <strong>Debugger Type</strong> to "Mixed (.NET Core)"</li>
+</ol>
+<p><img src="/images/posts/pwsh-msvc-launch-project-debugging-dotnet-core.png" alt="Launch project debugging settings .NET Core" /></p>
+<p>If you want to debug using Windows PowerShell 5.1 (powershell.exe) instead of PowerShell 7 (pwsh.exe), use the following settings instead:</p>
+<ol>
+<li>Set <strong>Command</strong> to "powershell.exe"</li>
+<li>Set <strong>Command Arguments</strong> to "-ExecutionPolicy Bypass -NoLogo -NoExit -File launch.ps1"</li>
+<li>Set <strong>Debugger Type</strong> to "Mixed (.NET Framework)"</li>
+</ol>
+<p><img src="/images/posts/pwsh-msvc-launch-project-debugging-dotnet-framework.png" alt="Launch project debugging settings .NET Framework" /></p>
+<p>Now go back to HelloWorldCmdlet.cs to set a breakpoint on the first line inside the <code>ProcessRecord</code> function of the Get-HelloWorld PowerShell cmdlet:</p>
+<p><img src="/images/posts/pwsh-msvc-set-breakpoint-on-hello-world-cmdlet.png" alt="Set breakpoint on Hello World cmdlet" /></p>
+<p>If you've never set a breakpoint in Visual Studio before, all you need is to click in the margin at the left of the line where the red dot appears in the screenshot. You are now ready to give it a try! Press F5 to launch your PowerShell cmdlet in the debugger:</p>
+<p><img src="/images/posts/pwsh-msvc-hello-world-cmdlet-in-debugger-break.png" alt="Hello World cmdlet in debugger break" /></p>
+<p>If everything worked, you should see the debugger break on the <code>WriteObject("Hello");</code> call inside <code>ProcessRecord</code>. If you press F10 or click the <strong>Step Over</strong> button, the debugger will move to the next line, and you should see "Hello" printed out to the terminal.</p>
+<p><img src="/images/posts/pwsh-msvc-hello-world-cmdlet-in-debugger-step.png" alt="Hello World cmdlet in debugger step" /></p>
+<p>You can also click <strong>Continue</strong> to resume program execution, which in this case will terminate the program as there's nothing else in our launch.ps1 script after the <code>Get-HelloWorld</code> call.</p>
+<h2 id="remote-debugging">Remote Debugging</h2>
+<p>All the steps up to this point cover the basics of <em>local</em> debugging, which is great, but the real deal is <em>remote</em> debugging. Who doesn't want to develop from Visual Studio to automatically deploy and debug PowerShell modules in clean Windows Server virtual machines? Brace yourselves, because the complexity for the second part of this blog post is much higher, but trust me, it's absolutely worth it. For testing, I created a test virtual machine "IT-HELP-DEBUG.ad.it-help.ninja", joined to a test domain "ad.it-help.ninja" <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/Devolutions/devolutions-labs">in my Hyper-V lab environment</a>, but any standalone Windows virtual machine should be enough.</p>
+<h2 id="remote-debugging-host">Remote Debugging Host</h2>
+<p>In the remote debugging target host, download and install the <a rel="noopener nofollow noreferrer" target="_blank" href="https://visualstudio.microsoft.com/downloads/#remote-tools-for-visual-studio-2022">Remote Tools for Visual Studio</a>. You can automate this part with PowerShell:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$RemoteToolsUrl </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;https://aka.ms/vs/17/release/RemoteTools.amd64ret.enu.exe&quot;
+</span><span style="color:#5ebfcc;">Invoke-WebRequest </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Uri </span><span style="color:#eb6772;">$RemoteToolsUrl </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">OutFile </span><span style="color:#9acc76;">&quot;~\Downloads\RemoteTools.exe&quot;
+</span><span style="color:#adb7c9;">&amp; </span><span style="color:#9acc76;">&quot;~\Downloads\RemoteTools.exe&quot; </span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">install </span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">quiet
+</span><span style="color:#5ebfcc;">Remove-Item </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#9acc76;">&quot;~\Downloads\RemoteTools.exe&quot;
+</span></code></pre>
+<p>Launch for the first time (msvsmon.exe, or search for "Remote Debugger" in the start menu). In the <strong>Remote Debugging Configuration</strong> dialog, ensure that all boxes are checked in the <strong>Configure Windows Firewall</strong> section, then click <strong>Configure remote debugging</strong>.</p>
+<p><img src="/images/posts/pwsh-msvc-remote-debugging-configuration.png" alt="Remote debugging configuration" /></p>
+<p>In the Visual Studio Remote Debugger, click <strong>Tools</strong>, then <strong>Options</strong>. Leave the default TCP port (4026), and leave <strong>Windows Authentication</strong> enabled. Click on <strong>Permissions</strong> to make sure that the user you want to use for remote debugging is allowed:</p>
+<p><img src="/images/posts/pwsh-msvc-remote-debugging-options-permissions.png" alt="Remote debugging options and permissions" /></p>
+<h2 id="remote-debugging-client">Remote Debugging Client</h2>
+<p>On top of Visual Studio, click on the downward arrow at the right of the active debugger type, revealing a drop-down with other choices. Select <strong>Remote Windows Debugger</strong>, then select <strong>SampleModule.Launch Debug Properties</strong>:</p>
+<p><img src="/images/posts/pwsh-msvc-set-remote-windows-debugger-properties.png" alt="Set Windows Remote Debugger Properties" /></p>
+<p>In the <strong>Property Pages</strong> dialog, navigate to the <strong>Debugging</strong> section, then change the following:</p>
+<ol>
+<li>Set <strong>Command</strong> to "C:\Program Files\PowerShell\7\pwsh.exe"</li>
+<li>Set <strong>Command Arguments</strong> to "-ExecutionPolicy Bypass -NoLogo -NoExit -File launch.ps1"</li>
+<li>Set <strong>Working Directory</strong> to "C:\Users\Public\Deploy\PowerShellDemo"</li>
+<li>Set <strong>Connection</strong> to "Remote with Windows Authentication"</li>
+<li>Set <strong>Remote Server Name</strong> to "IT-HELP-DEBUG.ad.it-help.ninja:4026"</li>
+<li>Set <strong>Debugger Type</strong> to "Mixed (.NET Core)"</li>
+<li>Set <strong>Deployment Directory</strong> to "C:\Users\Public\Deploy\PowerShellDemo"</li>
+<li>Set <strong>Additional Files to Deploy</strong> to "$(SolutionDir)SampleModule\bin$(Configuration)\netstandard2.0*"</li>
+<li>Set <strong>Deploy Visual C++ Debug Runtime Libraries</strong> to "No"</li>
+<li>Set <strong>Deploy Visual C++ Runtime Libraries</strong> to "No"</li>
+</ol>
+<p><img src="/images/posts/pwsh-msvc-remote-debugging-configuration-dotnet-core.png" alt="Launch project remote debugging settings .NET Core" /></p>
+<p>If you want to debug using Windows PowerShell 5.1 (powershell.exe) instead of PowerShell 7 (pwsh.exe) change the following:</p>
+<ol>
+<li>Set <strong>Command</strong> to "C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe"</li>
+<li>Set <strong>Debugger Type</strong> to "Mixed (.NET Framework)"</li>
+</ol>
+<p>You may notice that we're using <em>absolute</em> file paths to the remote executable: unfortunately, this a limitation of the remote debugger.</p>
+<p><img src="/images/posts/pwsh-msvc-remote-debugging-configuration-dotnet-framework.png" alt="Launch project remote debugging settings .NET Framework" /></p>
+<p>Click on <strong>Configuration Manager</strong> at the top-right of the current dialog, then enable <strong>Deploy</strong> for the SampleModule.Launch project:</p>
+<p><img src="/images/posts/pwsh-msvc-remote-debugging-deploy-configuration.png" alt="Launch project remote debugging deploy configuration" /></p>
+<p>Navigate to the <strong>General</strong> section under <strong>Configuration Properties</strong>, then change the following:</p>
+<ol>
+<li>Set <strong>Target Name</strong> to "launch.ps1"</li>
+<li>Set <strong>Configuration Type</strong> to "Utility"</li>
+</ol>
+<p><img src="/images/posts/pwsh-msvc-remote-debugging-general-properties.png" alt="Launch project remote debugging general properties" /></p>
+<p>You can now close the SampleModule.Launch properties dialog.</p>
+<p>Next, right-click on launch.ps1 and select <strong>Properties</strong> and navigate to the <strong>General</strong> section to make the following changes:</p>
+<ol>
+<li>Set <strong>Excluded From Build</strong> to "No"</li>
+<li>Set <strong>Content</strong> to "Yes"</li>
+<li>Set <strong>Item Type</strong> to "Copy File"</li>
+</ol>
+<p><img src="/images/posts/pwsh-msvc-remote-debugging-launch-ps1-properties.png" alt="Launch project remote debugging launch.ps1 properties" /></p>
+<p>Update launch.ps1 with the following code (launch.ps1 is now remotely deployed in the same directory as the binary PowerShell module):</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Import-Module </span><span style="color:#9acc76;">&quot;.\SampleModule.dll&quot;
+</span><span style="color:#5ebfcc;">Get-HelloWorld
+</span></code></pre>
+<p>To avoid getting prompted for credentials, you can save them in the Windows credential manager like this:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$TargetHost </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;IT-HELP-DEBUG.ad.it-help.ninja&quot;
+</span><span style="color:#eb6772;">$UserName </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;Administrator@ad.it-help.ninja&quot;
+</span><span style="color:#eb6772;">$Password </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;DevoLabs123!&quot;
+</span><span style="color:#eb6772;">$securePassword </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">ConvertTo-SecureString </span><span style="color:#eb6772;">$Password </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">AsPlainText </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force
+</span><span style="color:#abb2bf;">cmdkey </span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">generic:</span><span style="color:#eb6772;">$TargetHost </span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">user:</span><span style="color:#eb6772;">$UserName </span><span style="color:#adb7c9;">/</span><span style="color:#abb2bf;">pass:</span><span style="color:#eb6772;">$SecurePassword
+</span></code></pre>
+<p>You can then delete the credentials from the Windows credential manager later:</p>
+<p><img src="/images/posts/pwsh-msvc-remote-debugging-saved-credentials.png" alt="Remote debugging saved credentials" /></p>
+<p>You are now ready to finally press F5 to remotely deploy and debug your PowerShell binary module. If everything worked, you should get prompted for credentials (if you haven't saved them locally), then after a lot of symbol loading, you will finally hit the breakpoint in Visual Studio:</p>
+<p><img src="/images/posts/pwsh-msvc-remote-debugging-in-action-client.png" alt="Remote debugging client in action" /></p>
+<p>In the remote debugging target host, the Visual Studio Remote Debugger dialog should show a log entry for the connection. If there isn't one, it means the client isn't connecting. Make sure the <strong>Remote Server Name</strong> configured previously is set to the correct hostname and port ("IT-HELP-DEBUG.ad.it-help.ninja:4026" in my case, but you need to change it to point to your target host). If it still doesn't work, make sure that the firewall is not blocking the connection.</p>
+<p>In the success case, you should now see the PowerShell terminal in the target host with our sample PowerShell binary module loaded in the remote debugger:</p>
+<p><img src="/images/posts/pwsh-msvc-remote-debugging-in-action-client.png" alt="Remote debugging server in action" /></p>
+<p>Congratulations, you can now develop locally, yet remotely deploy and debug an up-to-date copy of your development build just by pressing F5 in Visual Studio! This is so much better than manually copying files over to the remote machine, which is error-prone, and often results in mismatches between local sources and remote binaries. The functionality is already there, but it is difficult to use, with too many repeated steps that could be automated.</p>
+<h2 id="remote-deployment-and-debugging-over-remote-development">Remote Deployment and Debugging over Remote Development?</h2>
+<p>A popular trend these days is <a rel="noopener nofollow noreferrer" target="_blank" href="https://code.visualstudio.com/docs/remote/remote-overview">VSCode remote development</a>, which most often consists of installing tools in a remote host to present the user interface locally. This is better than connecting to a Windows VM over RDP to run Visual Studio "remotely", as a local user interface is more responsive, especially for typing text. However, the actual development tools still run 100% remotely, meaning you're still doing local debugging, but with a remote user interface. The source code is also built from the <em>remote</em> host, rather than built locally to deploy only the resulting build artifacts. This may be great for use cases like <a rel="noopener nofollow noreferrer" target="_blank" href="https://azure.microsoft.com/en-us/products/dev-box/">Microsoft Dev Box</a> where you get a powerful build machine in the cloud, but it doesn't solve the issue of code deployment and execution in clean environments <em>separate</em> from the development environment.</p>
+<p>With remote deployment and debugging, we could stop building and debugging on the same host: we could cross-compile and debug to all targets from a single development environment. If this is obvious for mobile development to Android or iOS targets, why isn't isn't this the <em>norm</em> yet for desktop application development? It's now possible to <a rel="noopener nofollow noreferrer" target="_blank" href="https://learn.microsoft.com/en-us/visualstudio/debugger/debug-dotnet-core-in-wsl-2?view=vs-2022">debug Linux applications from Visual Studio using WSL</a>, but there's no simplified equivalent for Windows targets! Remote development solves <em>a</em> problem by making it easier to develop on remote hosts, but it doesn't make it easier to keep a single development environment from which you can develop for <em>all</em> targets at once. If you work in the Visual Studio team at Microsoft, I have a LOT of feedback to give on how these kinds of workflows could be improved.</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;active-directory-kerberos-kdc-certificate-selection&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              Active Directory Kerberos KDC certificate selection
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;decompiling-hyper-v-manager-to-rebuild-it-from-source&#x2F;">
+              Decompiling Hyper-V Manager to rebuild it from source<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>

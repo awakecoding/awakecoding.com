@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/disabling-msbuild-node-reuse-to-avoid-file-locking-issues/">
+  <link rel="alternate" href="https://awakecoding.com/posts/disabling-msbuild-node-reuse-to-avoid-file-locking-issues/" hreflang="en" />
+  
+  <meta name="description" content="Intermittent .NET host processes locking your build outputs? MSBuild&#x27;s node reuse feature causes file locking in complex build systems. Learn how MSBUILDDISABLENODEREUSE fixes years of sporadic build failures, why this optimization backfires, and when you should disable it." />
+  <meta property="og:title" content="Disabling MSBuild Node Reuse to Avoid File Locking Issues" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;disabling-msbuild-node-reuse-to-avoid-file-locking-issues&#x2F;" />
+  <meta property="og:description" content="Intermittent .NET host processes locking your build outputs? MSBuild&#x27;s node reuse feature causes file locking in complex build systems. Learn how MSBUILDDISABLENODEREUSE fixes years of sporadic build failures, why this optimization backfires, and when you should disable it." />
+  <meta name="twitter:title" content="Disabling MSBuild Node Reuse to Avoid File Locking Issues" />
+  <meta name="twitter:description" content="Intermittent .NET host processes locking your build outputs? MSBuild&#x27;s node reuse feature causes file locking in complex build systems. Learn how MSBUILDDISABLENODEREUSE fixes years of sporadic build failures, why this optimization backfires, and when you should disable it." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;disabling-msbuild-node-reuse-to-avoid-file-locking-issues&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/disabling-msbuild-node-reuse-to-avoid-file-locking-issues.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/disabling-msbuild-node-reuse-to-avoid-file-locking-issues.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Disabling MSBuild Node Reuse to Avoid File Locking Issues",
+  "description": "Intermittent .NET host processes locking your build outputs? MSBuild's node reuse feature causes file locking in complex build systems. Learn how MSBUILDDISABLENODEREUSE fixes years of sporadic build failures, why this optimization backfires, and when you should disable it.",
+  "datePublished": "2025-11-20",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/disabling-msbuild-node-reuse-to-avoid-file-locking-issues.png",
+  "url": "https://awakecoding.com/posts/disabling-msbuild-node-reuse-to-avoid-file-locking-issues/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/disabling-msbuild-node-reuse-to-avoid-file-locking-issues/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | Disabling MSBuild Node Reuse to Avoid File Locking Issues
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            Disabling MSBuild Node Reuse to Avoid File Locking Issues
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2025-11-20">November 20, 2025</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>4 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>788 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/msbuild/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>MSBuild</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/windows/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Windows</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/powershell/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>PowerShell</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>Ever been ready to commit your code, only to have MSBuild abort with a cryptic file locking error? You kill the processes, rebuild, and it works... until it doesn't. Again. And again.</p>
+<p>For years at Devolutions, developers have fought this elusive problem. Some hit it occasionally. Others couldn't build in Visual Studio at all anymore. The worst part? Nobody knew why perfectly idle processes were holding onto our assemblies and refusing to let go.</p>
+<p>The error usually looks like this—a file that can't be copied because multiple .NET host processes refuse to let go:</p>
+<blockquote>
+<p>warning MSB3026: Could not copy "obj\Debug\net9.0\RemoteDesktopManager.Business.dll" to "bin\Debug\net9.0\RemoteDesktopManager.Business.dll". Beginning retry 6 in 1000ms. The process cannot access the file 'bin\Debug\net9.0\RemoteDesktopManager.Business.dll' because it is being used by another process. The file is locked by: ".NET Host (54076), .NET Host (65656), .NET Host (17676)"</p>
+</blockquote>
+<p>To get unblocked "quickly", you may go through the task manager, find the offending processes to kill them one by one, or use the process ids in PowerShell:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Stop-Process </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Id </span><span style="color:#db9d63;">54076
+</span><span style="color:#5ebfcc;">Stop-Process </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Id </span><span style="color:#db9d63;">65656
+</span><span style="color:#5ebfcc;">Stop-Process </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Id </span><span style="color:#db9d63;">17676
+</span></code></pre>
+<p>This tedious whack-a-mole doesn't prevent the problem from coming back. It's a band-aid, not a cure.</p>
+<p>In recent months, the frequency escalated. One developer couldn't build from Visual Studio at all—only the dotnet CLI worked <em>most</em> of the time. When killing processes and rebooting isn't enough to get back to work, you know something is fundamentally broken. I had blamed using VSCode alongside Visual Studio, but the real culprit was hiding in plain sight.</p>
+<h2 id="when-github-copilot-reveals-what-google-can-t">When GitHub Copilot Reveals What Google Can't</h2>
+<p>If you're still just googling error messages, you're fighting with one hand tied behind your back. I pasted the error into GitHub Copilot and asked: "I don't understand why I've got dangling processes keeping locks, figure out if they're still active and what they are."</p>
+<p><img src="/images/posts/msbuild-node-reuse-github-copilot-error-analysis.png" alt="GitHub Copilot analysis of processes holding file locks" /></p>
+<p>Not only did it figure out a shorter way to kill all processes at once:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Stop-Process </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Id </span><span style="color:#db9d63;">54076</span><span style="color:#adb7c9;">, </span><span style="color:#db9d63;">65656</span><span style="color:#adb7c9;">, </span><span style="color:#db9d63;">17676 </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Force
+</span></code></pre>
+<p>But more importantly, it told me about a <code>dotnet</code> command I had no idea existed before, meant to terminate <strong>MSBuild worker nodes</strong>:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">dotnet </span><span style="color:#5ebfcc;">build-server</span><span style="color:#abb2bf;"> shutdown
+</span></code></pre>
+<p>So if they're worker nodes, why are they sticking around? Closing Visual Studio doesn't make them go away. Let's ask GitHub Copilot what controls the lifetime of those worker processes:</p>
+<p><img src="/images/posts/msbuild-node-reuse-github-copilot-lifetime-control.png" alt="GitHub Copilot msbuild worker node lifetime control" /></p>
+<p>Oh. <em>Oh.</em></p>
+<p>MSBuild worker nodes deliberately stick around <strong>as a feature</strong>. They're supposed to speed up builds by avoiding process startup costs. Noble goal, terrible side effect: when they load an assembly into memory, that file stays locked. If another process tries to overwrite it, the build fails.</p>
+<p>Our build system runs code generators that load assemblies, performs manual file copy operations, and generally does the kind of complex orchestration that doesn't play nice with persistent worker processes. What Microsoft designed as an optimization turned into a reliability problem for us.</p>
+<h2 id="the-fix-disable-node-reuse-and-reclaim-your-sanity">The Fix: Disable Node Reuse and Reclaim Your Sanity</h2>
+<p>The <code>MSBUILDDISABLENODEREUSE</code> environment variable can be set to disable MSBuild node reuse. Each build will spawn new worker processes instead of reusing old worker processes from previous builds. Don't forget to logout or reboot to make sure the environment variable gets properly loaded:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">System.Environment</span><span style="color:#abb2bf;">]::SetEnvironmentVariable(</span><span style="color:#9acc76;">&#39;MSBUILDDISABLENODEREUSE&#39;</span><span style="color:#adb7c9;">, </span><span style="color:#9acc76;">&#39;1&#39;</span><span style="color:#adb7c9;">, </span><span style="color:#9acc76;">&#39;User&#39;</span><span style="color:#abb2bf;">)
+</span></code></pre>
+<p>The performance impact? Negligible. Process startup time is a rounding error in our total build time. If you want to revert the change:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">System.Environment</span><span style="color:#abb2bf;">]::SetEnvironmentVariable(</span><span style="color:#9acc76;">&#39;MSBUILDDISABLENODEREUSE&#39;</span><span style="color:#adb7c9;">, </span><span style="color:#db9d63;">$null</span><span style="color:#adb7c9;">, </span><span style="color:#9acc76;">&#39;User&#39;</span><span style="color:#abb2bf;">)
+</span></code></pre>
+<p><strong>The result?</strong> Weeks without a single file locking issue. Zero. Problem solved.</p>
+<p>(Well, except when I forget to stop the debugger before rebuilding. But that's my mistake.)</p>
+<h2 id="why-node-reuse-fails-for-complex-build-systems">Why Node Reuse Fails for Complex Build Systems</h2>
+<p>MSBuild's node reuse is optimized for simple, repeated builds where the same assemblies get compiled over and over. It's perfect for rapid edit-compile-test cycles in straightforward projects.</p>
+<p>But throw in code generators, custom build steps that load assemblies dynamically, or file copy operations that happen outside MSBuild's knowledge, and the optimization backfires. The worker nodes cache assemblies in memory, unaware that other processes need to write to those same files.</p>
+<p>Microsoft designed this feature for speed. They didn't account for build systems that do more than just invoke the compiler.</p>
+<h2 id="the-real-lesson">The Real Lesson</h2>
+<p>Sometimes "optimizations" are just deferred problems. This issue plagued our team for <em>years</em> because nobody thought to question whether those lingering .NET host processes were intentional. We assumed they were bugs, leaks, or environmental issues. Turns out, they were a feature.</p>
+<p>And here's the kicker: I had googled this error dozens of times and never found the answer. GitHub Copilot surfaced it in seconds by understanding the context better than search engines ever could. If you're not using AI assistants for debugging yet, you're investigating with blinders on.</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;msbuild-binary-logs-reveal-what-visual-studio-hides&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              MSBuild Binary Logs Reveal What Visual Studio Hides
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;configuring-ssh-for-personal-and-work-github-accounts&#x2F;">
+              Configuring SSH for Personal and Work GitHub Accounts<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>

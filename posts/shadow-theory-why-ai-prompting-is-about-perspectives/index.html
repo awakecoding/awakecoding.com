@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/shadow-theory-why-ai-prompting-is-about-perspectives/">
+  <link rel="alternate" href="https://awakecoding.com/posts/shadow-theory-why-ai-prompting-is-about-perspectives/" hreflang="en" />
+  
+  <meta name="description" content="This post introduces Shadow Theory: a mental model for AI prompting that treats prompts as perspectives shaping what the model sees. It explains why better results often come from changing the angle of analysis rather than simply adding more instructions or context." />
+  <meta property="og:title" content="Shadow Theory: Why AI Prompting Is About Perspectives" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;shadow-theory-why-ai-prompting-is-about-perspectives&#x2F;" />
+  <meta property="og:description" content="This post introduces Shadow Theory: a mental model for AI prompting that treats prompts as perspectives shaping what the model sees. It explains why better results often come from changing the angle of analysis rather than simply adding more instructions or context." />
+  <meta name="twitter:title" content="Shadow Theory: Why AI Prompting Is About Perspectives" />
+  <meta name="twitter:description" content="This post introduces Shadow Theory: a mental model for AI prompting that treats prompts as perspectives shaping what the model sees. It explains why better results often come from changing the angle of analysis rather than simply adding more instructions or context." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;shadow-theory-why-ai-prompting-is-about-perspectives&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/shadow-theory-why-ai-prompting-is-about-perspectives.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/shadow-theory-why-ai-prompting-is-about-perspectives.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Shadow Theory: Why AI Prompting Is About Perspectives",
+  "description": "This post introduces Shadow Theory: a mental model for AI prompting that treats prompts as perspectives shaping what the model sees. It explains why better results often come from changing the angle of analysis rather than simply adding more instructions or context.",
+  "datePublished": "2026-06-14",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/shadow-theory-why-ai-prompting-is-about-perspectives.png",
+  "url": "https://awakecoding.com/posts/shadow-theory-why-ai-prompting-is-about-perspectives/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/shadow-theory-why-ai-prompting-is-about-perspectives/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | Shadow Theory: Why AI Prompting Is About Perspectives
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            Shadow Theory: Why AI Prompting Is About Perspectives
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2026-06-14">June 14, 2026</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>6 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>1069 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/ai/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>AI</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>I've had AI produce some of the most impressive technical work I've ever seen.</p>
+<p>I've also had it completely miss obvious problems.</p>
+<p>Sometimes the difference was not additional context.</p>
+<p>Sometimes it wasn't a better prompt.</p>
+<p>Sometimes it wasn't even more information.</p>
+<p>The breakthrough came when I stopped thinking about prompts as instructions and started thinking about them as perspectives.</p>
+<p>The same codebase.</p>
+<p>The same design.</p>
+<p>The same requirements.</p>
+<p>A different perspective.</p>
+<p>A completely different result.</p>
+<p>That observation led me to a mental model I now use constantly when working with AI.</p>
+<p>I call it <strong>Shadow Theory</strong>.</p>
+<p>The valuable skill, I've come to believe, is not prompt engineering.</p>
+<p>It's <strong>perspective engineering</strong>: the ability to deliberately examine a problem from different angles.</p>
+<h2 id="the-object-the-light-and-the-shadow">The Object, the Light, and the Shadow</h2>
+<p>Imagine a dark room.</p>
+<p>In the center sits a complex object.</p>
+<p>That object represents reality.</p>
+<p>A codebase.</p>
+<p>A software architecture.</p>
+<p>A deployment strategy.</p>
+<p>A product design.</p>
+<p>A business process.</p>
+<p>The object contains everything: requirements, assumptions, constraints, tradeoffs, edge cases, hidden problems, and future risks.</p>
+<p>Now place a light somewhere in the room.</p>
+<p>The object casts a shadow.</p>
+<p>That shadow is what the AI sees.</p>
+<p>In Shadow Theory:</p>
+<ul>
+<li><strong>The Object</strong> is the real problem.</li>
+<li><strong>The Light</strong> is the prompt.</li>
+<li><strong>The Shadow</strong> is the representation of the problem that the AI reasons about.</li>
+</ul>
+<p>Move the light and the shadow changes.</p>
+<p>The object remains exactly the same.</p>
+<p>The quality of the result often depends less on the amount of information provided and more on the shadow being cast.</p>
+<p>The AI doesn't necessarily need more information.</p>
+<p>It may simply need a different perspective.</p>
+<h2 id="the-problem-with-floodlighting">The Problem with Floodlighting</h2>
+<p>One of the recurring jokes in AI prompting is:</p>
+<blockquote>
+<p>Make no mistakes.</p>
+</blockquote>
+<p>Everyone knows it doesn't work.</p>
+<p>The instruction sounds useful, but it contains no perspective.</p>
+<p>It doesn't tell the AI what kind of mistakes matter or where to focus its attention.</p>
+<p>In Shadow Theory, this is equivalent to floodlighting the room.</p>
+<p>Light is coming from every direction.</p>
+<p>Nothing stands out.</p>
+<p>No shadow has contrast.</p>
+<p>The result isn't a better shadow.</p>
+<p>The result is no shadow at all.</p>
+<p><img src="/images/posts/shadow-theory-floodlighting-no-shadow.png" alt="shadow theory - floodlighting no shadow" /></p>
+<h2 id="high-contrast-shadows">High-Contrast Shadows</h2>
+<p>The best AI results I've obtained came from deliberately casting specific shadows.</p>
+<h3 id="the-maintainability-shadow">The Maintainability Shadow</h3>
+<blockquote>
+<p>What parts of this design are becoming API contracts that will be difficult to change?</p>
+</blockquote>
+<p>This reveals accidental contracts, backward compatibility concerns, hidden coupling, and architectural decisions that may limit future evolution.</p>
+<p>Many design decisions look perfectly reasonable today. The problem is that once customers, integrations, scripts, or other systems begin depending on them, changing them becomes expensive.</p>
+<h3 id="the-customer-shadow">The Customer Shadow</h3>
+<blockquote>
+<p>What assumptions in this design will surprise or frustrate users?</p>
+</blockquote>
+<p>This reveals usability issues, unexpected behaviors, product friction, and future support burden.</p>
+<h3 id="the-attacker-s-shadow">The Attacker's Shadow</h3>
+<blockquote>
+<p>Assume I have a valid user account. How do I become an administrator?</p>
+</blockquote>
+<p>This reveals privilege escalation paths, authorization flaws, trust boundary violations, and credential exposure risks.</p>
+<p>The system never changed.</p>
+<p>The shadow did.</p>
+<p><img src="/images/posts/shadow-theory-high-constrast-detailed-shadow.png" alt="shadow theory - high-constrast detailed shadow" /></p>
+<h2 id="the-multiple-shadows-principle">The Multiple Shadows Principle</h2>
+<p>No single shadow completely describes an object.</p>
+<p>Every shadow is incomplete.</p>
+<p>Every shadow is biased by the position of the light.</p>
+<p>This is where many AI conversations go wrong.</p>
+<p>People ask:</p>
+<blockquote>
+<p>Analyze this system completely.</p>
+</blockquote>
+<p>But there is no such shadow.</p>
+<p>There are only perspectives.</p>
+<p>Security.</p>
+<p>Performance.</p>
+<p>Maintainability.</p>
+<p>Customer impact.</p>
+<p>Each perspective reveals something different.</p>
+<p>None of them are wrong.</p>
+<p>They're incomplete.</p>
+<p>The goal is not to find the perfect prompt.</p>
+<p>The goal is to cast enough shadows from the angles that matter to reconstruct the shape of the object.</p>
+<p><img src="/images/posts/shadow-theory-multiple-shadows-different-angles.png" alt="shadow theory - multiple shadows different angles" /></p>
+<h2 id="why-agent-skills-work">Why Agent Skills Work</h2>
+<p>This mental model also explains why custom instructions and agent skills are useful.</p>
+<p>A good skill is not a magic intelligence upgrade.</p>
+<p>A good skill is a reusable way to apply a perspective.</p>
+<p>It says:</p>
+<blockquote>
+<p>When we're operating in this context, examine the problem from this angle, apply these conventions, and present the results in this format.</p>
+</blockquote>
+<p>Agent skills eliminate repetition, preserve context, and encode patterns that have proven useful.</p>
+<p>They make it easier to apply the same perspective consistently.</p>
+<h2 id="why-there-will-never-be-a-think-of-everything-skill">Why There Will Never Be a "Think of Everything" Skill</h2>
+<p>One conclusion I've reached is that there can never be a useful universal skill that says:</p>
+<blockquote>
+<p>Think of everything.</p>
+</blockquote>
+<p>Or:</p>
+<blockquote>
+<p>Make no mistakes.</p>
+</blockquote>
+<p>Or:</p>
+<blockquote>
+<p>Never miss anything.</p>
+</blockquote>
+<p>Those are not shadows.</p>
+<p>They're floodlights.</p>
+<p>They attempt to illuminate the entire room from every direction simultaneously.</p>
+<p>The result is not perfect reasoning.</p>
+<p>The result is reduced contrast.</p>
+<p>Good skills are always contextual.</p>
+<p>They work because they apply a specific perspective to a specific class of problems.</p>
+<p>A security skill applies an attacker's perspective.</p>
+<p>A maintainability skill applies a maintainer's perspective.</p>
+<p>A documentation skill applies a reader's perspective.</p>
+<p>A support skill applies a customer's perspective.</p>
+<p>Each one reveals different details.</p>
+<p>None of them eliminate the need for judgment.</p>
+<h2 id="perspective-engineering">Perspective Engineering</h2>
+<p>One thing I find amusing is the recurring prediction that AI will eventually remove the need for developers to think.</p>
+<p>My experience has been exactly the opposite.</p>
+<p>AI dramatically reduces the cost of execution.</p>
+<p>What it doesn't do is remove responsibility.</p>
+<p>The developer still decides:</p>
+<ul>
+<li>Which perspective matters?</li>
+<li>Which constraints are important?</li>
+<li>Which risks are acceptable?</li>
+<li>Which assumptions need validation?</li>
+<li>Which shadow should be cast next?</li>
+</ul>
+<p>AI can help explore a perspective.</p>
+<p>It cannot decide whether that perspective is the right one.</p>
+<p>That remains a human responsibility.</p>
+<p>Before AI, exploring ten different perspectives on a design was expensive.</p>
+<p>Each investigation required time, prototypes, analysis, meetings, experiments, or implementation work.</p>
+<p>Today, AI can help explore those perspectives in minutes.</p>
+<p>What AI changes is not the process.</p>
+<p>It changes the cost.</p>
+<p>The bottleneck has moved.</p>
+<p>The scarce resource is no longer the ability to generate an answer.</p>
+<p>The scarce resource is knowing which question to ask next.</p>
+<blockquote>
+<p>The valuable skill is knowing where to move the light.</p>
+</blockquote>
+<h2 id="conclusion">Conclusion</h2>
+<p>The biggest misconception about AI is that success comes from finding the perfect instruction.</p>
+<p>In reality, effective prompting is often about choosing the right perspective.</p>
+<p>The AI doesn't necessarily need more words.</p>
+<p>It doesn't necessarily need more context.</p>
+<p>It may simply need a different shadow.</p>
+<p>The next time an AI response feels shallow, resist the urge to ask a bigger question.</p>
+<p>Instead, move the light.</p>
+<p>The object hasn't changed.</p>
+<p>The shadow has.</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;everything-wrong-with-msix-the-virtual-filesystem-trap&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              Everything Wrong with MSIX: The Virtual Filesystem Trap
+            </a>
+          </div>
+           
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>

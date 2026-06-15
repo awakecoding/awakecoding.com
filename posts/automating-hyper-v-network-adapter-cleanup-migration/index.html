@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/automating-hyper-v-network-adapter-cleanup-migration/">
+  <link rel="alternate" href="https://awakecoding.com/posts/automating-hyper-v-network-adapter-cleanup-migration/" hreflang="en" />
+  
+  <meta name="description" content="Learn how to automate the cleanup of ghost Hyper-V network adapters and migrate static IP configurations using PowerShell. This post walks through detecting stale adapters, reassigning IP settings, and setting up a scheduled task to keep your lab environments self-healing on boot." />
+  <meta property="og:title" content="Automating Hyper-V Network Adapter Cleanup and IP Migration" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;automating-hyper-v-network-adapter-cleanup-migration&#x2F;" />
+  <meta property="og:description" content="Learn how to automate the cleanup of ghost Hyper-V network adapters and migrate static IP configurations using PowerShell. This post walks through detecting stale adapters, reassigning IP settings, and setting up a scheduled task to keep your lab environments self-healing on boot." />
+  <meta name="twitter:title" content="Automating Hyper-V Network Adapter Cleanup and IP Migration" />
+  <meta name="twitter:description" content="Learn how to automate the cleanup of ghost Hyper-V network adapters and migrate static IP configurations using PowerShell. This post walks through detecting stale adapters, reassigning IP settings, and setting up a scheduled task to keep your lab environments self-healing on boot." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;automating-hyper-v-network-adapter-cleanup-migration&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/automating-hyper-v-network-adapter-cleanup-migration.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/automating-hyper-v-network-adapter-cleanup-migration.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Automating Hyper-V Network Adapter Cleanup and IP Migration",
+  "description": "Learn how to automate the cleanup of ghost Hyper-V network adapters and migrate static IP configurations using PowerShell. This post walks through detecting stale adapters, reassigning IP settings, and setting up a scheduled task to keep your lab environments self-healing on boot.",
+  "datePublished": "2025-05-17",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/automating-hyper-v-network-adapter-cleanup-migration.png",
+  "url": "https://awakecoding.com/posts/automating-hyper-v-network-adapter-cleanup-migration/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/automating-hyper-v-network-adapter-cleanup-migration/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | Automating Hyper-V Network Adapter Cleanup and IP Migration
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            Automating Hyper-V Network Adapter Cleanup and IP Migration
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2025-05-17">May 17, 2025</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>4 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>766 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/windows/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Windows</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/networking/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Networking</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/powershell/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>PowerShell</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>If you've ever built Hyper-V lab environments with static IP configurations and later reused the VHDX files on a different host, you may have encountered the following issue:</p>
+<ol>
+<li>The old network adapter disappears but still retains the static IP configuration in the registry.</li>
+<li>The new network adapter created on import doesn't inherit the previous IP settings automatically.</li>
+</ol>
+<p>This leads to all kinds of network problems, especially if you're migrating an <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/Devolutions/devolutions-labs">Active Directory lab environment</a> like I do. Today, I'll show you how to use PowerShell to automatically clean up Hyper-V network adapters and migrate static IP configurations to the correct adapter.</p>
+<h2 id="simulating-the-problem">Simulating the Problem</h2>
+<p>Fortunately, it's relatively easy to simulate the problem. Delete the network adapter from an existing test VM that was previously configured with a static IP. Then, add a new network adapter and attach it to the same Hyper-V virtual switch:</p>
+<p><img src="/images/posts/hvnetadapter-virtual-machine-delete-network-adapter.png" alt="Hyper-V virtual machine delete network adapter" /></p>
+<p>Boot the virtual machine. If DHCP is enabled, the VM will likely receive a different IP address than the one previously assigned statically. Open the Device Manager (devmgmt.msc), then under <strong>View</strong>, enable <strong>Show Hidden Devices</strong>. The old network adapter should be listed with a half-transparent "ghost" icon:</p>
+<p><img src="/images/posts/hvnetadapter-device-manager-show-hidden-devices.png" alt="Device Manager show hidden devices" /></p>
+<p>From the GUI, you could right-click the ghost network adapter, and select <strong>Uninstall device</strong>. However, we're not going to do that today, as we want to <em>automate</em> the process. Let's try listing Hyper-V network adapters in PowerShell using <code>Get-NetAdapter -IncludeHidden</code>:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS</span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-NetAdapter </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">IncludeHidden </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Where-Object </span><span style="color:#abb2bf;">{ $_</span><span style="color:#eb6772;">.InterfaceDescription </span><span style="color:#adb7c9;">-Like </span><span style="color:#9acc76;">&quot;*Hyper-V*&quot; </span><span style="color:#abb2bf;">}
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">Name                      InterfaceDescription                    ifIndex Status       MacAddress             LinkSpeed
+</span><span style="color:#adb7c9;">----                      --------------------                    ------- ------       ----------             ---------
+</span><span style="color:#abb2bf;">Ethernet                  Microsoft Hyper</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">V Network Adapter             </span><span style="color:#db9d63;">7</span><span style="color:#abb2bf;"> Up           </span><span style="color:#db9d63;">00</span><span style="color:#adb7c9;">-</span><span style="color:#db9d63;">15</span><span style="color:#adb7c9;">-</span><span style="color:#db9d63;">5D</span><span style="color:#adb7c9;">-</span><span style="color:#db9d63;">32</span><span style="color:#adb7c9;">-</span><span style="color:#db9d63;">78</span><span style="color:#adb7c9;">-</span><span style="color:#db9d63;">38        10</span><span style="color:#abb2bf;"> Gbps
+</span></code></pre>
+<p>Wait, where's our ghost network adapter? Despite its name, <code>-IncludeHidden</code> doesn't show devices like the Device Manager does. That means <code>Get-NetAdapter</code> isn't suitable for the task.</p>
+<h2 id="listing-all-hyper-v-network-adapters-in-powershell">Listing All Hyper-V Network Adapters in PowerShell</h2>
+<p>Instead, we'll build our own <code>Get-HyperVNetworkAdapterInfo</code> cmdlet using <code>Get-PnpDevice</code>, <code>Get-PnpDeviceProperty</code>, and related information pulled from the registry:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#cd74e8;">function </span><span style="color:#5cb3fa;">Get-HyperVNetworkAdapterInfo </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    [</span><span style="color:#5ebfcc;">CmdletBinding</span><span style="color:#abb2bf;">()]
+</span><span style="color:#abb2bf;">    </span><span style="color:#cd74e8;">param</span><span style="color:#abb2bf;">()
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$PnpDevices </span><span style="color:#adb7c9;">= </span><span style="color:#cd74e8;">@</span><span style="color:#abb2bf;">(</span><span style="color:#5ebfcc;">Get-PnpDevice </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Class Net </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Where-Object </span><span style="color:#abb2bf;">{ $_</span><span style="color:#eb6772;">.FriendlyName </span><span style="color:#adb7c9;">-like </span><span style="color:#9acc76;">&#39;*Hyper-V Network Adapter*&#39; </span><span style="color:#abb2bf;">})
+</span><span style="color:#abb2bf;">    
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$PnpDevices </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">ForEach-Object </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$ClassGuid </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">$_</span><span style="color:#eb6772;">.ClassGuid
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">$DeviceDriverProperty </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-PnpDeviceProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">InstanceId $_</span><span style="color:#eb6772;">.InstanceId </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">KeyName </span><span style="color:#9acc76;">&#39;DEVPKEY_Device_Driver&#39; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ErrorAction SilentlyContinue
+</span><span style="color:#abb2bf;">        </span><span style="color:#cd74e8;">if </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$DeviceDriverProperty.Data </span><span style="color:#adb7c9;">-match </span><span style="color:#9acc76;">&#39;\\(?&lt;subkey&gt;\d{4})$&#39;</span><span style="color:#abb2bf;">) {
+</span><span style="color:#abb2bf;">            </span><span style="color:#eb6772;">$DeviceRegPath </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;HKLM:\SYSTEM\CurrentControlSet\Control\Class\</span><span style="color:#eb6772;">$ClassGuid</span><span style="color:#9acc76;">\$($matches</span><span style="color:#eb6772;">.subkey</span><span style="color:#9acc76;">)&quot;
+</span><span style="color:#abb2bf;">            </span><span style="color:#eb6772;">$NetCfgInstanceId </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-ItemPropertyValue </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$DeviceRegPath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name NetCfgInstanceId </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ErrorAction SilentlyContinue
+</span><span style="color:#abb2bf;">            </span><span style="color:#eb6772;">$NetCfgInstanceRegPath </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\</span><span style="color:#eb6772;">$NetCfgInstanceId</span><span style="color:#9acc76;">&quot;
+</span><span style="color:#abb2bf;">            </span><span style="color:#eb6772;">$NetCfg </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-ItemProperty </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$NetCfgInstanceRegPath </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Select-Object</span><span style="color:#abb2bf;"> IPAddress</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;"> SubnetMask</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;"> DefaultGateway</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;"> NameServer</span><span style="color:#adb7c9;">,</span><span style="color:#abb2bf;"> EnableDHCP
+</span><span style="color:#abb2bf;">            </span><span style="color:#eb6772;">$NetConnectionRegPath </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;HKLM:\SYSTEM\CurrentControlSet\Control\Network\</span><span style="color:#eb6772;">$ClassGuid</span><span style="color:#9acc76;">\</span><span style="color:#eb6772;">$NetCfgInstanceId</span><span style="color:#9acc76;">\Connection&quot;
+</span><span style="color:#abb2bf;">            </span><span style="color:#eb6772;">$NetAdapterName </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-ItemPropertyValue </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Path </span><span style="color:#eb6772;">$NetConnectionRegPath </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name Name
+</span><span style="color:#abb2bf;">            [</span><span style="color:#cd74e8;">PSCustomObject</span><span style="color:#abb2bf;">]</span><span style="color:#cd74e8;">@</span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">                </span><span style="color:#eb6772;">FriendlyName     </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">$_</span><span style="color:#eb6772;">.FriendlyName
+</span><span style="color:#abb2bf;">                </span><span style="color:#eb6772;">NetAdapterName   </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$NetAdapterName
+</span><span style="color:#abb2bf;">                </span><span style="color:#eb6772;">Status           </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">$_</span><span style="color:#eb6772;">.Status
+</span><span style="color:#abb2bf;">                </span><span style="color:#eb6772;">InstanceId       </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">$_</span><span style="color:#eb6772;">.InstanceId
+</span><span style="color:#abb2bf;">                </span><span style="color:#eb6772;">NetCfgInstanceId </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$NetCfgInstanceId
+</span><span style="color:#abb2bf;">                </span><span style="color:#eb6772;">IPAddress        </span><span style="color:#adb7c9;">= </span><span style="color:#cd74e8;">if </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$NetCfg.IPAddress</span><span style="color:#abb2bf;">) { </span><span style="color:#eb6772;">$NetCfg.IPAddress</span><span style="color:#abb2bf;">[</span><span style="color:#db9d63;">0</span><span style="color:#abb2bf;">] } </span><span style="color:#cd74e8;">else </span><span style="color:#abb2bf;">{ </span><span style="color:#9acc76;">&#39;&#39; </span><span style="color:#abb2bf;">}
+</span><span style="color:#abb2bf;">                </span><span style="color:#eb6772;">SubnetMask       </span><span style="color:#adb7c9;">= </span><span style="color:#cd74e8;">if </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$NetCfg.SubnetMask</span><span style="color:#abb2bf;">) { </span><span style="color:#eb6772;">$NetCfg.SubnetMask</span><span style="color:#abb2bf;">[</span><span style="color:#db9d63;">0</span><span style="color:#abb2bf;">] } </span><span style="color:#cd74e8;">else </span><span style="color:#abb2bf;">{ </span><span style="color:#9acc76;">&#39;&#39; </span><span style="color:#abb2bf;">}
+</span><span style="color:#abb2bf;">                </span><span style="color:#eb6772;">DefaultGateway   </span><span style="color:#adb7c9;">= </span><span style="color:#cd74e8;">if </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$NetCfg.DefaultGateway</span><span style="color:#abb2bf;">) { </span><span style="color:#eb6772;">$NetCfg.DefaultGateway</span><span style="color:#abb2bf;">[</span><span style="color:#db9d63;">0</span><span style="color:#abb2bf;">] } </span><span style="color:#cd74e8;">else </span><span style="color:#abb2bf;">{ </span><span style="color:#9acc76;">&#39;&#39; </span><span style="color:#abb2bf;">}
+</span><span style="color:#abb2bf;">                </span><span style="color:#eb6772;">NameServer       </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$NetCfg.NameServer
+</span><span style="color:#abb2bf;">                </span><span style="color:#eb6772;">EnableDHCP       </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$NetCfg.EnableDHCP
+</span><span style="color:#abb2bf;">            }
+</span><span style="color:#abb2bf;">        }
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">}
+</span></code></pre>
+<p>Paste the <code>Get-HyperVNetworkAdapterInfo</code> cmdlet definition in PowerShell, then use it to list <em>all</em> Hyper-V network adapters:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">PS</span><span style="color:#adb7c9;">&gt; </span><span style="color:#5ebfcc;">Get-HyperVNetworkAdapterInfo
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">FriendlyName     : Microsoft Hyper</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">V Network Adapter
+</span><span style="color:#abb2bf;">NetAdapterName   : Ethernet
+</span><span style="color:#abb2bf;">Status           : OK
+</span><span style="color:#abb2bf;">InstanceId       : VMBUS\{F8615163</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">DF3E</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">46C5</span><span style="color:#adb7c9;">-</span><span style="color:#db9d63;">913F</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">F2D2F965ED0E}\{B22F1BF5</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">12F6</span><span style="color:#adb7c9;">-</span><span style="color:#db9d63;">480D</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">8F16</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">702AC7BE5CAA}
+</span><span style="color:#abb2bf;">NetCfgInstanceId : {20BE1EE8</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">E115</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">4A5F</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">B1C0</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">B295B293E127}
+</span><span style="color:#abb2bf;">IPAddress        :
+</span><span style="color:#abb2bf;">SubnetMask       :
+</span><span style="color:#abb2bf;">DefaultGateway   :
+</span><span style="color:#abb2bf;">NameServer       :
+</span><span style="color:#abb2bf;">EnableDHCP       : </span><span style="color:#db9d63;">1
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">FriendlyName     : Microsoft Hyper</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">V Network Adapter </span><span style="font-style:italic;color:#5f697a;">#3
+</span><span style="color:#abb2bf;">NetAdapterName   : vEthernet (LAN)
+</span><span style="color:#abb2bf;">Status           : Unknown
+</span><span style="color:#abb2bf;">InstanceId       : VMBUS\{F8615163</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">DF3E</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">46C5</span><span style="color:#adb7c9;">-</span><span style="color:#db9d63;">913F</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">F2D2F965ED0E}\{19E87F3D</span><span style="color:#adb7c9;">-</span><span style="color:#db9d63;">4849</span><span style="color:#adb7c9;">-</span><span style="color:#db9d63;">4959</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">B43D</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">75381017DB77}
+</span><span style="color:#abb2bf;">NetCfgInstanceId : {99439FE2</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">D5F1</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">4E92</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">AEA3</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">4988838F2201}
+</span><span style="color:#abb2bf;">IPAddress        : </span><span style="color:#db9d63;">10.10</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">0.9
+</span><span style="color:#abb2bf;">SubnetMask       : </span><span style="color:#db9d63;">255.255</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">255.0
+</span><span style="color:#abb2bf;">DefaultGateway   : </span><span style="color:#db9d63;">10.10</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">0.2
+</span><span style="color:#abb2bf;">NameServer       : </span><span style="color:#db9d63;">10.10</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">0.3
+</span><span style="color:#abb2bf;">EnableDHCP       : </span><span style="color:#db9d63;">0
+</span></code></pre>
+<p>Great — we can now list ghost Hyper-V network adapters, including their static IP configurations!</p>
+<h2 id="cleaning-up-old-hyper-v-network-adapters">Cleaning Up Old Hyper-V Network Adapters</h2>
+<p>If your goal is simply to clean up ghost adapters without migrating IP settings, you can filter for adapters with an unknown status and use <code>pnputil /remove-device</code> with each adapter's instance ID:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#5ebfcc;">Get-HyperVNetworkAdapterInfo </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Where-Object </span><span style="color:#abb2bf;">{ $_</span><span style="color:#eb6772;">.Status </span><span style="color:#adb7c9;">-eq </span><span style="color:#9acc76;">&#39;Unknown&#39; </span><span style="color:#abb2bf;">} </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">ForEach-Object </span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Write-Host </span><span style="color:#9acc76;">&quot;Removing ghost network adapter: &#39;$($_</span><span style="color:#eb6772;">.NetAdapterName</span><span style="color:#9acc76;">)&#39;&quot;
+</span><span style="color:#abb2bf;">    </span><span style="color:#adb7c9;">&amp;</span><span style="color:#abb2bf;"> pnputil </span><span style="color:#adb7c9;">/</span><span style="color:#5ebfcc;">remove-device </span><span style="color:#9acc76;">&quot;$($_</span><span style="color:#eb6772;">.InstanceId</span><span style="color:#9acc76;">)&quot;
+</span><span style="color:#abb2bf;">}
+</span></code></pre>
+<h2 id="migrating-ip-configuration-to-new-hyper-v-adapter">Migrating IP Configuration to New Hyper-V Adapter</h2>
+<p>Let's take things a step further with an automated script that migrates network settings from an old Hyper-V adapter to a new one. This way, VMs using a shared VHDX can automatically restore their static IP configuration on first boot. Here's the plan:</p>
+<ol>
+<li>Detect the old network adapter with a static IP matching "10.10.0.*"</li>
+<li>Identify the new network adapter with no assigned IP address</li>
+<li>Remove the old (ghost) network adapter</li>
+<li>Rename the new adapter to match the previous one</li>
+<li>Reassign the previous static IP address to the new adapter</li>
+<li>Reapply the previous DNS server configuration</li>
+</ol>
+<p>Here's the resulting script, which you can adapt for your needs:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$NetAdapters </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">Get-HyperVNetworkAdapterInfo
+</span><span style="color:#eb6772;">$OldAdapter </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$NetAdapters </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Where-Object </span><span style="color:#abb2bf;">{ $_</span><span style="color:#eb6772;">.Status </span><span style="color:#adb7c9;">-eq </span><span style="color:#9acc76;">&#39;Unknown&#39; </span><span style="color:#adb7c9;">-and </span><span style="color:#abb2bf;">$_</span><span style="color:#eb6772;">.IPAddress </span><span style="color:#adb7c9;">-Match </span><span style="color:#9acc76;">&quot;10.10.0.*&quot; </span><span style="color:#abb2bf;">} </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Select-Object </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">First </span><span style="color:#db9d63;">1
+</span><span style="color:#eb6772;">$NewAdapter </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$NetAdapters </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Where-Object </span><span style="color:#abb2bf;">{ $_</span><span style="color:#eb6772;">.Status </span><span style="color:#adb7c9;">-eq </span><span style="color:#9acc76;">&#39;OK&#39; </span><span style="color:#adb7c9;">-and </span><span style="color:#abb2bf;">[</span><span style="color:#cd74e8;">string</span><span style="color:#abb2bf;">]::IsNullOrEmpty($_</span><span style="color:#eb6772;">.IPAddress</span><span style="color:#abb2bf;">) } </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Select-Object </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">First </span><span style="color:#db9d63;">1
+</span><span style="color:#abb2bf;">
+</span><span style="color:#cd74e8;">if </span><span style="color:#abb2bf;">(</span><span style="color:#eb6772;">$OldAdapter </span><span style="color:#adb7c9;">-and </span><span style="color:#eb6772;">$NewAdapter</span><span style="color:#abb2bf;">) {
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Write-Host </span><span style="color:#9acc76;">&quot;Removing old network adapter: &#39;$(</span><span style="color:#eb6772;">$OldAdapter.NetAdapterName</span><span style="color:#9acc76;">)&#39;&quot;
+</span><span style="color:#abb2bf;">    </span><span style="color:#adb7c9;">&amp;</span><span style="color:#abb2bf;"> pnputil </span><span style="color:#adb7c9;">/</span><span style="color:#5ebfcc;">remove-device </span><span style="color:#9acc76;">&quot;$(</span><span style="color:#eb6772;">$OldAdapter.InstanceId</span><span style="color:#9acc76;">)&quot;
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$NetAdapterName </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$OldAdapter.NetAdapterName
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$IPAddress </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$OldAdapter.IPAddress
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$SubnetMask </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$OldAdapter.SubnetMask
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$DefaultGateway </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$OldAdapter.DefaultGateway
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$NameServer </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$OldAdapter.NameServer
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Write-Host </span><span style="color:#9acc76;">&quot;Renaming new network adapter to &#39;</span><span style="color:#eb6772;">$NetAdapterName</span><span style="color:#9acc76;">&#39;&quot;
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Rename-NetAdapter </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Name </span><span style="color:#eb6772;">$NewAdapter.NetAdapterName </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">NewName </span><span style="color:#eb6772;">$NetAdapterName
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$PrefixLength </span><span style="color:#adb7c9;">= </span><span style="color:#abb2bf;">([</span><span style="color:#cd74e8;">System.Net.IPAddress</span><span style="color:#abb2bf;">]::Parse(</span><span style="color:#eb6772;">$SubnetMask</span><span style="color:#abb2bf;">).GetAddressBytes() </span><span style="color:#adb7c9;">|
+</span><span style="color:#abb2bf;">        </span><span style="color:#5ebfcc;">ForEach-Object </span><span style="color:#abb2bf;">{ [</span><span style="color:#cd74e8;">Convert</span><span style="color:#abb2bf;">]::ToString($_</span><span style="color:#adb7c9;">, </span><span style="color:#db9d63;">2</span><span style="color:#abb2bf;">).PadLeft(</span><span style="color:#db9d63;">8</span><span style="color:#adb7c9;">, </span><span style="color:#9acc76;">&#39;0&#39;</span><span style="color:#abb2bf;">) </span><span style="color:#adb7c9;">-split </span><span style="color:#9acc76;">&#39;&#39; </span><span style="color:#abb2bf;">} </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Where-Object </span><span style="color:#abb2bf;">{ $_ </span><span style="color:#adb7c9;">-eq </span><span style="color:#9acc76;">&#39;1&#39; </span><span style="color:#abb2bf;">}).Count
+</span><span style="color:#abb2bf;">    </span><span style="color:#eb6772;">$Params </span><span style="color:#adb7c9;">= </span><span style="color:#cd74e8;">@</span><span style="color:#abb2bf;">{
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">IPAddress </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$IPAddress</span><span style="color:#abb2bf;">;
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">InterfaceAlias </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$NetAdapterName</span><span style="color:#abb2bf;">;
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">AddressFamily </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;IPv4&quot;</span><span style="color:#abb2bf;">;
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">PrefixLength </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$PrefixLength</span><span style="color:#abb2bf;">;
+</span><span style="color:#abb2bf;">        </span><span style="color:#eb6772;">DefaultGateway </span><span style="color:#adb7c9;">= </span><span style="color:#eb6772;">$DefaultGateway</span><span style="color:#abb2bf;">;
+</span><span style="color:#abb2bf;">    }
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Write-Host </span><span style="color:#9acc76;">&quot;Configuring &#39;</span><span style="color:#eb6772;">$NetAdapterName</span><span style="color:#9acc76;">&#39;:&quot;
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Write-Host </span><span style="color:#9acc76;">&quot;</span><span style="color:#5ebfcc;">`t</span><span style="color:#9acc76;">IPAddress: </span><span style="color:#eb6772;">$IPAddress</span><span style="color:#5ebfcc;">`n`t</span><span style="color:#9acc76;">SubnetMask: </span><span style="color:#eb6772;">$SubnetMask</span><span style="color:#5ebfcc;">`n`t</span><span style="color:#9acc76;">DefaultGateway: </span><span style="color:#eb6772;">$DefaultGateway</span><span style="color:#9acc76;">&quot;
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Set-NetIPInterface </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">InterfaceAlias </span><span style="color:#eb6772;">$NetAdapterName </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Dhcp Disabled
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Get-NetIPAddress </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">InterfaceAlias </span><span style="color:#eb6772;">$NetAdapterName </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">AddressFamily IPv4 </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ErrorAction SilentlyContinue </span><span style="color:#adb7c9;">| </span><span style="color:#5ebfcc;">Remove-NetIPAddress </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Confirm:</span><span style="color:#db9d63;">$false
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">New-NetIPAddress </span><span style="color:#eb6772;">@Params
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Write-Host </span><span style="color:#9acc76;">&quot;Setting DNS server: </span><span style="color:#eb6772;">$NameServer</span><span style="color:#9acc76;">&quot;
+</span><span style="color:#abb2bf;">    </span><span style="color:#5ebfcc;">Set-DnsClientServerAddress </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">InterfaceAlias </span><span style="color:#eb6772;">$NetAdapterName </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">ServerAddresses </span><span style="color:#eb6772;">$NameServer
+</span><span style="color:#abb2bf;">}
+</span></code></pre>
+<p>After running the script, use <code>ipconfig /all</code> to verify that it worked as intended:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#abb2bf;">Ethernet adapter vEthernet (LAN):
+</span><span style="color:#abb2bf;">
+</span><span style="color:#abb2bf;">   Connection</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">specific DNS Suffix  </span><span style="color:#adb7c9;">.</span><span style="color:#abb2bf;"> :
+</span><span style="color:#abb2bf;">   Description </span><span style="color:#adb7c9;">. . . . . . . . . . .</span><span style="color:#abb2bf;"> : Microsoft Hyper</span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">V Network Adapter
+</span><span style="color:#abb2bf;">   Physical Address. </span><span style="color:#adb7c9;">. . . . . . . .</span><span style="color:#abb2bf;"> : </span><span style="color:#db9d63;">00</span><span style="color:#adb7c9;">-</span><span style="color:#db9d63;">15</span><span style="color:#adb7c9;">-</span><span style="color:#db9d63;">5D</span><span style="color:#adb7c9;">-</span><span style="color:#db9d63;">32</span><span style="color:#adb7c9;">-</span><span style="color:#db9d63;">78</span><span style="color:#adb7c9;">-</span><span style="color:#db9d63;">38
+</span><span style="color:#abb2bf;">   DHCP Enabled. </span><span style="color:#adb7c9;">. . . . . . . . . .</span><span style="color:#abb2bf;"> : No
+</span><span style="color:#abb2bf;">   Autoconfiguration Enabled </span><span style="color:#adb7c9;">. . . .</span><span style="color:#abb2bf;"> : Yes
+</span><span style="color:#abb2bf;">   IPv4 Address. </span><span style="color:#adb7c9;">. . . . . . . . . .</span><span style="color:#abb2bf;"> : </span><span style="color:#db9d63;">10.10</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">0.9</span><span style="color:#abb2bf;">(Preferred)
+</span><span style="color:#abb2bf;">   Subnet Mask </span><span style="color:#adb7c9;">. . . . . . . . . . .</span><span style="color:#abb2bf;"> : </span><span style="color:#db9d63;">255.255</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">255.0
+</span><span style="color:#abb2bf;">   </span><span style="color:#cd74e8;">Default</span><span style="color:#abb2bf;"> Gateway </span><span style="color:#adb7c9;">. . . . . . . . .</span><span style="color:#abb2bf;"> : </span><span style="color:#db9d63;">10.10</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">0.2
+</span><span style="color:#abb2bf;">   DNS Servers </span><span style="color:#adb7c9;">. . . . . . . . . . .</span><span style="color:#abb2bf;"> : </span><span style="color:#db9d63;">10.10</span><span style="color:#abb2bf;">.</span><span style="color:#db9d63;">0.3
+</span><span style="color:#abb2bf;">   NetBIOS over Tcpip. </span><span style="color:#adb7c9;">. . . . . . .</span><span style="color:#abb2bf;"> : Enabled
+</span></code></pre>
+<p>Success — this virtual machine previously had a static IP of 10.10.0.9, which has now been fully migrated to the new Hyper-V network adapter, along with the rest of its network configuration.</p>
+<h2 id="self-healing-hyper-v-network-adapter-configuration">Self-Healing Hyper-V Network Adapter Configuration</h2>
+<p>Let's take it one step further and make your Hyper-V network adapter configuration self-healing — with no manual intervention required.</p>
+<p>Save the previous script as <code>Fix-NetworkAdapters.ps1</code> under <code>C:\tools\scripts</code>, then create a scheduled task to run it automatically at system startup:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#6c7079;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span style="color:#eb6772;">$TaskName </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;Fix-NetworkAdapters&quot;
+</span><span style="color:#eb6772;">$ScriptPath </span><span style="color:#adb7c9;">= </span><span style="color:#9acc76;">&quot;C:\tools\scripts\Fix-NetworkAdapters.ps1&quot;
+</span><span style="color:#eb6772;">$Action </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">New-ScheduledTaskAction </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Execute </span><span style="color:#9acc76;">&quot;powershell.exe&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Argument </span><span style="color:#9acc76;">&quot;-NoProfile -ExecutionPolicy Bypass -File </span><span style="color:#5ebfcc;">`&quot;</span><span style="color:#eb6772;">$ScriptPath</span><span style="color:#5ebfcc;">`&quot;</span><span style="color:#9acc76;">&quot;
+</span><span style="color:#eb6772;">$Trigger </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">New-ScheduledTaskTrigger </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">AtStartup
+</span><span style="color:#eb6772;">$Principal </span><span style="color:#adb7c9;">= </span><span style="color:#5ebfcc;">New-ScheduledTaskPrincipal </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">UserId </span><span style="color:#9acc76;">&quot;SYSTEM&quot; </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">LogonType ServiceAccount </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">RunLevel Highest
+</span><span style="color:#5ebfcc;">Register-ScheduledTask </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">TaskName </span><span style="color:#eb6772;">$TaskName </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Action </span><span style="color:#eb6772;">$Action </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Trigger </span><span style="color:#eb6772;">$Trigger </span><span style="color:#adb7c9;">-</span><span style="color:#abb2bf;">Principal </span><span style="color:#eb6772;">$Principal
+</span></code></pre>
+<p>Now shut down your VM, re-create the Hyper-V network adapter to simulate the problem, and start it up again. That's it — your virtual machine will now automatically repair its network adapter configuration on boot!</p>
+<h2 id="closing-thoughts">Closing Thoughts</h2>
+<p>Why not use DHCP? I could — but for my use case, it's much simpler to assign a number to each lab virtual machine and derive its IP address from that. It makes the setup far more predictable, and I don't need to bother extracting MAC addresses to configure static DHCP leases.</p>
+<p>Even if I wanted to use DHCP with static assignments, the platform I'm uploading the VHDX files to doesn't expose DHCP settings beyond "Enable DHCP".</p>
+<p>In my case, the simplest approach was to build the lab locally, upload the VHDX, and let each virtual machine automatically restore its original network configuration — even inside a new Hyper-V host.</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;pinning-apps-to-the-windows-11-taskbar-with-powershell&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              Pinning Apps to the Windows 11 Taskbar with PowerShell
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;disabling-the-windows-11-taskbar-search-box-for-all-users&#x2F;">
+              Disabling the Windows 11 Taskbar Search Box for All Users<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>
