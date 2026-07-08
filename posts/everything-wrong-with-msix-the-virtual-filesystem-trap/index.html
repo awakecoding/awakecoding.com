@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/everything-wrong-with-msix-the-virtual-filesystem-trap/">
+  <link rel="alternate" href="https://awakecoding.com/posts/everything-wrong-with-msix-the-virtual-filesystem-trap/" hreflang="en" />
+  
+  <meta name="description" content="MSIX solves real packaging problems, but package identity and filesystem virtualization change where applications and settings live. For ISVs, the settings path is the bigger risk: customer state, rollback, support workflows, and migration from MSI all depend on predictable paths." />
+  <meta property="og:title" content="Everything Wrong with MSIX: The Virtual Filesystem Trap" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;everything-wrong-with-msix-the-virtual-filesystem-trap&#x2F;" />
+  <meta property="og:description" content="MSIX solves real packaging problems, but package identity and filesystem virtualization change where applications and settings live. For ISVs, the settings path is the bigger risk: customer state, rollback, support workflows, and migration from MSI all depend on predictable paths." />
+  <meta name="twitter:title" content="Everything Wrong with MSIX: The Virtual Filesystem Trap" />
+  <meta name="twitter:description" content="MSIX solves real packaging problems, but package identity and filesystem virtualization change where applications and settings live. For ISVs, the settings path is the bigger risk: customer state, rollback, support workflows, and migration from MSI all depend on predictable paths." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;everything-wrong-with-msix-the-virtual-filesystem-trap&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/everything-wrong-with-msix-the-virtual-filesystem-trap.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/everything-wrong-with-msix-the-virtual-filesystem-trap.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Everything Wrong with MSIX: The Virtual Filesystem Trap",
+  "description": "MSIX solves real packaging problems, but package identity and filesystem virtualization change where applications and settings live. For ISVs, the settings path is the bigger risk: customer state, rollback, support workflows, and migration from MSI all depend on predictable paths.",
+  "datePublished": "2026-06-12",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/everything-wrong-with-msix-the-virtual-filesystem-trap.png",
+  "url": "https://awakecoding.com/posts/everything-wrong-with-msix-the-virtual-filesystem-trap/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/everything-wrong-with-msix-the-virtual-filesystem-trap/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | Everything Wrong with MSIX: The Virtual Filesystem Trap
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            Everything Wrong with MSIX: The Virtual Filesystem Trap
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2026-06-12">June 12, 2026</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>14 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>2769 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/msix/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>MSIX</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/windows/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Windows</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/powershell/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>PowerShell</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>MSIX solves real packaging problems, but it also creates a filesystem transition problem that looks minor until you support real customers: paths. The install path problem is mostly a discovery problem. The settings path problem is a product-risk problem.</p>
+<p>The <a rel="noopener nofollow noreferrer external" target="_blank" href="https://learn.microsoft.com/windows/msix/msix-containerization-overview">MSIX containerization model</a> is meant to provide clean uninstall, reliable updates, tamper resistance, user-scoped state, and less system rot. Those are valuable goals. The adoption problem is that file paths are not just implementation details users and administrators can ignore. In practice, paths are operational contracts: documentation, support scripts, log collectors, firewall and EDR rules, backup policies, roaming profile exclusions, automation, environment variables, and the muscle memory of every support engineer who has ever said, "open File Explorer and go to..."</p>
+<p>Changing an install path is not cosmetic. It changes how software is discovered, diagnosed, automated, and trusted. But the install path is only the mild version of the problem. The higher-risk break comes when the application's settings path changes too, because now the packaged and unpackaged versions can behave like two different products with two different user profiles.</p>
+<h2 id="where-is-windows-terminal">Where Is Windows Terminal?</h2>
+<p>Let's start with a familiar packaged application: Windows Terminal. From PowerShell, <code>wt.exe</code> appears to be on <code>PATH</code>:</p>
+<pre class="giallo" style="color: #ABB2BF; background-color: #282C34;"><code data-lang="powershell"><span class="giallo-l"><span>(</span><span style="color: #56B6C2;">Get-Command</span><span> wt).Source</span></span>
+<span class="giallo-l"><span>C:\Users\mamoreau\AppData\Local\Microsoft\WindowsApps\</span><span style="color: #56B6C2;">wt.exe</span></span></code></pre>
+<p>That is not the traditional executable install location. It is an app execution alias under the user's profile. That part is useful: app execution aliases make packaged apps launchable from the command line without every vendor adding custom install directories to <code>PATH</code>. Microsoft documents this as <a rel="noopener nofollow noreferrer external" target="_blank" href="https://learn.microsoft.com/uwp/schemas/appxpackage/uapmanifestschema/element-uap5-appexecutionalias"><code>uap5:AppExecutionAlias</code></a>, and the <a rel="noopener nofollow noreferrer external" target="_blank" href="https://learn.microsoft.com/windows/terminal/command-line-arguments#add-windows-terminal-executable-to-your-path">Windows Terminal command-line documentation</a> tells users to enable the alias if <code>wt.exe</code> is not found.</p>
+<p>The important distinction is that the alias is a launch entry point, not the application payload or the settings location. The real package payload is somewhere else entirely:</p>
+<pre class="giallo" style="color: #ABB2BF; background-color: #282C34;"><code data-lang="powershell"><span class="giallo-l"><span style="color: #56B6C2;">Get-AppxPackage</span><span> Microsoft.WindowsTerminal |</span><span style="color: #56B6C2;"> Select-Object</span><span> Name, Version, PackageFullName, PackageFamilyName, InstallLocation</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Name              : Microsoft.WindowsTerminal</span></span>
+<span class="giallo-l"><span>Version           : </span><span style="color: #D19A66;">1.24</span><span>.</span><span style="color: #D19A66;">11321.0</span></span>
+<span class="giallo-l"><span>PackageFullName   : Microsoft.WindowsTerminal_1.</span><span style="color: #D19A66;">24.11321</span><span>.0_x64__8wekyb3d8bbwe</span></span>
+<span class="giallo-l"><span>PackageFamilyName : Microsoft.WindowsTerminal_8wekyb3d8bbwe</span></span>
+<span class="giallo-l"><span>InstallLocation   : C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_1.</span><span style="color: #D19A66;">24.11321</span><span>.0_x64__8wekyb3d8bbwe</span></span></code></pre>
+<p>Now try browsing the parent folder directly:</p>
+<pre class="giallo" style="color: #ABB2BF; background-color: #282C34;"><code data-lang="powershell"><span class="giallo-l"><span style="color: #56B6C2;">Get-ChildItem</span><span style="color: #98C379;"> &#39;C:\Program Files\WindowsApps&#39;</span></span>
+<span class="giallo-l"><span style="color: #56B6C2;">Get-ChildItem</span><span>: Access to the path </span><span style="color: #98C379;">&#39;C:\Program Files\WindowsApps&#39;</span><span> is denied.</span></span></code></pre>
+<p>This is the first path distinction. With an MSI install, the answer to "where is the program installed?" is usually a path like this:</p>
+<pre class="giallo" style="color: #ABB2BF; background-color: #282C34;"><code data-lang="powershell"><span class="giallo-l"><span>C:\Program Files\Vendor\Product\</span><span style="color: #56B6C2;">Product.exe</span></span></code></pre>
+<p>With MSIX, the answer is split across a launch alias, package identity, protected storage, and package-scoped app data:</p>
+<pre class="giallo" style="color: #ABB2BF; background-color: #282C34;"><code data-lang="powershell"><span class="giallo-l"><span>C:\Users\&lt;user&gt;\AppData\Local\Microsoft\WindowsApps\</span><span style="color: #56B6C2;">wt.exe</span></span>
+<span class="giallo-l"><span>C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_1.</span><span style="color: #D19A66;">24.11321</span><span>.0_x64__8wekyb3d8bbwe\</span><span style="color: #56B6C2;">WindowsTerminal.exe</span></span>
+<span class="giallo-l"><span>C:\Users\&lt;user&gt;\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState</span></span></code></pre>
+<p>The alias solves command-line launch. The install and state paths behind it are the parts that are not equally visible, stable, writable, or explainable on a support call.</p>
+<p>For example, a regular user cannot open <code>C:\Program Files\WindowsApps</code> to list the installed package folders. The place where the real MSIX payloads live is intentionally protected, and the broader Windows app model has its own <a rel="noopener nofollow noreferrer external" target="_blank" href="https://learn.microsoft.com/windows/apps/develop/files/file-access-permissions">file access permission rules</a>, so the obvious payload discovery path starts with an access-denied dialog.</p>
+<p><img src="/images/posts/msix-filesystem-program-files-windows-apps-access-denied.png" alt="MSIX Program Files WindowsApps access denied" /></p>
+<p>A user can open a package install folder directly if they already have the exact full path, but that is a very different support experience. It is easy to say "open <code>C:\Program Files</code>, then open <code>Vendor</code>, then open <code>Product</code>" on a call. It is much harder to ask someone to copy a versioned package path that is discoverable through PowerShell but not by browsing.</p>
+<pre class="giallo" style="color: #ABB2BF; background-color: #282C34;"><code data-lang="powershell"><span class="giallo-l"><span>C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_1.</span><span style="color: #D19A66;">24.11321</span><span>.0_x64__8wekyb3d8bbwe</span></span></code></pre>
+<p><img src="/images/posts/msix-filesystem-program-files-windows-apps-windows-terminal.png" alt="MSIX Program Files WindowsApps Windows Terminal package folder" /></p>
+<h2 id="the-package-install-path-is-opaque-by-design">The Package Install Path Is Opaque by Design</h2>
+<p>MSIX package payloads are installed under <code>C:\Program Files\WindowsApps</code>, using a package full name like <code>Microsoft.WindowsTerminal_1.24.11321.0_x64__8wekyb3d8bbwe</code>, which includes the package name, version, architecture, resource ID, and publisher ID.</p>
+<p>That path is precise for Windows, but poor for human workflows. It is versioned, verbose, and contains an opaque publisher identifier. It also changes when the package version changes.</p>
+<p>This matters for vendors considering MSIX as an alternative to MSI. Many support and enterprise workflows assume the installation root is a stable, documented path: scripts check an executable, monitoring tools allowlist a binary path, support runbooks ask for logs under the install directory, and deployment validation looks for files under a known root. MSIX effectively asks vendors and administrators to stop assuming a pattern the Windows ecosystem has relied on for decades.</p>
+<p>I consider the executable install path a real but manageable friction point. You can usually document the new location, expose a command-line alias, add a registry key, or teach a script to resolve the installed package. None of that is ideal, but it is survivable.</p>
+<p>Settings paths are different. They are not just lookup locations for binaries. They contain user data, customer policy, environment-specific values, support history, and sometimes years of carefully accumulated configuration. When that path changes, the vendor is no longer just explaining where the program is installed. The vendor is deciding what happens to the customer's state.</p>
+<h2 id="the-settings-path-is-the-bigger-risk">The Settings Path Is the Bigger Risk</h2>
+<p>Packaged apps get package-scoped app data folders under <code>%LocalAppData%\Packages\&lt;PackageFamilyName&gt;</code>:</p>
+<pre class="giallo" style="color: #ABB2BF; background-color: #282C34;"><code data-lang="powershell"><span class="giallo-l"><span style="color: #56B6C2;">Get-ChildItem</span><span style="color: #98C379;"> &quot;</span><span style="color: #E06C75;">$Env:LocalAppData</span><span style="color: #98C379;">\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe&quot;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>    Directory: C:\Users\mamoreau\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Mode                 LastWriteTime         Length Name</span></span>
+<span class="giallo-l"><span style="color: #56B6C2;">----                 -------------         ------ ----</span></span>
+<span class="giallo-l"><span>d</span><span style="color: #56B6C2;">----</span><span style="color: #D19A66;">          2024</span><span style="color: #56B6C2;">-</span><span style="color: #D19A66;">10</span><span style="color: #56B6C2;">-</span><span style="color: #D19A66;">01  1</span><span>:</span><span style="color: #D19A66;">38</span><span> PM                AC</span></span>
+<span class="giallo-l"><span>d</span><span style="color: #56B6C2;">----</span><span style="color: #D19A66;">          2024</span><span style="color: #56B6C2;">-</span><span style="color: #D19A66;">03</span><span style="color: #56B6C2;">-</span><span style="color: #D19A66;">21 10</span><span>:</span><span style="color: #D19A66;">20</span><span> AM                AppData</span></span>
+<span class="giallo-l"><span>d</span><span style="color: #56B6C2;">----</span><span style="color: #D19A66;">          2024</span><span style="color: #56B6C2;">-</span><span style="color: #D19A66;">10</span><span style="color: #56B6C2;">-</span><span style="color: #D19A66;">01  1</span><span>:</span><span style="color: #D19A66;">38</span><span> PM                LocalCache</span></span>
+<span class="giallo-l"><span>d</span><span style="color: #56B6C2;">----</span><span style="color: #D19A66;">          2026</span><span style="color: #56B6C2;">-</span><span style="color: #D19A66;">06</span><span style="color: #56B6C2;">-</span><span style="color: #D19A66;">05  2</span><span>:</span><span style="color: #D19A66;">54</span><span> AM                LocalState</span></span>
+<span class="giallo-l"><span>d</span><span style="color: #56B6C2;">----</span><span style="color: #D19A66;">          2024</span><span style="color: #56B6C2;">-</span><span style="color: #D19A66;">03</span><span style="color: #56B6C2;">-</span><span style="color: #D19A66;">21 10</span><span>:</span><span style="color: #D19A66;">20</span><span> AM                RoamingState</span></span>
+<span class="giallo-l"><span>d</span><span style="color: #56B6C2;">----</span><span style="color: #D19A66;">          2024</span><span style="color: #56B6C2;">-</span><span style="color: #D19A66;">10</span><span style="color: #56B6C2;">-</span><span style="color: #D19A66;">01  1</span><span>:</span><span style="color: #D19A66;">38</span><span> PM                Settings</span></span>
+<span class="giallo-l"><span>d</span><span style="color: #56B6C2;">----</span><span style="color: #D19A66;">          2024</span><span style="color: #56B6C2;">-</span><span style="color: #D19A66;">10</span><span style="color: #56B6C2;">-</span><span style="color: #D19A66;">01  1</span><span>:</span><span style="color: #D19A66;">38</span><span> PM                SystemAppData</span></span>
+<span class="giallo-l"><span>d</span><span style="color: #56B6C2;">----</span><span style="color: #D19A66;">          2024</span><span style="color: #56B6C2;">-</span><span style="color: #D19A66;">03</span><span style="color: #56B6C2;">-</span><span style="color: #D19A66;">21 10</span><span>:</span><span style="color: #D19A66;">20</span><span> AM                TempState</span></span></code></pre>
+<p>For unpackaged apps, support instructions often use familiar paths:</p>
+<pre class="giallo" style="color: #ABB2BF; background-color: #282C34;"><code data-lang="powershell"><span class="giallo-l"><span style="color: #56B6C2;">%</span><span>AppData</span><span style="color: #56B6C2;">%</span><span>\Vendor\Product</span></span>
+<span class="giallo-l"><span style="color: #56B6C2;">%</span><span>LocalAppData</span><span style="color: #56B6C2;">%</span><span>\Vendor\Product</span></span>
+<span class="giallo-l"><span style="color: #56B6C2;">%</span><span>ProgramData</span><span style="color: #56B6C2;">%</span><span>\Vendor\Product</span></span></code></pre>
+<p>For packaged apps, the equivalent state may be under paths like these:</p>
+<pre class="giallo" style="color: #ABB2BF; background-color: #282C34;"><code data-lang="powershell"><span class="giallo-l"><span style="color: #56B6C2;">%</span><span>LocalAppData</span><span style="color: #56B6C2;">%</span><span>\Packages\&lt;PackageFamilyName&gt;\LocalState</span></span>
+<span class="giallo-l"><span style="color: #56B6C2;">%</span><span>LocalAppData</span><span style="color: #56B6C2;">%</span><span>\Packages\&lt;PackageFamilyName&gt;\LocalCache</span></span>
+<span class="giallo-l"><span style="color: #56B6C2;">%</span><span>LocalAppData</span><span style="color: #56B6C2;">%</span><span>\Packages\&lt;PackageFamilyName&gt;\RoamingState</span></span>
+<span class="giallo-l"><span style="color: #56B6C2;">%</span><span>LocalAppData</span><span style="color: #56B6C2;">%</span><span>\Packages\&lt;PackageFamilyName&gt;\TempState</span></span></code></pre>
+<p>Microsoft's <a rel="noopener nofollow noreferrer external" target="_blank" href="https://learn.microsoft.com/windows/apps/develop/data/store-and-retrieve-app-data">app data documentation</a> explains the intended model: packaged apps should use <code>ApplicationData.Current.LocalFolder</code>, <code>LocalCacheFolder</code>, <code>RoamingFolder</code>, and <code>TemporaryFolder</code> instead of hardcoding physical paths. That is good API guidance for developers. It does not erase the operational reality that support teams, administrators, and external tools still need to find the physical files.</p>
+<p>Windows Terminal makes this split easy to see. The MSIX-packaged version stores its user settings here:</p>
+<pre class="giallo" style="color: #ABB2BF; background-color: #282C34;"><code data-lang="powershell"><span class="giallo-l"><span style="color: #56B6C2;">%</span><span>LocalAppData</span><span style="color: #56B6C2;">%</span><span>\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json</span></span></code></pre>
+<p>For an unpackaged Windows Terminal, use the official ZIP asset from the <a rel="noopener nofollow noreferrer external" target="_blank" href="https://github.com/microsoft/terminal/releases">Windows Terminal releases page</a>, not the installed MSIX package under <code>C:\Program Files\WindowsApps</code>. Extract the ZIP, run <code>WindowsTerminal.exe</code> from that folder, and it runs without package identity. Without portable-mode opt-in, that unpackaged build uses the unpackaged settings path instead:</p>
+<pre class="giallo" style="color: #ABB2BF; background-color: #282C34;"><code data-lang="powershell"><span class="giallo-l"><span style="color: #56B6C2;">%</span><span>LocalAppData</span><span style="color: #56B6C2;">%</span><span>\Microsoft\Windows Terminal\settings.json</span></span></code></pre>
+<p>That is already two settings files for the same application version. If a user changes a profile in the MSIX package, the ZIP build will not read it from <code>LocalState</code>; if the user changes the ZIP build settings, the MSIX package will not read them from <code>%LocalAppData%\Microsoft\Windows Terminal</code>.</p>
+<p>One answer is to say: the future is packaged, so migrate the settings once and move on. That sounds simple until you are the vendor responsible for customer data. Settings migration is risky. If the migration code has a bug, if it misses a file, if it misunderstands a versioned schema, or if it overwrites something the customer expected to keep, you have created a data-loss incident out of an installer choice.</p>
+<p>Rollback makes it worse. Suppose a customer installs the MSIX package, launches it, and the application automatically migrates settings from the unpackaged location into the package-scoped location. Then the customer decides MSIX is not working for them and goes back to the MSI or ZIP build. The unpackaged app may start as a fresh, unconfigured application because the active settings now live under <code>%LocalAppData%\Packages\&lt;PackageFamilyName&gt;</code>. The files may still exist, but the customer now has two versions of the truth in two different directories.</p>
+<p>For an existing desktop app, that can be a large operational risk introduced by the packaging transition. A simple, predictable settings path is a feature: scripts can bootstrap the application, external tools can preconfigure it, support can name the file, and customers can inspect or redact it without package identity, an app data API, or a support utility.</p>
+<p>This leaves vendors choosing between trade-offs that did not exist before:</p>
+<ol>
+<li>Keep packaged and unpackaged settings separate, and accept that the same user may see different configuration depending on how the app was launched.</li>
+<li>Copy or move settings into the package location, and accept stale state, rollback, and external-tool compatibility risks.</li>
+<li>Build two-way synchronization, and accept a new conflict-resolution problem that the product did not need before.</li>
+<li>Avoid MSIX-specific state APIs and keep using the old path, giving up some of the isolation model MSIX is trying to provide.</li>
+</ol>
+<p>None of those choices is equivalent to the old MSI answer: the settings are in the documented settings folder, regardless of how the application was installed.</p>
+<p>The ZIP build also supports explicit <a rel="noopener nofollow noreferrer external" target="_blank" href="https://github.com/microsoft/terminal/blob/main/doc/specs/portable-mode-spec.md">portable mode</a>: if a <code>.portable</code> marker file is placed next to <code>Microsoft.Terminal.Settings.Model.dll</code>, Terminal roots settings and state in a <code>settings</code> folder beside that DLL. That makes the portable-mode path look like this:</p>
+<pre class="giallo" style="color: #ABB2BF; background-color: #282C34;"><code data-lang="powershell"><span class="giallo-l"><span>&lt;WindowsTerminalZipRoot&gt;\settings\settings.json</span></span></code></pre>
+<p>That is useful, but it is also another path a support engineer must know to ask about. When a product has packaged, unpackaged, and portable forms, "send me your settings file" is no longer a single instruction.</p>
+<h2 id="the-virtual-filesystem-makes-paths-more-complicated">The Virtual Filesystem Makes Paths More Complicated</h2>
+<p>The part that makes this even more confusing is the MSIX virtual filesystem. Microsoft documents this in <a rel="noopener nofollow noreferrer external" target="_blank" href="https://learn.microsoft.com/windows/msix/desktop/desktop-to-uwp-behind-the-scenes#file-system">Understanding how packaged desktop apps run on Windows</a>: packaged desktop apps run with special filesystem behavior depending on the location being accessed.</p>
+<p>The important pieces are:</p>
+<ol>
+<li>The package install directory is read-only at runtime.</li>
+<li>The package can contain a virtual filesystem folder named <code>VFS</code>, with files mapped into well-known Windows locations.</li>
+<li>Reads can show a merged view of real system folders and package-provided virtual files.</li>
+<li>Writes under parts of <code>AppData</code> can be redirected to a private per-user, per-package location.</li>
+</ol>
+<p>The goal is compatibility. If a classic desktop app expected a DLL to exist in <code>System32</code>, the package can include it under the corresponding virtual filesystem folder and Windows can make it appear in the expected place for that app. If an app writes new files under certain <code>AppData</code> locations, Windows can redirect those writes so the package state remains isolated and removable. Newer MSIX packages can also opt into <a rel="noopener nofollow noreferrer external" target="_blank" href="https://learn.microsoft.com/windows/msix/desktop/flexible-virtualization#mechanisms-prior-to-windows-11">flexible virtualization</a>, which is useful, but also reinforces the point: whether a path behaves like a normal path depends on package identity and runtime context.</p>
+<p>That is clever engineering. It is also another source of mismatch between what the app sees and what the user, support engineer, service, script, or external diagnostic tool sees.</p>
+<p>When a packaged app reads a path, it may be seeing a merged view. When it writes a path, the write may land somewhere else. When another process inspects the same ordinary-looking path, it may not have the same package identity, package registration, or virtualization context. This is why Microsoft's own <a rel="noopener nofollow noreferrer external" target="_blank" href="https://learn.microsoft.com/windows/msix/manage/troubleshoot-msix-container">runtime troubleshooting guidance</a> and <a rel="noopener nofollow noreferrer external" target="_blank" href="https://learn.microsoft.com/windows/msix/msix-troubleshooting-guide#runtime-and-virtualization-behavior">MSIX troubleshooting guide</a> have to talk about container behavior explicitly. This is also the point where "just open the config file" turns into a diagnostic exercise.</p>
+<h2 id="why-this-breaks-migration-assumptions">Why This Breaks Migration Assumptions</h2>
+<p>Imagine a vendor with an existing MSI package. The application has been around for years. Customers know where logs are. Support knows where settings are. Automation knows where the executable is. Enterprise customers have allowlists, detection rules, backup exclusions, and deployment checks. Then the vendor decides to offer an MSIX package as a "modern" alternative.</p>
+<p>Even if the application code works, the operational surface changes:</p>
+<ol>
+<li>Packaged and unpackaged builds may read different settings files.</li>
+<li>Automatic settings migration can create rollback and downgrade traps.</li>
+<li>Existing support scripts may miss logs and settings.</li>
+<li>Existing customer scripts may bootstrap or preconfigure the wrong directory.</li>
+<li>User data may move under <code>%LocalAppData%\Packages\&lt;PackageFamilyName&gt;</code>.</li>
+<li>Profile-management products may treat package folders differently.</li>
+<li>Machine-wide state under <code>%ProgramData%</code> may no longer fit the package model.</li>
+<li>The executable is no longer under a predictable vendor install folder.</li>
+<li>The real install path is ACL-protected and versioned.</li>
+</ol>
+<p>This is why "paths should be irrelevant" is not a sufficient answer. Paths are part of the product contract, even if they were never written down that way.</p>
+<h2 id="the-operational-contract-changes">The Operational Contract Changes</h2>
+<p>The moment an application has both packaged and unpackaged forms, the vendor inherits a new operational contract. The hard question is not only whether the MSIX package launches. It is what happens to the customer's existing configuration files, logs, support bundles, deployment detection rules, profile-management assumptions, backup rules, and preconfiguration scripts. Those things may never have been treated as a formal API, but customers build around them anyway.</p>
+<p>The hardest part of shipping MSIX beside MSI is not always packaging the binaries. It is deciding whether to migrate user state at all, how to make that migration safe, and how to support customers who need to move back. The packaged version may look like the same product to the end user while behaving like a different product to everyone responsible for operating it.</p>
+<p>That is the transition cost vendors feel directly. MSIX moves risk from the platform model into the product team. If the vendor migrates too aggressively, they can break rollback or damage customer state. If they migrate too cautiously, customers see an empty profile and assume the product lost their settings. If they keep both paths alive, support now has to ask which package type launched the app before they can even interpret a log bundle.</p>
+<h2 id="what-support-teams-need-to-resolve">What Support Teams Need to Resolve</h2>
+<p>A small helper makes the package path model visible. If you support MSIX-packaged apps, you eventually need to translate a package name into the paths users can actually inspect. Here are the pieces involved:</p>
+<pre class="giallo" style="color: #ABB2BF; background-color: #282C34;"><code data-lang="powershell"><span class="giallo-l"><span style="color: #C678DD;">function</span><span style="color: #61AFEF;"> Get-AppxPathMap</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #C678DD;">    param</span><span>(</span></span>
+<span class="giallo-l"><span>        [</span><span style="color: #56B6C2;">Parameter</span><span>(</span><span style="color: #E06C75;font-style: italic;">Mandatory</span><span style="color: #56B6C2;"> =</span><span style="color: #D19A66;"> $true</span><span>)]</span></span>
+<span class="giallo-l"><span>        [</span><span style="color: #C678DD;">string</span><span>]</span><span style="color: #E06C75;"> $PackageName</span></span>
+<span class="giallo-l"><span>    )</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">    $appx</span><span style="color: #56B6C2;"> = Get-AppxPackage -</span><span>Name </span><span style="color: #E06C75;">$PackageName</span><span> |</span><span style="color: #56B6C2;"> Select-Object -</span><span>First </span><span style="color: #D19A66;">1</span></span>
+<span class="giallo-l"><span style="color: #C678DD;">    if</span><span> (</span><span style="color: #56B6C2;">-not</span><span style="color: #E06C75;"> $appx</span><span>) {</span></span>
+<span class="giallo-l"><span style="color: #C678DD;">        throw</span><span style="color: #98C379;"> &quot;Package not found: </span><span style="color: #E06C75;">$PackageName</span><span style="color: #98C379;">&quot;</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">    $packageFamilyName</span><span style="color: #56B6C2;"> =</span><span style="color: #E06C75;"> $appx.PackageFamilyName</span></span>
+<span class="giallo-l"><span>    [</span><span style="color: #C678DD;">pscustomobject</span><span>]</span><span style="color: #C678DD;">@</span><span>{</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        Name</span><span style="color: #56B6C2;">            =</span><span style="color: #E06C75;"> $appx.Name</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        Version</span><span style="color: #56B6C2;">         =</span><span style="color: #E06C75;"> $appx.Version.ToString</span><span>()</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        PackageFullName</span><span style="color: #56B6C2;"> =</span><span style="color: #E06C75;"> $appx.PackageFullName</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        PackageFamily</span><span style="color: #56B6C2;">   =</span><span style="color: #E06C75;"> $packageFamilyName</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        InstallLocation</span><span style="color: #56B6C2;"> =</span><span style="color: #E06C75;"> $appx.InstallLocation</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        AliasRoot</span><span style="color: #56B6C2;">       = Join-Path</span><span style="color: #E06C75;"> $Env:LocalAppData</span><span style="color: #98C379;"> &quot;Microsoft\WindowsApps&quot;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        AppDataRoot</span><span style="color: #56B6C2;">     = Join-Path</span><span style="color: #E06C75;"> $Env:LocalAppData</span><span style="color: #98C379;"> &quot;Packages\</span><span style="color: #E06C75;">$packageFamilyName</span><span style="color: #98C379;">&quot;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        LocalState</span><span style="color: #56B6C2;">      = Join-Path</span><span style="color: #E06C75;"> $Env:LocalAppData</span><span style="color: #98C379;"> &quot;Packages\</span><span style="color: #E06C75;">$packageFamilyName</span><span style="color: #98C379;">\LocalState&quot;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        LocalCache</span><span style="color: #56B6C2;">      = Join-Path</span><span style="color: #E06C75;"> $Env:LocalAppData</span><span style="color: #98C379;"> &quot;Packages\</span><span style="color: #E06C75;">$packageFamilyName</span><span style="color: #98C379;">\LocalCache&quot;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        RoamingState</span><span style="color: #56B6C2;">    = Join-Path</span><span style="color: #E06C75;"> $Env:LocalAppData</span><span style="color: #98C379;"> &quot;Packages\</span><span style="color: #E06C75;">$packageFamilyName</span><span style="color: #98C379;">\RoamingState&quot;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        TempState</span><span style="color: #56B6C2;">       = Join-Path</span><span style="color: #E06C75;"> $Env:LocalAppData</span><span style="color: #98C379;"> &quot;Packages\</span><span style="color: #E06C75;">$packageFamilyName</span><span style="color: #98C379;">\TempState&quot;</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #56B6C2;">Get-AppxPathMap -</span><span>PackageName Microsoft.WindowsTerminal |</span><span style="color: #56B6C2;"> Format-List</span></span></code></pre>
+<p>That helper is not a workaround. It illustrates the extra resolution step. With a classic MSI install, support documentation usually points at a stable vendor folder. With MSIX, support tooling has to resolve package identity first, then translate it into the install location, alias root, and app data root.</p>
+<p>The support cost is not just internal convenience. Customers often need to inspect or redact settings before sharing them. A predictable path makes that possible with File Explorer; a package-scoped path hidden behind identity lookup turns a basic support request into a guided procedure.</p>
+<h2 id="suggested-improvements">Suggested Improvements</h2>
+<p>If you work on MSIX at Microsoft, these are the platform changes that would reduce the adoption cost for ISVs:</p>
+<ul>
+<li>Make it possible to open <code>%ProgramFiles%\WindowsApps</code> in File Explorer, at least for read-only inspection of installed package files. It is much easier to ask a user to open a folder than to ask them to discover a package full name first. MSIX may be designed to "just work", but packaging mistakes still happen, and support teams often need to confirm that specific DLLs are present with the expected version numbers in the installed path.</li>
+<li>Allow unvirtualized filesystem paths for application settings, so vendors can move back and forth between MSI, ZIP, and MSIX without creating two distinct directories for the same application state. This is the riskiest path change introduced by MSIX because it touches customer data, rollback behavior, and support workflows.</li>
+<li>Allow filesystem aliases for program files and program data. If filesystem virtualization has to remain, take inspiration from app execution aliases and let traditional program files and data paths resolve to their packaged equivalents. Existing scripts, runbooks, monitoring rules, and support instructions need a compatibility path.</li>
+</ul>
+<p>The core problem is that MSIX combines application packaging with application virtualization, and ISVs cannot adopt one without absorbing the operational consequences of the other. MSIX is not "just" a packaging format. The virtualization model can make the packaged application operationally distinct from its unpackaged equivalent, even when the binaries and UI look the same.</p>
+<h2 id="closing-thoughts">Closing Thoughts</h2>
+<p>MSIX is trying to solve real problems: uninstall cleanup, update reliability, package integrity, dependency management, and state isolation. Those goals matter. But software distribution is not only about installing files. It is also about making software observable, scriptable, supportable, and predictable.</p>
+<p>MSI has plenty of problems, but it gave vendors and administrators a simple mental model: files go here, machine state goes there, user state goes somewhere recognizable, and the installed product can be found without decoding package identity. MSIX replaces that model with a more controlled one, but the transition cost is real. The install path friction is mostly a discovery problem. The settings path friction is higher risk, because it touches user data, rollback behavior, support workflows, and customer trust.</p>
+<p>For consumer desktop apps, maybe that trade-off is acceptable. For developer tools, infrastructure tools, enterprise software, and anything with serious support obligations, paths are not irrelevant. They are part of the product experience.</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;everything-wrong-with-msix-no-system-context&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              Everything Wrong with MSIX: No System Context
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;shadow-theory-why-ai-prompting-is-about-perspectives&#x2F;">
+              Shadow Theory: Why AI Prompting Is About Perspectives<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>
