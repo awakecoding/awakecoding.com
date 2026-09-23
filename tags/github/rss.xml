@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+      <title>AwakeCoding ☀️💻 - GitHub</title>
+      <link>https://awakecoding.com</link>
+      <description>awakecoding - Adventures of a CTO</description>
+      <generator>Zola</generator>
+      <language>en</language>
+      <atom:link href="https://awakecoding.com/tags/github/rss.xml" rel="self" type="application/rss+xml"/>
+      <lastBuildDate>Fri, 30 Jan 2026 00:00:00 +0000</lastBuildDate>
+      <item>
+          <title>Configuring SSH for Personal and Work GitHub Accounts</title>
+          <pubDate>Fri, 30 Jan 2026 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/configuring-ssh-for-personal-and-work-github-accounts/</link>
+          <guid>https://awakecoding.com/posts/configuring-ssh-for-personal-and-work-github-accounts/</guid>
+          <description>Managing separate GitHub accounts for work and personal projects? Learn how to configure SSH keys, URL rewriting, and conditional git settings to automatically select the right identity—plus where GitHub&#x27;s tools still need manual account switching.</description>
+          <bannerImage>https://awakecoding.com/images/banners/configuring-ssh-for-personal-and-work-github-accounts.png</bannerImage><tags>
+              <tag>GitHub</tag>
+              <tag>CTO</tag>
+            </tags></item>
+    </channel>
+</rss>

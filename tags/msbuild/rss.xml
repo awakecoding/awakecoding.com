@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+      <title>AwakeCoding ☀️💻 - MSBuild</title>
+      <link>https://awakecoding.com</link>
+      <description>awakecoding - Adventures of a CTO</description>
+      <generator>Zola</generator>
+      <language>en</language>
+      <atom:link href="https://awakecoding.com/tags/msbuild/rss.xml" rel="self" type="application/rss+xml"/>
+      <lastBuildDate>Thu, 20 Nov 2025 00:00:00 +0000</lastBuildDate>
+      <item>
+          <title>Disabling MSBuild Node Reuse to Avoid File Locking Issues</title>
+          <pubDate>Thu, 20 Nov 2025 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/disabling-msbuild-node-reuse-to-avoid-file-locking-issues/</link>
+          <guid>https://awakecoding.com/posts/disabling-msbuild-node-reuse-to-avoid-file-locking-issues/</guid>
+          <description>Intermittent .NET host processes locking your build outputs? MSBuild&#x27;s node reuse feature causes file locking in complex build systems. Learn how MSBUILDDISABLENODEREUSE fixes years of sporadic build failures, why this optimization backfires, and when you should disable it.</description>
+          <bannerImage>https://awakecoding.com/images/banners/disabling-msbuild-node-reuse-to-avoid-file-locking-issues.png</bannerImage><tags>
+              <tag>MSBuild</tag>
+              <tag>Windows</tag>
+              <tag>PowerShell</tag>
+              <tag>CTO</tag>
+            </tags></item>
+    </channel>
+</rss>

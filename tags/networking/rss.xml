@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+      <title>AwakeCoding ☀️💻 - Networking</title>
+      <link>https://awakecoding.com</link>
+      <description>awakecoding - Adventures of a CTO</description>
+      <generator>Zola</generator>
+      <language>en</language>
+      <atom:link href="https://awakecoding.com/tags/networking/rss.xml" rel="self" type="application/rss+xml"/>
+      <lastBuildDate>Fri, 01 Aug 2025 00:00:00 +0000</lastBuildDate>
+      <item>
+          <title>Deleting Hidden Proxy Settings that Break Windows Apps</title>
+          <pubDate>Fri, 01 Aug 2025 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/deleting-hidden-proxy-settings-that-break-windows-apps/</link>
+          <guid>https://awakecoding.com/posts/deleting-hidden-proxy-settings-that-break-windows-apps/</guid>
+          <description>Windows leaves behind hidden proxy configurations in the ProxyMgr registry that break apps even after disabling proxy settings. Learn how to identify and completely eliminate these phantom settings that affect system services like Kerberos authentication.</description>
+          <bannerImage>https://awakecoding.com/images/banners/deleting-hidden-proxy-settings-that-break-windows-apps.png</bannerImage><tags>
+              <tag>Windows</tag>
+              <tag>PowerShell</tag>
+              <tag>Networking</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>Automating Hyper-V Network Adapter Cleanup and IP Migration</title>
+          <pubDate>Sat, 17 May 2025 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/automating-hyper-v-network-adapter-cleanup-migration/</link>
+          <guid>https://awakecoding.com/posts/automating-hyper-v-network-adapter-cleanup-migration/</guid>
+          <description>Learn how to automate the cleanup of ghost Hyper-V network adapters and migrate static IP configurations using PowerShell. This post walks through detecting stale adapters, reassigning IP settings, and setting up a scheduled task to keep your lab environments self-healing on boot.</description>
+          <bannerImage>https://awakecoding.com/images/banners/automating-hyper-v-network-adapter-cleanup-migration.png</bannerImage><lastUpdated>Sun, 18 May 2025 00:00:00 +0000</lastUpdated><tags>
+              <tag>Windows</tag>
+              <tag>Networking</tag>
+              <tag>PowerShell</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>Windows Virtual Network using Wintun and tun2socks</title>
+          <pubDate>Tue, 21 Jan 2025 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/windows-virtual-network-using-wintun-and-tun2socks/</link>
+          <guid>https://awakecoding.com/posts/windows-virtual-network-using-wintun-and-tun2socks/</guid>
+          <description>Learn how to set up a TUN-based virtual network interface in Windows using WinTun and tun2socks, route traffic through a SOCKS proxy, and build your own custom VPN solution from scratch</description>
+          <bannerImage>https://awakecoding.com/images/banners/windows-virtual-network-using-wintun-and-tun2socks.png</bannerImage><tags>
+              <tag>Windows</tag>
+              <tag>Networking</tag>
+              <tag>CTO</tag>
+            </tags></item>
+    </channel>
+</rss>
