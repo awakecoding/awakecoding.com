@@ -30,8 +30,8 @@ In my case, I will create two key pairs, one for Devolutions (work), and one for
 In PowerShell, here's how to invoke `ssh-keygen`, pay close attention to the syntax for the empty passphrase at the end:
 
 ```powershell
-ssh-keygen -t ed25519 -C "mamoreau@devolutions.net" -f ~/.ssh/id_ed25519_devolutions -N '""'
-ssh-keygen -t ed25519 -C "marcandre.moreau@gmail.com" -f ~/.ssh/id_ed25519_awakecoding -N '""'
+ssh-keygen -t ed25519 -C 'mamoreau@devolutions.net' -f ~/.ssh/id_ed25519_devolutions -N ''
+ssh-keygen -t ed25519 -C 'marcandre.moreau@gmail.com' -f ~/.ssh/id_ed25519_awakecoding -N ''
 ```
 
 In bash, it's a bit simpler:
