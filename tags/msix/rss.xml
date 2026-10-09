@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+      <title>AwakeCoding ☀️💻 - MSIX</title>
+      <link>https://awakecoding.com</link>
+      <description>awakecoding - Adventures of a CTO</description>
+      <generator>Zola</generator>
+      <language>en</language>
+      <atom:link href="https://awakecoding.com/tags/msix/rss.xml" rel="self" type="application/rss+xml"/>
+      <lastBuildDate>Fri, 12 Jun 2026 00:00:00 +0000</lastBuildDate>
+      <item>
+          <title>Everything Wrong with MSIX: The Virtual Filesystem Trap</title>
+          <pubDate>Fri, 12 Jun 2026 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/everything-wrong-with-msix-the-virtual-filesystem-trap/</link>
+          <guid>https://awakecoding.com/posts/everything-wrong-with-msix-the-virtual-filesystem-trap/</guid>
+          <description>MSIX solves real packaging problems, but package identity and filesystem virtualization change where applications and settings live. For ISVs, the settings path is the bigger risk: customer state, rollback, support workflows, and migration from MSI all depend on predictable paths.</description>
+          <bannerImage>https://awakecoding.com/images/banners/everything-wrong-with-msix-the-virtual-filesystem-trap.png</bannerImage><tags>
+              <tag>MSIX</tag>
+              <tag>Windows</tag>
+              <tag>PowerShell</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>Everything Wrong with MSIX: No System Context</title>
+          <pubDate>Wed, 06 May 2026 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/everything-wrong-with-msix-no-system-context/</link>
+          <guid>https://awakecoding.com/posts/everything-wrong-with-msix-no-system-context/</guid>
+          <description>PowerShell&#x27;s MSI deprecation exposes the problem with treating MSIX like a better MSI: user-registered packages can disappear from SYSTEM, breaking services, scheduled tasks, remoting, and automation.</description>
+          <bannerImage>https://awakecoding.com/images/banners/everything-wrong-with-msix-no-system-context.png</bannerImage><tags>
+              <tag>MSIX</tag>
+              <tag>Windows</tag>
+              <tag>PowerShell</tag>
+              <tag>CTO</tag>
+            </tags></item>
+    </channel>
+</rss>

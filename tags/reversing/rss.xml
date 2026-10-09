@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+      <title>AwakeCoding ☀️💻 - Reversing</title>
+      <link>https://awakecoding.com</link>
+      <description>awakecoding - Adventures of a CTO</description>
+      <generator>Zola</generator>
+      <language>en</language>
+      <atom:link href="https://awakecoding.com/tags/reversing/rss.xml" rel="self" type="application/rss+xml"/>
+      <lastBuildDate>Tue, 02 Jan 2024 00:00:00 +0000</lastBuildDate>
+      <item>
+          <title>Decompiling Hyper-V Manager to rebuild it from source</title>
+          <pubDate>Tue, 02 Jan 2024 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/decompiling-hyper-v-manager-to-rebuild-it-from-source/</link>
+          <guid>https://awakecoding.com/posts/decompiling-hyper-v-manager-to-rebuild-it-from-source/</guid>
+          <description>This post guides through decompiling Hyper-V Manager to rebuild it from source, aiming to assess its value for potential open-sourcing. It explores manual and automated decompilation processes, including troubleshooting and enhancing the tool, advocating for community-led improvements to this widely-used but neglected software.</description>
+          <bannerImage>https://awakecoding.com/images/banners/decompiling-hyper-v-manager-to-rebuild-it-from-source.png</bannerImage><tags>
+              <tag>Hyper-V</tag>
+              <tag>Reversing</tag>
+              <tag>CTO</tag>
+            </tags></item>
+    </channel>
+</rss>

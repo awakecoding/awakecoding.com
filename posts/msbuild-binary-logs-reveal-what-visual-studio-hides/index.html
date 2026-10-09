@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/msbuild-binary-logs-reveal-what-visual-studio-hides/">
+  <link rel="alternate" href="https://awakecoding.com/posts/msbuild-binary-logs-reveal-what-visual-studio-hides/" hreflang="en" />
+  
+  <meta name="description" content="Visual Studio build logs are noisy and useless for real insight. MSBuild binary logs reveal what the IDE hides: where time is spent, which analyzers drag, and why projects rebuild. Learn how to capture .binlog files and finally see the truth behind your .NET builds." />
+  <meta property="og:title" content="MSBuild Binary Logs Reveal What Visual Studio Hides" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;msbuild-binary-logs-reveal-what-visual-studio-hides&#x2F;" />
+  <meta property="og:description" content="Visual Studio build logs are noisy and useless for real insight. MSBuild binary logs reveal what the IDE hides: where time is spent, which analyzers drag, and why projects rebuild. Learn how to capture .binlog files and finally see the truth behind your .NET builds." />
+  <meta name="twitter:title" content="MSBuild Binary Logs Reveal What Visual Studio Hides" />
+  <meta name="twitter:description" content="Visual Studio build logs are noisy and useless for real insight. MSBuild binary logs reveal what the IDE hides: where time is spent, which analyzers drag, and why projects rebuild. Learn how to capture .binlog files and finally see the truth behind your .NET builds." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;msbuild-binary-logs-reveal-what-visual-studio-hides&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/msbuild-binary-logs-reveal-what-visual-studio-hides.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/msbuild-binary-logs-reveal-what-visual-studio-hides.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "MSBuild Binary Logs Reveal What Visual Studio Hides",
+  "description": "Visual Studio build logs are noisy and useless for real insight. MSBuild binary logs reveal what the IDE hides: where time is spent, which analyzers drag, and why projects rebuild. Learn how to capture .binlog files and finally see the truth behind your .NET builds.",
+  "datePublished": "2025-09-26",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/msbuild-binary-logs-reveal-what-visual-studio-hides.png",
+  "url": "https://awakecoding.com/posts/msbuild-binary-logs-reveal-what-visual-studio-hides/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/msbuild-binary-logs-reveal-what-visual-studio-hides/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | MSBuild Binary Logs Reveal What Visual Studio Hides
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            MSBuild Binary Logs Reveal What Visual Studio Hides
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2025-09-26">September 26, 2025</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>7 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>1281 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/windows/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Windows</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/powershell/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>PowerShell</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>If you've ever tried to diagnose slow .NET builds in Visual Studio, you already know the pain: even if you crank the build verbosity to <em>Diagnostic</em>, all you get is a firehose of interleaved, noisy text that describes what happened without the why and how. Your life feels like a Coldplay song:</p>
+<blockquote>
+<p>🎶 <em>When you try your best, but you don't succeed</em> 🎵 <em>When you get what you want, but not what you need</em> 🎶</p>
+</blockquote>
+<p>What do we want? Build logs.
+What do we need? Build <em>insight</em>.</p>
+<p>Want to know where your build time actually went? Which analyzer or generator slowed everything down? Why a project got rebuilt when it shouldn't have? <strong>Forget it. Visual Studio won't tell you.</strong></p>
+<p>The irony is that MSBuild has had the answer for years: <strong>binary logs</strong>. Compact, structured, and infinitely more useful than anything in the Output Window. They capture everything that happens during your build, and with the right viewer, they make diagnosing performance issues <em>almost pleasant</em>.</p>
+<p>This post shows you how to break free: capture your own binary logs, explore them with <a rel="noopener nofollow noreferrer external" target="_blank" href="https://msbuildlog.com/">msbuildlog.com</a>, and finally see the truth behind your builds.</p>
+<h2 id="step-1-install-the-viewer">Step 1: Install the Viewer</h2>
+<p>You'll need a way to read <code>.binlog</code> files. Install the <a rel="noopener nofollow noreferrer external" target="_blank" href="https://msbuildlog.com/">MSBuild Structured Log Viewer</a>:</p>
+<pre class="giallo" style="color: #ABB2BF; background-color: #282C34;"><code data-lang="powershell"><span class="giallo-l"><span>winget install KirillOsenkov.MSBuildStructuredLogViewer</span></span></code></pre><h2 id="step-2-enter-a-developer-shell">Step 2: Enter a Developer Shell</h2>
+<p>Open PowerShell, then move to the directory where your .sln file is located. You will need a Visual Studio developer shell to use the <code>msbuild</code> command. Instead of launching a new Visual Studio shell in a special way, you can use the <a rel="noopener nofollow noreferrer external" target="_blank" href="https://github.com/awakecoding/VsDevShell-ps">VsDevShell PowerShell module</a> to do it from an existing shell easily:</p>
+<pre class="giallo" style="color: #ABB2BF; background-color: #282C34;"><code data-lang="powershell"><span class="giallo-l"><span style="color: #56B6C2;">Install-Module</span><span> VsDevShell </span><span style="color: #56B6C2;">-</span><span>Scope CurrentUser</span></span>
+<span class="giallo-l"><span style="color: #56B6C2;">Enter-VsDevShell</span></span></code></pre>
+<p>You can also use the <code>dotnet build</code> command which doesn't require a Visual Studio developer shell, but it is possible that your solution won't build, especially if it has a lot of .NET legacy components.</p>
+<h2 id="step-3-capture-a-binary-log">Step 3: Capture a Binary Log</h2>
+<p>Build your solution at the command-line with the <code>/bl /p:ReportAnalyzer=true</code> parameters:</p>
+<pre class="giallo" style="color: #ABB2BF; background-color: #282C34;"><code data-lang="powershell"><span class="giallo-l"><span>msbuild .\YourAwesomeApp.sln </span><span style="color: #56B6C2;">/</span><span>bl </span><span style="color: #56B6C2;">/</span><span>p:ReportAnalyzer</span><span style="color: #56B6C2;">=</span><span>true</span></span></code></pre><pre class="giallo" style="color: #ABB2BF; background-color: #282C34;"><code data-lang="powershell"><span class="giallo-l"><span>dotnet build .\YourAwesomeApp.sln </span><span style="color: #56B6C2;">/</span><span>bl </span><span style="color: #56B6C2;">/</span><span>p:ReportAnalyzer</span><span style="color: #56B6C2;">=</span><span>true</span></span></code></pre>
+<p>You'll get <strong>msbuild.binlog</strong> in the current working directory. In order to get insight into Roslyn code analyzers, you'll want to make sure <a rel="noopener nofollow noreferrer external" target="_blank" href="https://learn.microsoft.com/en-us/visualstudio/code-quality/disable-code-analysis">they're enabled at build time</a>.</p>
+<h2 id="step-4-actually-learn-something">Step 4: Actually Learn Something</h2>
+<p>Open <code>msbuild.binlog</code> in the viewer and you'll finally see:</p>
+<p><strong>Top 10 most expensive tasks</strong> → figure out where most of the build time went (beyond just "building stuff"):</p>
+<p><img src="/images/posts/msbuild-binlog-most-expensive-tasks.png" alt="MSBuild Log Most Expensive Tasks" /></p>
+<p><strong>Analyzer and generator summary</strong> → spot costly Roslyn code analyzers and source generators instantly:</p>
+<p><img src="/images/posts/msbuild-binlog-source-generators.png" alt="MSBuild Log Analyzers and Generators" /></p>
+<p><strong>Search</strong> → run queries like <code>$task csc $time</code> to see core compiler cost, among other things.</p>
+<p><img src="/images/posts/msbuild-binlog-task-csc-time.png" alt="MSBuild Log Analyzers and Generators" /></p>
+<p>Instead of scrolling endlessly through useless text, you'll have real, detailed insight that you can investigate properly.</p>
+<h2 id="roslyn-code-analyzers">Roslyn Code Analyzers</h2>
+<p>Roslyn code analyzers are a common cause of Visual Studio eating all the RAM and CPU until your $5,000 laptop feels like a $500 model. Seriously, here's a screenshot from 2023 showing StyleCop <em>costing an entire minute of code analysis</em>:</p>
+<p><img src="/images/posts/msbuild-binlog-code-analyzers.png" alt="MSBuild Log Code Analyzers" /></p>
+<p>And before StyleCop, we had been bitten by SecurityCodeScan that was taking <em>90 seconds</em> for something we certainly didn't need to run on every build.</p>
+<p>Take the time to capture logs with code analyzers enabled, as they can be horribly expensive to run continuously. Review your project settings to control when they run, and the scope of analysis.</p>
+<h2 id="roslyn-source-generators">Roslyn Source Generators</h2>
+<p>The first time I heard about Roslyn source generators, I was a bit skeptical. If it's too convenient to generate source code during the build, what will prevent it from becoming a trap for build performance?</p>
+<p>It turns out my intuition was confirmed when someone sent me a screenshot of their own build log with <em>90 seconds</em> spent in WinRT.SourceGenerator. The other Roslyn source generators would bring the total generation time to a whopping two minutes.</p>
+<p>Just this year, <a rel="noopener nofollow noreferrer external" target="_blank" href="https://github.com/dotnet/sdk/issues/44026">a bug in the .NET SDK unexpectedly enabled WinRT source generators we didn't use</a>, adding 30 seconds to our builds.</p>
+<p>As if it wasn't enough, a few months later, a <a rel="noopener nofollow noreferrer external" target="_blank" href="https://github.com/Azure/azure-sdk-for-net/issues/49995">bug in the .NET Azure SDK</a> accidentally enabled the System.ClientModel source generator, adding 60 seconds to our builds, but also increasing RAM usage in Visual Studio by 8GB.</p>
+<p>How many other developers out there have come to accept such poor build performance as the norm? This is becoming a recurring problem that can't easily be fixed by buying better hardware.</p>
+<h2 id="capturing-design-time-builds">Capturing Design-Time Builds</h2>
+<p>If you suspect performance issues that happen <em>while using Visual Studio</em>, there's a good chance <a rel="noopener nofollow noreferrer external" target="_blank" href="https://github.com/dotnet/project-system/blob/main/docs/design-time-builds.md">design-time builds are responsible</a>. In order to capture those logs, you'll have to launch Visual Studio (devenv.exe) from the command-line with environment variables:</p>
+<pre class="giallo" style="color: #ABB2BF; background-color: #282C34;"><code data-lang="powershell"><span class="giallo-l"><span style="color: #E06C75;">$Env:MSBuildDebugEngine</span><span style="color: #56B6C2;">=</span><span style="color: #98C379;">&quot;1&quot;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">$Env:MSBUILDDEBUGPATH</span><span style="color: #56B6C2;">=</span><span style="color: #98C379;">&quot;</span><span style="color: #E06C75;">$Env:LocalAppData</span><span style="color: #98C379;">\Microsoft\IDE\MSBuildDebug&quot;</span></span>
+<span class="giallo-l"><span>&amp;</span><span style="color: #56B6C2;"> devenv.exe</span></span></code></pre>
+<p>If <code>devenv.exe</code> cannot be found, make sure you are inside a developer shell. Once Visual Studio starts, open your project, build it and then close it. Collect the log files under <code>%LocalAppData%\Microsoft\IDE\MSBuildDebug</code> for analysis.</p>
+<p>Unfortunately, when collecting logs this way, you will get a lot of individual .binlog files. This is because Visual Studio spawns multiple processes for the different builds it launches (design-time or not).</p>
+<h2 id="capturing-command-line-arguments">Capturing Command-Line Arguments</h2>
+<p>Under a <strong>CoreCompile</strong> target, you'll find a <strong>Csc</strong> task. Expand it, then double-click on <strong>CommandLineArguments</strong>. The entire csc.exe command-line will be shown on the right-hand side:</p>
+<p><img src="/images/posts/msbuild-binlog-command-line-arguments.png" alt="MSBuild Log Command-Line Arguments" /></p>
+<p>Alternatively, you can log Roslyn (csc.exe) command-lines to files using the <strong>RoslynCommandLineLogFile</strong> environment variable:</p>
+<pre class="giallo" style="color: #ABB2BF; background-color: #282C34;"><code data-lang="powershell"><span class="giallo-l"><span style="color: #E06C75;">$Env:RoslynCommandLineLogFile</span><span style="color: #56B6C2;"> =</span><span style="color: #98C379;"> &quot;</span><span style="color: #E06C75;">$Env:LocalAppData</span><span style="color: #98C379;">\Microsoft\IDE\RoslynCommandLineLogs&quot;</span></span>
+<span class="giallo-l"><span>mkdir </span><span style="color: #E06C75;">$Env:RoslynCommandLineLogFile</span></span>
+<span class="giallo-l"><span>&amp;</span><span style="color: #56B6C2;"> devenv.exe</span></span></code></pre>
+<p>Make sure the directory you're pointing to already exists, otherwise the logs won't get created. The format is slightly different, but in both cases, you can copy the command-line parameters to a .rsp file which can be passed to csc.exe manually, like this:</p>
+<pre class="giallo" style="color: #ABB2BF; background-color: #282C34;"><code data-lang="powershell"><span class="giallo-l"><span>&amp;</span><span style="color: #98C379;"> &quot;csc.exe&quot;</span><span style="color: #56B6C2;"> /</span><span>noconfig </span><span style="color: #98C379;">&#39;@D:\dev\build.rsp&#39;</span></span></code></pre>
+<p>Just remember that <code>/noconfig</code> cannot be inside the .rsp file, and that <code>csc.exe</code> commands need to be executed from the directory where the .csproj file is located.</p>
+<h2 id="why-doesn-t-visual-studio-show-this">Why Doesn't Visual Studio Show This?</h2>
+<p>This is the frustrating part: msbuild binary logs aren't new. They are incredibly useful, yet they have never been properly exposed as a built-in feature of the <em>Visual Studio IDE</em>. For the vast majority of Visual Studio users, if it's not in the GUI, it might as well not exist at all.</p>
+<p>Yes, Visual Studio 2026 Insiders <em>feels</em> snappier, but that's mostly on the surface.</p>
+<p>Loading projects faster into my solution isn't going to help me figure out why the projects I <em>have</em> to build are rebuilt when they shouldn't, or <em>where</em> the build time is spent.</p>
+<p>Would you believe me if I told you that we only recently figured out at Devolutions that a whole 8 seconds of build time was caused by 300,000 lines of constantly regenerated <a rel="noopener nofollow noreferrer external" target="_blank" href="https://learn.microsoft.com/en-us/dotnet/core/additional-tools/xml-serializer-generator">XML serializer code</a> that was always rebuilt from source, even if the corresponding project was skipped for building?</p>
+<p>You can't fix what you cannot know is broken in the first place!</p>
+<h2 id="closing-thoughts">Closing Thoughts</h2>
+<p>Next time your build feels slow, don't guess. Capture a binary log, open it, and see what happens <em>for real</em>. Make changes, rinse and repeat.</p>
+<p>If you're in the Visual Studio team, I have one request for you: please implement msbuild binary logging directly inside Visual Studio as a first-class feature. This would be by far the most significant improvement of the last decade in Visual Studio for .NET developers.</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;deleting-hidden-proxy-settings-that-break-windows-apps&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              Deleting Hidden Proxy Settings that Break Windows Apps
+            </a>
+          </div>
+           
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;disabling-msbuild-node-reuse-to-avoid-file-locking-issues&#x2F;">
+              Disabling MSBuild Node Reuse to Avoid File Locking Issues<span class="icon ml-2">
+                <i class="fas fa-arrow-circle-right"></i>
+              </span>
+            </a>
+          </div>
+          
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>

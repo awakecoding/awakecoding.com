@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+      <title>AwakeCoding ☀️💻 - Azure</title>
+      <link>https://awakecoding.com</link>
+      <description>awakecoding - Adventures of a CTO</description>
+      <generator>Zola</generator>
+      <language>en</language>
+      <atom:link href="https://awakecoding.com/tags/azure/rss.xml" rel="self" type="application/rss+xml"/>
+      <lastBuildDate>Thu, 10 Aug 2023 00:00:00 +0000</lastBuildDate>
+      <item>
+          <title>RDP NLA with Azure AD: The PKU2U Nightmare</title>
+          <pubDate>Thu, 10 Aug 2023 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/rdp-nla-with-azure-ad-the-pku2u-nightmare/</link>
+          <guid>https://awakecoding.com/posts/rdp-nla-with-azure-ad-the-pku2u-nightmare/</guid>
+          <description>This post tackles the challenges of RDP Network Level Authentication (NLA) with Azure AD, labeled as the PKU2U nightmare, offering detailed solutions for common problems. It addresses enabling PKU2U authentication, Azure AD workplace joining, the correct Azure AD username format, and third-party application support, providing both technical insights and practical steps to mitigate these issues in Azure AD environments.</description>
+          <bannerImage>https://awakecoding.com/images/banners/rdp-nla-with-azure-ad-the-pku2u-nightmare.png</bannerImage><tags>
+              <tag>RDP</tag>
+              <tag>Windows</tag>
+              <tag>Azure</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>Windows Hello: Cloud Kerberos Trust, or Key Trust?</title>
+          <pubDate>Mon, 15 May 2023 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/windows-hello-cloud-kerberos-trust-or-key-trust/</link>
+          <guid>https://awakecoding.com/posts/windows-hello-cloud-kerberos-trust-or-key-trust/</guid>
+          <description>Unpack the dilemma between Cloud Kerberos Trust and Key Trust in Windows Hello for Business deployments. This post navigates through troubleshooting login issues, clarifying deployment types, and offering solutions for transitioning between deployment models with Group Policy and PowerShell, ensuring a smoother Windows Hello setup and operational reliability.</description>
+          <bannerImage>https://awakecoding.com/images/banners/windows-hello-cloud-kerberos-trust-or-key-trust.png</bannerImage><tags>
+              <tag>Windows</tag>
+              <tag>Azure</tag>
+              <tag>CTO</tag>
+            </tags></item>
+    </channel>
+</rss>

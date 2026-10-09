@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <meta content="#ffffff" name="theme-color" />
+  <meta content="#da532c" name="msapplication-TileColor" />
+
+  <link rel="canonical" href="https://awakecoding.com/posts/speeding-up-dotnet-builds-on-windows-nuget-cache/">
+  <link rel="alternate" href="https://awakecoding.com/posts/speeding-up-dotnet-builds-on-windows-nuget-cache/" hreflang="en" />
+  
+  <meta name="description" content="Windows CI builds always finish last, but is Windows really that slow? Benchmarking the same .NET build on GitHub-hosted Windows and Linux runners revealed that the default NuGet cache location on C: made package restore over three times slower. Learn how moving NUGET_PACKAGES and NUGET_HTTP_CACHE_PATH to the runner&#x27;s temp drive cut Windows restore times by more than two thirds, and why cross-compiling the same build from Linux keeps surfacing optimizations like this one." />
+  <meta property="og:title" content="Speeding Up .NET Builds on Windows: The NuGet Cache Fix" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AwakeCoding ☀️💻" />
+  <meta property="og:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;speeding-up-dotnet-builds-on-windows-nuget-cache&#x2F;" />
+  <meta property="og:description" content="Windows CI builds always finish last, but is Windows really that slow? Benchmarking the same .NET build on GitHub-hosted Windows and Linux runners revealed that the default NuGet cache location on C: made package restore over three times slower. Learn how moving NUGET_PACKAGES and NUGET_HTTP_CACHE_PATH to the runner&#x27;s temp drive cut Windows restore times by more than two thirds, and why cross-compiling the same build from Linux keeps surfacing optimizations like this one." />
+  <meta name="twitter:title" content="Speeding Up .NET Builds on Windows: The NuGet Cache Fix" />
+  <meta name="twitter:description" content="Windows CI builds always finish last, but is Windows really that slow? Benchmarking the same .NET build on GitHub-hosted Windows and Linux runners revealed that the default NuGet cache location on C: made package restore over three times slower. Learn how moving NUGET_PACKAGES and NUGET_HTTP_CACHE_PATH to the runner&#x27;s temp drive cut Windows restore times by more than two thirds, and why cross-compiling the same build from Linux keeps surfacing optimizations like this one." />
+  <meta name="twitter:url" content="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;speeding-up-dotnet-builds-on-windows-nuget-cache&#x2F;" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://awakecoding.com/images/banners/speeding-up-dotnet-builds-on-windows-nuget-cache.png" />
+  <meta property="og:image" content="https://awakecoding.com/images/banners/speeding-up-dotnet-builds-on-windows-nuget-cache.png" />
+  
+  
+
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Speeding Up .NET Builds on Windows: The NuGet Cache Fix",
+  "description": "Windows CI builds always finish last, but is Windows really that slow? Benchmarking the same .NET build on GitHub-hosted Windows and Linux runners revealed that the default NuGet cache location on C: made package restore over three times slower. Learn how moving NUGET_PACKAGES and NUGET_HTTP_CACHE_PATH to the runner's temp drive cut Windows restore times by more than two thirds, and why cross-compiling the same build from Linux keeps surfacing optimizations like this one.",
+  "datePublished": "2026-10-09",
+  "author": {
+    "@type": "Person",
+    "name": "Marc-André Moreau"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Marc-André Moreau",
+    "image": "https://awakecoding.com/images/avatar.jpg"
+  },
+  "image": "https://awakecoding.com/images/banners/speeding-up-dotnet-builds-on-windows-nuget-cache.png",
+  "url": "https://awakecoding.com/posts/speeding-up-dotnet-builds-on-windows-nuget-cache/",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://awakecoding.com/posts/speeding-up-dotnet-builds-on-windows-nuget-cache/"
+  }
+}
+</script>
+
+
+  
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-16x16.png' rel="icon" sizes="16x16" type="image/png" />
+  
+  
+  <link href='&#x2F;images&#x2F;favicon-32x32.png' rel="icon" sizes="32x32" type="image/png" />
+  
+  
+
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.css" integrity="sha384-+rY0QD+LRnTOquDMzGa9lXU6jIwdiQuwCJQ2cdcW0qeP/0UbjQCZlXnRsUMA+9pH" crossorigin="anonymous">
+  
+
+  
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1.9.1/css/academicons.min.css" integrity="sha384-FIue+PI4SsI9XfHCz8dBLg33b0c1fMJgNU3X//L26FYbGnlSEfWmNT7zgWc2N9b6" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
+  <link href="https://awakecoding.com/deep-thought.css" rel="stylesheet" />
+  
+  
+
+  <title>
+    
+AwakeCoding ☀️💻 | Speeding Up .NET Builds on Windows: The NuGet Cache Fix
+
+  </title>
+
+  
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JT1V4R3MZD"></script>
+  <script type="text/javascript">
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-JT1V4R3MZD");
+  </script>
+  
+  
+
+  
+</head>
+
+<body class="has-background-white">
+  <nav aria-label="section navigation" class="navbar is-light" role="navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item is-size-5 has-text-weight-bold" href="https:&#x2F;&#x2F;awakecoding.com">AwakeCoding ☀️💻</a>
+        <a aria-expanded="false" aria-label="menu" class="navbar-burger burger" data-target="navMenu" role="button">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <div class="navbar-end has-text-centered">
+          
+          
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;">
+            Home
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts">
+            Posts
+          </a>
+          
+          <a class="navbar-item has-text-weight-semibold" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;tags">
+            Tags
+          </a>
+          
+          
+          
+          <a class="navbar-item" id="nav-search" title="Search" data-target="#search-modal">
+            <span class="icon">
+              <i class="fas fa-search"></i>
+            </span>
+          </a>
+          <a class="navbar-item" id="dark-mode" title="Switch to dark theme">
+            <span class="icon">
+              <i class="fas fa-adjust"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  
+  
+
+  
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-8 is-offset-2">
+        <article class="box">
+          <h1 class="title">
+            Speeding Up .NET Builds on Windows: The NuGet Cache Fix
+          </h1>
+          <div class="columns is-multiline is-gapless">
+            <div class="column is-8">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="fas fa-user"></i>
+  </span>
+  <span>Marc-André Moreau published on</span>
+  <span class="icon">
+    <i class="far fa-calendar-alt"></i>
+  </span>
+  <span><time datetime="2026-10-09">October 09, 2026</time></span>
+</span>
+
+            </div>
+            <div class="column is-4 has-text-right-desktop">
+              
+<span class="icon-text has-text-grey">
+  <span class="icon">
+    <i class="far fa-clock"></i>
+  </span>
+  <span>6 min,</span>
+  <span class="icon">
+    <i class="fas fa-pencil-alt"></i>
+  </span>
+  <span>1127 words</span>
+</span>
+
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column has-text-right-desktop">
+              
+              
+<p>
+  Tags:
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/msbuild/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>MSBuild</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/nuget/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>NuGet</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/windows/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>Windows</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/github/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>GitHub</span>
+    </span>
+  </a>
+  
+  <a class="has-text-info-dark has-text-weight-semibold" href="https://awakecoding.com/tags/cto/">
+    <span class="icon-text">
+      <span class="icon">
+        <i class="fas fa-tag"></i>
+      </span>
+      <span>CTO</span>
+    </span>
+  </a>
+  
+</p>
+
+              
+            </div>
+          </div>
+          <div class="content mt-2">
+            <p>I've done a <em>lot</em> of build workflows in my career, and I like to optimize them to remove friction in development. If you're like me and build cross-platform software, you probably know the golden rule: in a CI matrix job, Windows always comes last, behind macOS and Linux. If you want to optimize the wall time for your cross-platform builds, you have to make the Windows build faster.</p>
+<p>This is why I am a fan of cross-compilation: from experience, switching from a Windows runner to a Linux runner to build the <em>same</em> Windows application often results in faster builds. I've observed this in GitHub Actions, but also on a Windows host through WSL. Over time, I have come to accept as fact that building software on Windows is just slower.</p>
+<p>With enough accumulated anecdotal evidence, anyone would come to the same conclusion. What if you take the time to perform elaborate comparison benchmarks? That's what I did for our CI build check workflow that runs on every pull request for <a rel="noopener nofollow noreferrer external" target="_blank" href="https://devolutions.net/remote-desktop-manager/">RDM Windows at Devolutions</a>:</p>
+<table><thead><tr><th>Runner</th><th style="text-align: right">vCPU</th><th style="text-align: right">Linux</th><th style="text-align: right">Windows</th><th style="text-align: right">Windows penalty</th></tr></thead><tbody>
+<tr><td>GitHub-hosted</td><td style="text-align: right">4</td><td style="text-align: right">295.8 s</td><td style="text-align: right">423.5 s</td><td style="text-align: right">1.43×</td></tr>
+<tr><td>GitHub-hosted</td><td style="text-align: right">8</td><td style="text-align: right">219.6 s</td><td style="text-align: right">285.3 s</td><td style="text-align: right">1.30×</td></tr>
+<tr><td>GitHub-hosted</td><td style="text-align: right">16</td><td style="text-align: right">166.5 s</td><td style="text-align: right">243.0 s</td><td style="text-align: right">1.46×</td></tr>
+<tr><td>WarpBuild</td><td style="text-align: right">4</td><td style="text-align: right">262.8 s</td><td style="text-align: right">284.9 s</td><td style="text-align: right">1.08×</td></tr>
+<tr><td>WarpBuild</td><td style="text-align: right">8</td><td style="text-align: right">157.6 s</td><td style="text-align: right">214.5 s</td><td style="text-align: right">1.36×</td></tr>
+<tr><td>WarpBuild</td><td style="text-align: right">16</td><td style="text-align: right">131.6 s</td><td style="text-align: right">166.7 s</td><td style="text-align: right">1.27×</td></tr>
+</tbody></table>
+<p>Windows is slower in <strong>all</strong> pairings, with a median penalty of 1.33x. <a rel="noopener nofollow noreferrer external" target="_blank" href="https://www.warpbuild.com/">WarpBuild</a> runners are faster than the GitHub-hosted runners, but the numbers clearly show I should pick Linux runners to build RDM Windows faster, and cheaper. It's not a one-off: I ran the benchmarking workflow 5 times to produce an average, and reduce variance between workflow runs.</p>
+<h2 id="reproducing-the-benchmark">Reproducing the benchmark</h2>
+<p>The biggest issue with reproducing my original benchmarks is that RDM is a closed-source application. Since I couldn't find an open source .NET enterprise application as large as RDM, I used GitHub Copilot's <a rel="noopener nofollow noreferrer external" target="_blank" href="https://github.blog/ai-and-ml/github-copilot/project-hydrafusion-frontier-quality-via-multi-model-orchestration/">new HydraFusion model</a> to generate a deliberately bloated sample application that could approximate its size and complexity: <a rel="noopener nofollow noreferrer external" target="_blank" href="https://github.com/mamoreau-devolutions/AtlasOps">AtlasOps</a>. I created a simple benchmarking workflow to build it on a 4 vCPU GitHub runner, with the following first results, averaged from multiple workflow runs:</p>
+<table><thead><tr><th>Average</th><th style="text-align: right">Linux</th><th style="text-align: right">Windows</th><th style="text-align: right">Windows delta</th></tr></thead><tbody>
+<tr><td>Restore</td><td style="text-align: right">19.78s</td><td style="text-align: right">104.39s</td><td style="text-align: right">+84.61s (+427.8%)</td></tr>
+<tr><td>Core build</td><td style="text-align: right">113.12s</td><td style="text-align: right">130.73s</td><td style="text-align: right">+17.61s (+15.6%)</td></tr>
+<tr><td>Total</td><td style="text-align: right">142.06s</td><td style="text-align: right">249.84s</td><td style="text-align: right">+107.78s (+75.9%)</td></tr>
+</tbody></table>
+<p>For the exact same AtlasOps Windows build, Windows took 75% more time than Linux. It's the same application, with the same compiler toolchain (Roslyn for C#), and equivalent runner hardware resources. Notice how the biggest delta is when restoring nuget packages (427%), much more than for the core build which is the expected heaviest part (15%).</p>
+<h2 id="investigating-the-benchmark">Investigating the benchmark</h2>
+<p>Complex build workflows are mostly constrained by CPU and disk I/O performance. Network I/O usually only affects an early part of the build where packages are fetched. One theory might be that the Windows runners have very bad network performance, but that's something hard to believe wouldn't have been noticed before.</p>
+<p>If both runners are assumed to have similar CPU resources, we're down to one main possible culprit: disk I/O performance. But how? The answer lies in the "dotnet restore" step: it is bound to disk write performance, not network performance! The default nuget cache on a Windows runner is on the OS disk (C:\), <em>not</em> on the faster disk where the git clone is located (D:\). It just happens that on the Linux runners, the default nuget cache path is on the "good" disk, which is why it is several times faster for nuget-related operations.</p>
+<p>Once I set NUGET_PACKAGES and NUGET_HTTP_CACHE_PATH environment variables to point to a path on the "good" disk of a Windows runner (D:\), the numbers started making a lot more sense:</p>
+<table><thead><tr><th>Host</th><th style="text-align: right">Restore (s)</th><th style="text-align: right">Core build (s)</th><th style="text-align: right">Total (s)</th></tr></thead><tbody>
+<tr><td>Linux</td><td style="text-align: right">36.4</td><td style="text-align: right">136.3</td><td style="text-align: right">172.7</td></tr>
+<tr><td>Windows (caches on D:)</td><td style="text-align: right">37.6</td><td style="text-align: right">159.4</td><td style="text-align: right">197.0</td></tr>
+<tr><td>Windows minus Linux</td><td style="text-align: right">+1.2</td><td style="text-align: right">+23.0</td><td style="text-align: right">+24.3</td></tr>
+</tbody></table>
+<p>The new delta for restoring nuget packages is now small enough to be considered equivalent between Windows and Linux. The core build is now faster because of nuget package <em>read</em> operations from the good disk. The core build remains slower on Windows than on Linux, but I'm leaving that part for future investigation. For all I know, it could be as simple as moving another cache path to a faster disk, I just don't know which one.</p>
+<h2 id="the-nuget-cache-path-fix">The nuget cache path fix</h2>
+<p>How do you fix your existing GitHub Actions workflow to supercharge your Windows builds? Here's a simple solution you can try today:</p>
+<pre class="giallo" style="color: #ABB2BF; background-color: #282C34;"><code data-lang="yaml"><span class="giallo-l"><span>-</span><span style="color: #E06C75;"> name</span><span>:</span><span style="color: #98C379;"> Move NuGet caches to the temp drive</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">  if</span><span>:</span><span style="color: #98C379;"> runner.os == &#39;Windows&#39; &amp;&amp; runner.environment == &#39;github-hosted&#39;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">  shell</span><span>:</span><span style="color: #98C379;"> pwsh</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">  run</span><span>:</span><span style="color: #C678DD;"> |</span></span>
+<span class="giallo-l"><span style="color: #98C379;">    $packages = Join-Path $Env:RUNNER_TEMP &#39;nuget\packages&#39;</span></span>
+<span class="giallo-l"><span style="color: #98C379;">    $httpCache = Join-Path $Env:RUNNER_TEMP &#39;nuget\http-cache&#39;</span></span>
+<span class="giallo-l"><span style="color: #98C379;">    New-Item -ItemType Directory -Force -Path $packages, $httpCache | Out-Null</span></span>
+<span class="giallo-l"><span style="color: #98C379;">    &quot;NUGET_PACKAGES=$packages&quot; &gt;&gt; $Env:GITHUB_ENV</span></span>
+<span class="giallo-l"><span style="color: #98C379;">    &quot;NUGET_HTTP_CACHE_PATH=$httpCache&quot; &gt;&gt; $Env:GITHUB_ENV</span></span></code></pre>
+<p>This code snippet will create the directories for the nuget cache paths and set the environment variables that nuget will use in your .NET builds. After I <a rel="noopener nofollow noreferrer external" target="_blank" href="https://x.com/awakecoding/status/2106105659519345050">shared the tip on X</a>, a few users shared their impressive results:</p>
+<ul>
+<li><a rel="noopener nofollow noreferrer external" target="_blank" href="https://x.com/bgrainger/status/2106411800061489602">Bradley Grainger</a> saw his .NET restore times drop from <strong>5.5 minutes to 1.5 minutes</strong>.</li>
+<li><a rel="noopener nofollow noreferrer external" target="_blank" href="https://x.com/robertmclaws/status/2106567286953795976">Robert McLaws</a> went further by moving the .NET SDK as well, with a full build time down to 4m21s from 6m24s.</li>
+</ul>
+<h2 id="what-about-using-a-dev-drive">What about using a Dev Drive?</h2>
+<p>GitHub Actions doesn't use a <a rel="noopener nofollow noreferrer external" target="_blank" href="https://learn.microsoft.com/en-us/windows/dev-drive/">Dev Drive</a>, but disables Windows Defender by default. A Dev Drive could still help further improve performance, but for now, just using a faster drive makes a huge difference. Speaking of which, if you have a Dev Drive for local development on Windows but did <em>not</em> override the nuget cache paths to point to it, you're not fully benefiting from it. The .NET build performance is directly affected by the disk where the nuget cache path is located, locally or in the cloud!</p>
+<h2 id="closing-thoughts">Closing Thoughts</h2>
+<p>It's too easy to dismiss slow build performance on software being large and heavy to build. It becomes impossible to dismiss it when switching the same Windows build to a Linux runner magically makes it much faster. While cross-compilation is officially supported for .NET managed builds, it isn't for .NET NativeAOT. In fact, <em>native</em> cross-compilation targeting the Windows MSVC ABI is technically supported in various languages, but requires copying non-redistributable files from a Windows machine.</p>
+<p>Microsoft should aim at making Windows match or beat Linux across all compilation workloads. However, if nobody bothers to compare, how can we observe differences worthy of investigation? More opportunities for build performance optimization like this one are currently being investigated, and were all surfaced by cross-compiling the same Windows software from Linux and Windows.</p>
+<p>To make Windows builds faster, Microsoft must first embrace cross-compilation from Linux for <em>all</em> programming languages.</p>
+
+          </div>
+        </article>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+  
+  <section class="modal" id="search-modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Search</p>
+      </header>
+      <section class="modal-card-body">
+        <div class="field mb-2">
+          <div class="control">
+            <input class="input" id="search" placeholder="Search this website." type="search" />
+          </div>
+        </div>
+        <div class="search-results">
+          <div class="search-results__items"></div>
+        </div>
+      </section>
+    </div>
+    <button aria-label="close" class="modal-close is-large"></button>
+  </section>
+  
+
+
+  
+
+<section class="section">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <nav class="level">
+              
+          <div class="level-item has-text-centered">
+            <a class="button is-black is-outlined" href="https:&#x2F;&#x2F;awakecoding.com&#x2F;posts&#x2F;shadow-theory-why-ai-prompting-is-about-perspectives&#x2F;">
+              <span class="icon mr-2">
+                <i class="fas fa-arrow-circle-left"></i>
+              </span>
+              Shadow Theory: Why AI Prompting Is About Perspectives
+            </a>
+          </div>
+           
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  
+
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/galleria.min.js" integrity="sha384-QSfwGT8/EU536DKdtyP2D6SLlh8zBaZ0cVkwfrwhqzIU9VCfJT00CLVP5t+HAiYg" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/galleria@1.6.1/dist/themes/folio/galleria.folio.min.js" integrity="sha384-DwpKI+deZB267+hPKwiOIc5Y2GKsVL0mR6hgz7GgIu7AgAMYqJwcJKY1YBNfhWcY" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.13.5/dist/mermaid.min.js" integrity="sha384-0yWn54pSGtfKCU+skfA69l25VsCw+MZt4LQov3xNRoS7YkAMrFokGgSBnAWSK4pv" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.xkcd@1.1.13/dist/chart.xkcd.min.js" integrity="sha384-xC3h1+IHXK8seA+8KfT79Z4e0GPsznjXBoMa5nd8ooWKplPyXx92NOmljWxLC/cs" crossorigin="anonymous"></script>
+  
+  
+  <script src="https://awakecoding.com/elasticlunr.min.js"></script>
+  <script src="https://awakecoding.com/search_index.en.js"></script><script src="https://awakecoding.com/js/site.js"></script>
+
+  
+
+
+
+
+
+  
+  
+</body>
+
+</html>

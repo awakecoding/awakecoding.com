@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+      <title>AwakeCoding ☀️💻 - GitHub</title>
+      <link>https://awakecoding.com</link>
+      <description>awakecoding - Adventures of a CTO</description>
+      <generator>Zola</generator>
+      <language>en</language>
+      <atom:link href="https://awakecoding.com/tags/github/rss.xml" rel="self" type="application/rss+xml"/>
+      <lastBuildDate>Fri, 09 Oct 2026 00:00:00 +0000</lastBuildDate>
+      <item>
+          <title>Speeding Up .NET Builds on Windows: The NuGet Cache Fix</title>
+          <pubDate>Fri, 09 Oct 2026 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/speeding-up-dotnet-builds-on-windows-nuget-cache/</link>
+          <guid>https://awakecoding.com/posts/speeding-up-dotnet-builds-on-windows-nuget-cache/</guid>
+          <description>Windows CI builds always finish last, but is Windows really that slow? Benchmarking the same .NET build on GitHub-hosted Windows and Linux runners revealed that the default NuGet cache location on C: made package restore over three times slower. Learn how moving NUGET_PACKAGES and NUGET_HTTP_CACHE_PATH to the runner&#x27;s temp drive cut Windows restore times by more than two thirds, and why cross-compiling the same build from Linux keeps surfacing optimizations like this one.</description>
+          <bannerImage>https://awakecoding.com/images/banners/speeding-up-dotnet-builds-on-windows-nuget-cache.png</bannerImage><tags>
+              <tag>MSBuild</tag>
+              <tag>NuGet</tag>
+              <tag>Windows</tag>
+              <tag>GitHub</tag>
+              <tag>CTO</tag>
+            </tags></item>
+      <item>
+          <title>Configuring SSH for Personal and Work GitHub Accounts</title>
+          <pubDate>Fri, 30 Jan 2026 00:00:00 +0000</pubDate>
+          <author>Marc-André Moreau</author>
+          <link>https://awakecoding.com/posts/configuring-ssh-for-personal-and-work-github-accounts/</link>
+          <guid>https://awakecoding.com/posts/configuring-ssh-for-personal-and-work-github-accounts/</guid>
+          <description>Managing separate GitHub accounts for work and personal projects? Learn how to configure SSH keys, URL rewriting, and conditional git settings to automatically select the right identity—plus where GitHub&#x27;s tools still need manual account switching.</description>
+          <bannerImage>https://awakecoding.com/images/banners/configuring-ssh-for-personal-and-work-github-accounts.png</bannerImage><tags>
+              <tag>GitHub</tag>
+              <tag>CTO</tag>
+            </tags></item>
+    </channel>
+</rss>
